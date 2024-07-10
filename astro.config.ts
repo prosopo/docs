@@ -74,6 +74,7 @@ export default defineConfig({
 		tailwind({
 			// Disable the default base styles:
 			applyBaseStyles: false,
+			configFiles: ['./tailwind.config.mjs'],
 		}),
 		sitemap(),
 

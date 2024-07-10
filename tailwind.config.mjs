@@ -12,5 +12,11 @@ export default {
             colors: { accent, gray },
         },
     },
+    fontFamily: {
+        // Your preferred text font. Starlight uses a system font stack by default.
+        sans: ['Open Sans', 'sans-serif'],
+        // Your preferred code font. Starlight uses system monospace fonts by default.
+        mono: ['"IBM Plex Mono"'],
+    },
     plugins: [starlightPlugin()],
 };
