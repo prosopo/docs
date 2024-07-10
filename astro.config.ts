@@ -9,6 +9,8 @@ import rehypeSlug from 'rehype-slug';
 import remarkSmartypants from 'remark-smartypants';
 import starlight from '@astrojs/starlight';
 import tailwind from '@astrojs/tailwind';
+import json5Plugin from 'vite-plugin-json5'
+import { builtinModules } from 'module';
 
 /* https://vercel.com/docs/projects/environment-variables/system-environment-variables#system-environment-variables */
 const VERCEL_PREVIEW_SITE =
@@ -16,7 +18,12 @@ const VERCEL_PREVIEW_SITE =
 	process.env.VERCEL_URL &&
 	`https://${process.env.VERCEL_URL}`;
 
-const site = VERCEL_PREVIEW_SITE || 'https://docs.astro.build/';
+const site = VERCEL_PREVIEW_SITE || 'https://docs.prosopo.io/';
+
+const allExternal = [
+	...builtinModules,
+	...builtinModules.map((m) => `node:${m}`)
+]
 
 // https://astro.build/config
 export default defineConfig({
@@ -69,6 +76,7 @@ export default defineConfig({
 			applyBaseStyles: false,
 		}),
 		sitemap(),
+
 	],
 	trailingSlash: 'always',
 	scopedStyleStrategy: 'where',
@@ -97,4 +105,17 @@ export default defineConfig({
 		contentCollectionCache: false,
 		directRenderScript: true,
 	},
+	vite: {
+
+		plugins: [json5Plugin()],
+		build: {
+			modulePreload: { polyfill: true },
+			rollupOptions: {
+				external: [
+					'fsevents',
+					...allExternal
+				],
+			}
+		}
+	}
 });

@@ -20,6 +20,11 @@
 export default [
 	{ text: 'Learn the Basics', header: true, type: 'learn', key: 'basics' },
 	{
+		text: 'Get Started',
+		slug: 'basics/index',
+		key: 'basics/index',
+	},
+	{
 		text: 'Client Side Rendering',
 		slug: 'basics/client-side-rendering',
 		key: 'basics/client-side-rendering',
