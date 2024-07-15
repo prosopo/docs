@@ -49,10 +49,16 @@ in the example above.
 
 ## Verification Package
 
-So far, we only have a TypeScript implementation of the Procaptcha verification package. However, we are working on
-delivering additional language support in the future.
+We have a JavaScript implementation of the Procaptcha verification package and we are working on
+delivering additional language support.
 
 ### TypeScript Verification
+
+The JavaScript package is available on NPM and can be installed using:
+
+```bash
+npm install @prosopo/server
+```
 
 To verify a user's response using TypeScript, simpy import the `verify` function from `@prosopo/server` and pass it
 the `procaptcha-response` POST data. Types can be imported from `@prosopo/types`.
