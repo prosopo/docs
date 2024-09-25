@@ -6,6 +6,7 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build",
+    "build:cjs": "echo 'no cjs build'",
     "preview": "astro preview",
     "check": "astro check",
     "format": "pnpm run format:code",
