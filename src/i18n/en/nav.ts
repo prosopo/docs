@@ -44,6 +44,11 @@ export default [
 		slug: 'basics/timeouts',
 		key: 'basics/timeouts',
 	},
+	{
+		text: 'Frequently Asked Questions',
+		slug: 'basics/faq',
+		key: 'basics/faq',
+	},
 	{ text: 'Demos', header: true, type: 'learn', key: 'demos' },
 	{
 		text: 'React Frontend Client Example',
