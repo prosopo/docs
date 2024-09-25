@@ -7,6 +7,7 @@
     "start": "astro dev",
     "build": "astro build",
     "build:cjs": "echo 'no cjs build'",
+    "test": "echo 'No test specified'",
     "preview": "astro preview",
     "check": "astro check",
     "format": "pnpm run format:code",
