@@ -2,6 +2,10 @@
   "name": "docs",
   "version": "2.1.2",
   "private": true,
+  "engines": {
+    "node": ">=20",
+    "npm": ">=9"
+  },
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
