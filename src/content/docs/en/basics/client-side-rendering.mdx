@@ -118,14 +118,25 @@ following fields:
 | close-callback         | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is closed.          | ✗        |
 | open-callback          | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is opened.          | ✗        |
 | expired-callback       | string or function | The name of the window function, or a function, that will be called when the CAPTCHA solution expires.   | ✗        |
+| failed-callback				    | string or function | The name of the window function, or a function, that will be called when the CAPTCHA challenge fails.    | ✗        |
+| reset-callback 			     | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is reset.           | ✗        |
 | challenge-valid-length | number             | The amount of time, in milliseconds, a successful CAPTCHA challenge is valid for. Defaults to 2 minutes. | ✗        |
 | language               | string             | The language of the CAPTCHA widget. The default is `en`.                                                 | ✗        |
+
+### Data Attributes
 
 The same options can be passed to the implicit rendering method by adding them as data attributes to the `.procaptcha`.
 For example, to set the theme to dark, you would add `data-theme="dark"` to the `.procaptcha` container.
 
 ```html
 <div class="procaptcha" data-sitekey="your_site_key" data-theme="dark"></div>
+```
+
+To set a callback using a data tag, you would add `data-callback="yourCallbackFunction"` to the `.procaptcha` container,
+and define the callback function on the window object.
+
+```html
+<div class="procaptcha" data-sitekey="your_site_key" data-callback="yourCallbackFunction"></div>
 ```
 
 ### `captchaType`
