@@ -11,6 +11,7 @@
     "start": "astro dev",
     "build": "astro build",
     "build:cjs": "echo 'no cjs build'",
+    "clean": "echo 'no clean command'",
     "test": "echo 'No test specified'",
     "preview": "astro preview",
     "check": "astro check",
