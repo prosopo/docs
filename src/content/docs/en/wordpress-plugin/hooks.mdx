@@ -1,0 +1,50 @@
+---
+title: 'Filters and Hooks'
+description: 'Filters and hooks.'
+---
+
+The Procaptcha plugin introduces new WordPress filters and hooks, allowing you to customize its behavior.
+
+## 1. Captcha Visibility
+
+By default, CAPTCHA is displayed only to unauthorized users.
+
+To modify this behavior, use the `is_captcha_present` hook. 
+For example, to make CAPTCHA required for everyone, add the following code to your theme's functions.php file:
+
+```php
+add_filter('prosopo/procaptcha/is_captcha_present', '__return_true');`
+```
+
+## 2. Custom Error Message
+
+You can customize the default error message by adding this code to your theme's functions.php file:
+
+```php
+add_filter('prosopo/procaptcha/validation_error_message', function (string $message): string {
+    return __('Custom error message', 'my-theme');
+});
+```
+
+## 3. Customizing CAPTCHA Attributes
+
+Beyond the style preferences in the plugin settings, you can customize any supported [Procaptcha data attributes](https://docs.prosopo.io/en/basics/client-side-rendering/#procaptcha-options) using the **prosopo/procaptcha/captcha_attributes** filter.
+
+```php
+add_filter('prosopo/procaptcha/captcha_attributes', function (array $attributes): array {
+    $attributes['lang'] = 'de';
+    return $attributes;
+});
+```
+
+## 4. Forms with CAPTCHA in Tests
+
+If your tests involve forms with ProCaptcha, you can bypass the CAPTCHA by adding the following constant to your wp-config.php file:
+
+```php
+define('PROSOPO_PROCAPTCHA_ALLOW_BYPASS', true);
+```
+
+In your tests, include an **input[name=procaptcha-response]** element with the value **bypass** to simulate CAPTCHA completion.
+
+**Important:** This bypass constant should only be used in development environments.
