@@ -65,6 +65,22 @@ export default [
 		slug: 'demos/client-example-bundle',
 		key: 'demos/client-example-bundle',
 	},
+	{ text: 'Wordpress', header: true, type: 'learn', key: 'wordpress' },
+	{
+		text: 'Get Started With Wordpress',
+		slug: 'wordpress/',
+		key: 'wordpress/',
+	},
+	{
+		text: 'Hooks',
+		slug: 'wordpress/hooks',
+		key: 'wordpress/hooks',
+	},
+	{
+		text: 'Contact Form 7',
+		slug: 'wordpress/contact-form-7',
+		key: 'wordpress/contact-form-7',
+	},
 ] satisfies NavEntry[];
 
 type NavEntry = {
