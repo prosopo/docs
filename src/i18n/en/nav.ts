@@ -72,15 +72,16 @@ export default [
 		key: 'wordpress/',
 	},
 	{
-		text: 'Hooks',
-		slug: 'wordpress/hooks',
-		key: 'wordpress/hooks',
-	},
-	{
 		text: 'Contact Form 7',
 		slug: 'wordpress/contact-form-7',
 		key: 'wordpress/contact-form-7',
 	},
+	{
+		text: 'Hooks',
+		slug: 'wordpress/hooks',
+		key: 'wordpress/hooks',
+	},
+
 ] satisfies NavEntry[];
 
 type NavEntry = {
