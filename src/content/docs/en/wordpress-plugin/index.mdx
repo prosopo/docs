@@ -1,0 +1,40 @@
+---
+title: 'WordPress Plugin'
+description: 'Procaptcha has an official WordPress plugin, enabling seamless integration with your WordPress site.'
+---
+
+Procaptcha has an [official WordPress plugin](https://wordpress.org/plugins/prosopo-procaptcha/), enabling seamless integration with your WordPress site.
+
+## Installation
+
+1. Visit your WordPress admin panel, and go to **Plugins** > **Add New**, then search for **Procaptcha** and click **Install Now**.
+2. Once the installation is complete, click **Activate**.
+3. Navigate to the plugin settings (**Settings > Procaptcha**) and enter your site key and secret key, which you can obtain from the [Prosopo user portal](https://portal.prosopo.io/).
+4. Save the settings
+
+If the credentials are correct, you'll see the Procaptcha displayed on the right side of the settings page.
+
+## WordPress Core Forms
+
+Procaptcha supports WordPress core forms out-of-the-box, including Login, Registration, Lost Password, Comments, and Post/Page password protection forms. It also works with custom login URLs, like those created by [WPS Hide Login](https://wordpress.org/plugins/wps-hide-login/).
+
+To enable protection for these forms, go to the plugin settings and toggle the corresponding options.
+
+## Third-party Form Plugins
+
+Procaptcha integrates with many popular form plugins. Check the pages in this section for detailed instructions on how to enable it for specific form plugins.
+
+Can’t find your plugin? Let us know via the [support forum](https://wordpress.org/support/plugin/prosopo-procaptcha/), and we’ll consider adding it!
+
+## FAQ
+
+** Is Procaptcha visible only to unauthorized users? **
+
+Yes, by default, Procaptcha is shown only to unauthorized users. 
+However, some plugins, such as Contact Form 7, don't send user data during submission, so Procaptcha is displayed to all users in those cases.
+
+If you would like to force Procaptcha display for authorized users, refer to the `is_captcha_present` section in the Hooks page.
+
+## Advanced Usage 
+
+Visit the Hooks section to explore how you can further customize the plugin's behavior.
