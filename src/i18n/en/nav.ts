@@ -72,16 +72,25 @@ export default [
 		key: 'wordpress-plugin/',
 	},
 	{
+		text: 'Hooks',
+		slug: 'wordpress-plugin/hooks',
+		key: 'wordpress-plugin/hooks',
+	},
+	{
 		text: 'Contact Form 7',
 		slug: 'wordpress-plugin/contact-form-7',
 		key: 'wordpress-plugin/contact-form-7',
 	},
 	{
-		text: 'Hooks',
-		slug: 'wordpress-plugin/hooks',
-		key: 'wordpress-plugin/hooks',
+		text: 'Fluent Forms',
+		slug: 'wordpress-plugin/fluent-forms',
+		key: 'wordpress-plugin/fluent-forms',
 	},
-
+	{
+		text: 'Ninja Forms',
+		slug: 'wordpress-plugin/ninja-forms',
+		key: 'wordpress-plugin/ninja-forms',
+	},
 ] satisfies NavEntry[];
 
 type NavEntry = {
