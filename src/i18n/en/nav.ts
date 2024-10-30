@@ -87,9 +87,19 @@ export default [
 		key: 'wordpress-plugin/fluent-forms',
 	},
 	{
+		text: 'Gravity Forms',
+		slug: 'wordpress-plugin/gravity-forms',
+		key: 'wordpress-plugin/gravity-forms',
+	},
+	{
 		text: 'Ninja Forms',
 		slug: 'wordpress-plugin/ninja-forms',
 		key: 'wordpress-plugin/ninja-forms',
+	},
+	{
+		text: 'bbPress',
+		slug: 'wordpress-plugin/bbpress',
+		key: 'wordpress-plugin/bbpress',
 	},
 ] satisfies NavEntry[];
 
