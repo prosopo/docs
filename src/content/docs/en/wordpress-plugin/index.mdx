@@ -14,26 +14,60 @@ Procaptcha has an [official WordPress plugin](https://wordpress.org/plugins/pros
 
 If the credentials are correct, you'll see the Procaptcha displayed on the right side of the settings page.
 
-## WordPress Core Forms
+## Form Plugins
 
-Procaptcha supports WordPress core forms out-of-the-box, including Login, Registration, Lost Password, Comments, and Post/Page password protection forms. It also works with custom login URLs, like those created by [WPS Hide Login](https://wordpress.org/plugins/wps-hide-login/).
-
-To enable protection for these forms, go to the plugin settings and toggle the corresponding options.
-
-## Third-party Form Plugins
-
-Procaptcha integrates with many popular form plugins. Check the pages in this section for detailed instructions on how to enable it for specific form plugins.
+Procaptcha integrates with many popular form plugins. Check the pages in left menu for detailed instructions on how to enable it for specific form plugins.
 
 Can’t find your plugin? Let us know via the [support forum](https://wordpress.org/support/plugin/prosopo-procaptcha/), and we’ll consider adding it!
+
+## WordPress Core Forms
+
+Procaptcha supports WordPress core forms out-of-the-box:
+
+1. Login
+2. Registration
+3. Lost Password
+4. Comments
+5. Post/Page password protection
+
+Visit the plugin settings to enable protection for these forms.
+
+## Account Plugins
+
+The Procaptcha plugin is officially compatible with the following plugins, that extend the WordPress account features:
+
+Security:
+
+1. [All-In-One Security](https://wordpress.org/plugins/all-in-one-wp-security-and-firewall/) (Hide backend feature)
+2. [LWS Hide Login](https://wordpress.org/plugins/lws-hide-login/) (Hide backend feature)
+3. [Login With Ajax](https://wordpress.org/plugins/login-with-ajax/) (AJAXify Login Forms feature)
+4. [Security Optimizer](https://wordpress.org/plugins/sg-security/) (Hide backend feature)
+5. [Solid Security](https://wordpress.org/plugins/better-wp-security/) (Hide backend feature)
+6. [WPS Hide Login](https://wordpress.org/plugins/wps-hide-login/)
+
+Branding:
+
+1. [Branda White Labeling](https://wordpress.org/plugins/branda-white-labeling/)
+2. [Custom Login](https://wordpress.org/plugins/custom-login/)
+3. [Login Customizer](https://wordpress.org/plugins/login-customizer/)
+4. [Login Designer](https://wordpress.org/plugins/login-designer/)
+5. [Login Page Customizer by Colorlib](https://wordpress.org/plugins/colorlib-login-customizer/)
+6. [Loginpress](https://wordpress.org/plugins/loginpress/)
+7. [Theme My Login](https://wordpress.org/plugins/theme-my-login/)
+8. [Ultimate Dashboard](https://wordpress.org/plugins/ultimate-dashboard/)
+9. [White label](https://wordpress.org/plugins/white-label/)
+10. [YITH Custom Login](https://wordpress.org/plugins/yith-custom-login/)
+11. [bbPress](https://wordpress.org/plugins/bbpress/) (account forms from [the shortcodes](https://codex.bbpress.org/features/shortcodes/))
+
+While only the items above are tested, overall, the Procaptcha plugin supports all the plugins with custom account forms that use the native WordPress account hooks.
 
 ## FAQ
 
 **Is Procaptcha visible only to unauthorized users?**
 
-Yes, by default, Procaptcha is shown only to unauthorized users. 
-However, some plugins, such as Contact Form 7, don't send user data during submission, so Procaptcha is displayed to all users in those cases.
+Yes, by default, Procaptcha is shown only to unauthorized users. You can change this in the `behavior` section of the plugin settings, or using the plugin hooks.
 
-If you would like to force Procaptcha display for authorized users, refer to the `is_captcha_present` section in the Hooks page.
+Note: However, some plugins, such as Contact Form 7, don't send user data during submission, so Procaptcha is displayed to all users in those cases.
 
 ## Advanced Usage 
 

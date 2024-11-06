@@ -87,6 +87,11 @@ export default [
 		key: 'wordpress-plugin/fluent-forms',
 	},
 	{
+		text: 'Formidable',
+		slug: 'wordpress-plugin/formidable',
+		key: 'wordpress-plugin/formidable',
+	},
+	{
 		text: 'Gravity Forms',
 		slug: 'wordpress-plugin/gravity-forms',
 		key: 'wordpress-plugin/gravity-forms',
@@ -95,6 +100,11 @@ export default [
 		text: 'Ninja Forms',
 		slug: 'wordpress-plugin/ninja-forms',
 		key: 'wordpress-plugin/ninja-forms',
+	},
+	{
+		text: 'WP Forms',
+		slug: 'wordpress-plugin/wpforms',
+		key: 'wordpress-plugin/wpforms',
 	},
 	{
 		text: 'bbPress',
