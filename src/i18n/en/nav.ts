@@ -72,16 +72,45 @@ export default [
 		key: 'wordpress-plugin/',
 	},
 	{
+		text: 'Hooks',
+		slug: 'wordpress-plugin/hooks',
+		key: 'wordpress-plugin/hooks',
+	},
+	{
 		text: 'Contact Form 7',
 		slug: 'wordpress-plugin/contact-form-7',
 		key: 'wordpress-plugin/contact-form-7',
 	},
 	{
-		text: 'Hooks',
-		slug: 'wordpress-plugin/hooks',
-		key: 'wordpress-plugin/hooks',
+		text: 'Fluent Forms',
+		slug: 'wordpress-plugin/fluent-forms',
+		key: 'wordpress-plugin/fluent-forms',
 	},
-
+	{
+		text: 'Formidable',
+		slug: 'wordpress-plugin/formidable',
+		key: 'wordpress-plugin/formidable',
+	},
+	{
+		text: 'Gravity Forms',
+		slug: 'wordpress-plugin/gravity-forms',
+		key: 'wordpress-plugin/gravity-forms',
+	},
+	{
+		text: 'Ninja Forms',
+		slug: 'wordpress-plugin/ninja-forms',
+		key: 'wordpress-plugin/ninja-forms',
+	},
+	{
+		text: 'WP Forms',
+		slug: 'wordpress-plugin/wpforms',
+		key: 'wordpress-plugin/wpforms',
+	},
+	{
+		text: 'bbPress',
+		slug: 'wordpress-plugin/bbpress',
+		key: 'wordpress-plugin/bbpress',
+	},
 ] satisfies NavEntry[];
 
 type NavEntry = {
