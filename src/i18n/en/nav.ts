@@ -97,6 +97,11 @@ export default [
 		key: 'wordpress-plugin/gravity-forms',
 	},
 	{
+		text: 'JetPack',
+		slug: 'wordpress-plugin/jetpack',
+		key: 'wordpress-plugin/jetpack',
+	},
+	{
 		text: 'Ninja Forms',
 		slug: 'wordpress-plugin/ninja-forms',
 		key: 'wordpress-plugin/ninja-forms',
