@@ -82,6 +82,11 @@ export default [
 		key: 'wordpress-plugin/contact-form-7',
 	},
 	{
+		text: 'Everest Forms',
+		slug: 'wordpress-plugin/everest-forms',
+		key: 'wordpress-plugin/everest-forms',
+	},
+	{
 		text: 'Fluent Forms',
 		slug: 'wordpress-plugin/fluent-forms',
 		key: 'wordpress-plugin/fluent-forms',
