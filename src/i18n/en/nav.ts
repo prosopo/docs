@@ -112,6 +112,11 @@ export default [
 		key: 'wordpress-plugin/ninja-forms',
 	},
 	{
+		text: 'User Registration',
+		slug: 'wordpress-plugin/user-registration',
+		key: 'wordpress-plugin/user-registration',
+	},
+	{
 		text: 'WP Forms',
 		slug: 'wordpress-plugin/wpforms',
 		key: 'wordpress-plugin/wpforms',
