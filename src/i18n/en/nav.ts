@@ -82,6 +82,11 @@ export default [
 		key: 'wordpress-plugin/contact-form-7',
 	},
 	{
+		text: 'Everest Forms',
+		slug: 'wordpress-plugin/everest-forms',
+		key: 'wordpress-plugin/everest-forms',
+	},
+	{
 		text: 'Fluent Forms',
 		slug: 'wordpress-plugin/fluent-forms',
 		key: 'wordpress-plugin/fluent-forms',
@@ -105,6 +110,11 @@ export default [
 		text: 'Ninja Forms',
 		slug: 'wordpress-plugin/ninja-forms',
 		key: 'wordpress-plugin/ninja-forms',
+	},
+	{
+		text: 'User Registration',
+		slug: 'wordpress-plugin/user-registration',
+		key: 'wordpress-plugin/user-registration',
 	},
 	{
 		text: 'WP Forms',
