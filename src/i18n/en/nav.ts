@@ -126,6 +126,11 @@ export default [
 		slug: 'wordpress-plugin/bbpress',
 		key: 'wordpress-plugin/bbpress',
 	},
+	{
+		text: 'WooCommerce',
+		slug: 'wordpress-plugin/woocommerce',
+		key: 'wordpress-plugin/woocommerce',
+	},
 ] satisfies NavEntry[];
 
 type NavEntry = {

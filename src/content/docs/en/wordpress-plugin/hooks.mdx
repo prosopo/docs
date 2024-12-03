@@ -37,19 +37,7 @@ add_filter('prosopo/procaptcha/captcha_attributes', function (array $attributes)
 });
 ```
 
-## 4. Styling the Widget
-
-One of the Procaptcha's features is the ability to customize the widget's appearance. 
-Pay attention, that the plugin wraps the widget into the WebComponent with shadow DOM to avoid style conflicts, so direct CSS styling is not possible.
-Instead, use the **prosopo/procaptcha/widget_css** filter to add custom CSS styles inside the widget's component:
-
-```php
-add_filter('prosopo/procaptcha/widget_css', function (string $css): string {
-    return $css . 'label{color:green; font-size:20px;}';
-});
-```
-
-## 5. Forms with Procaptcha in Tests
+## 4. Forms with Procaptcha in Tests
 
 If your tests involve forms with Procaptcha, you can bypass the Procaptcha by adding the following constant to your wp-config.php file:
 
