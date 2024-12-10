@@ -33,7 +33,7 @@ const docSearchStrings = getDocSearchStrings(Astro);
 	docsearch({
 		container: 'sl-doc-search',
 		appId: 'OCM8ZFZOLH',
-		indexName: 'prosopo',
+		indexName: 'prosopo_docs_pages',
 		apiKey: '6945155a60a9005eb656b393296bc9a3',
 		searchParameters: { facetFilters: [[`lang:${location.pathname.split('/')[1]}`]] },
 		insights: true,
