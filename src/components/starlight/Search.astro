@@ -61,6 +61,12 @@ const docSearchStrings = getDocSearchStrings(Astro);
 				buttonAriaLabel: translations.button,
 			},
 		},
+		sitemaps: [
+			{
+				url: new URL('sitemap-index.xml', import.meta.url).href,
+				algoliaIndex: 'Prosopo Docs',
+			},
+		]
 	});
 </script>
 
