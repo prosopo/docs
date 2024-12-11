@@ -122,14 +122,19 @@ export default [
 		key: 'wordpress-plugin/wpforms',
 	},
 	{
-		text: 'bbPress',
-		slug: 'wordpress-plugin/bbpress',
-		key: 'wordpress-plugin/bbpress',
-	},
-	{
 		text: 'WooCommerce',
 		slug: 'wordpress-plugin/woocommerce',
 		key: 'wordpress-plugin/woocommerce',
+	},
+	{
+		text: 'Elementor Pro',
+		slug: 'wordpress-plugin/elementor-pro',
+		key: 'wordpress-plugin/elementor-pro',
+	},
+	{
+		text: 'bbPress',
+		slug: 'wordpress-plugin/bbpress',
+		key: 'wordpress-plugin/bbpress',
 	},
 ] satisfies NavEntry[];
 
