@@ -35,7 +35,8 @@
     "eslint:fix": "npm run lint:eslint -- --fix",
     "netlify:build": "pnpm ${NETLIFY_BUILD_SCRIPT:-build}",
     "lunaria:build": "lunaria build",
-    "lunaria:preview": "lunaria preview"
+    "lunaria:preview": "lunaria preview",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@11ty/eleventy-fetch": "^3.0.0",
@@ -69,6 +70,7 @@
     "hastscript": "^8.0.0",
     "html-escaper": "^3.0.3",
     "htmlparser2": "^7.2.0",
+    "husky": "^9.1.7",
     "kleur": "^4.1.5",
     "mdast-util-from-markdown": "^2.0.0",
     "mdast-util-to-hast": "^13.0.0",
