@@ -122,6 +122,10 @@
         "react-dom",
         "vite"
       ]
+    },
+    "engines": {
+      "node": "20",
+      "npm": "10.8.2"
     }
   },
   "optionalDependencies": {
