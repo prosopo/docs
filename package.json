@@ -35,7 +35,15 @@
     "eslint:fix": "npm run lint:eslint -- --fix",
     "netlify:build": "pnpm ${NETLIFY_BUILD_SCRIPT:-build}",
     "lunaria:build": "lunaria build",
-    "lunaria:preview": "lunaria preview"
+    "lunaria:preview": "lunaria preview",
+    "pkgjson": "f() { npx -w $1 node -e 'console.log(process.cwd()+\"/package.json\")' ;}; f",
+		"pkgdir": "f() { npx -w $1 node -e 'console.log(process.cwd())' ;}; f",
+		"depcheck": "npm run --silent ws:pkg | xargs -P 1 --verbose -I {} bash -c 'cd $(dirname {}) && npx depcheck --ignores vite,vitest,@vitest/coverage-v8,del-cli,concurrently,npm-run-all,tslib,typescript,tsx || true; echo \"\"'",
+		"deps:ls": "npm run --silent ws:pkg | xargs -P 100 -I {} bash -c 'cat {} | jq .dependencies | head -n -1 | tail -n +2' | tr -d ',' | sort | uniq",
+		"deps:dupe": "npm run deps:ls | awk -F': ' 'NF {count[$1]++; lines[$1] = lines[$1] $0 \"\\n\"} END {for (pkg in count) if (count[pkg] > 1) printf \"%s\", lines[pkg]}' | sort",
+		"audit:fix": "npm audit fix --force",
+		"deps:status": "npm-check-updates --deep",
+		"deps:upgrade": "npm-check-updates --deep --interactive --format group"
   },
   "devDependencies": {
     "@11ty/eleventy-fetch": "^3.0.0",
@@ -93,7 +101,17 @@
     "unist-util-visit": "^5.0.0",
     "unist-util-walker": "^1.0.0",
     "vite-plugin-json5": "^1.1.2",
-    "vite-plugin-node-polyfills": "^0.22.0"
+    "vite-plugin-node-polyfills": "^0.22.0",
+		"@biomejs/biome": "1.9.1",
+		"@taplo/cli": "0.7.0",
+		"@vitest/coverage-v8": "2.1.1",
+		"concurrently": "9.0.1",
+		"del-cli": "6.0.0",
+		"depcheck": "1.4.7",
+		"npm-check-updates": "17.1.1",
+		"npm-run-all": "2.1.0",
+		"tslib": "2.7.0",
+		"tsx": "4.19.1"
   },
   "dependencies": {
     "@astrojs/check": "^0.7.0",
