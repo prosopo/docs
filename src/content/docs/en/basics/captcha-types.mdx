@@ -15,11 +15,23 @@ Serve **different** types of CAPTCHA by setting the `captchaType` to `frictionle
 
 ## Set Type Implicitly
 
+### 1. Set the type in the widget configuration
+
+Here we are setting the `captchaType` to Proof-of-Work `pow`.
+
 ```html
-<div class="procaptcha" data-sitekey="your_site_key" data-captcha-type="frictionless"></div>
+<div class="procaptcha" data-sitekey="your_site_key" data-captcha-type="pow"></div>
 ```
 
+### 2. Set the type in the portal
+
+Navigate to the [Prosopo portal](https://portal.prosopo.io) and update the CAPTCHA type in the settings to `pow`.
+
 ## Set Type Explicitly
+
+### 1. Set the type in the widget configuration
+
+Here we are setting the `captchaType` to Image `image`.
 
 ```javascript
 document.getElementById('procaptcha-script').addEventListener('load', function () {
@@ -32,16 +44,20 @@ document.getElementById('procaptcha-script').addEventListener('load', function (
         siteKey: 'YOUR_SITE_KEY',
         theme: 'dark',
         callback: onCaptchaVerified,
-        captchaType: 'image', // `pow` or `frictionless`
+        captchaType: 'image', // `pow` or leave blank for `frictionless`
     })
 })
 ```
+
+### 2. Set the type in the portal
+
+Navigate to the [Prosopo portal](https://portal.prosopo.io) and update the CAPTCHA type in the settings to `image`.
 
 ## Proof of Work (PoW) CAPTCHA
 
 A Proof of Work (PoW) CAPTCHA challenge requires the user to solve a computational puzzle before submitting the form. It is easy for humans to solve but computationally expensive for bots.
 
-<Image src={ProcaptchaGIF} alt={'prosopo procaptcha pow captcha challenge'} />
+<Image src={ProcaptchaGIF} alt={'prosopo procaptcha pow captcha challenge'}/>
 
 The Proof of Work CAPTCHA type does not interrogate the user's browser environment, use `frictionless` for that (above).
 
@@ -50,7 +66,7 @@ The Proof of Work CAPTCHA type does not interrogate the user's browser environme
 An image CAPTCHA challenge requires the user to select the correct image(s) that match the given prompt.
 
 <Image
-	src={ImageCaptcha}
-	alt="prosopo procaptcha image captcha challenge" />
+    src={ImageCaptcha}
+    alt="prosopo procaptcha image captcha challenge"/>
 
 The Image CAPTCHA type does not interrogate the user's browser environment, use `frictionless` for that (above).
