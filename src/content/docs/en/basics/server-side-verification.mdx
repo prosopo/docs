@@ -54,6 +54,16 @@ in the example above. The response will be a JSON object with a `verified` key, 
 }
 ```
 
+If you are a [Premium Tier customer](https://prosopo.io/pricing/) then you will also receive a risk score associated
+with the request. The closer the score is to 1, the more likely it is that the request is from a bot.
+
+```json
+{
+    "verified": true,
+    "score": 0.1
+}
+```
+
 ## Verification Package
 
 We have a JavaScript implementation of the Procaptcha verification package and we are working on

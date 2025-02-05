@@ -3,15 +3,41 @@ title: CAPTCHA Types
 description: Serve different types of CAPTCHA by setting the `captchaType` to `frictionless`, `pow`, `image`.
 i18nReady: true
 ---
-import { Image } from 'astro:assets';
+import {Image} from 'astro:assets';
 import ProcaptchaGIF from '~/assets/procaptcha-pow.gif';
 import ImageCaptcha from '~/assets/image-captcha.png';
-
-Procaptcha's default `frictionless` feature dynamically detects if the user is a bot or a human. If the user is likely
-to be a bot, the user will be presented with an image CAPTCHA challenge. If the user is likely to be a human, the
-user will not be presented with an image CAPTCHA challenge and will instead solve a simple, invisible Proof of Work (PoW) challenge.
+import PoWSettings from '~/assets/pow-settings.png';
+import ImageSettings from '~/assets/image-settings.png';
 
 Serve **different** types of CAPTCHA by setting the `captchaType` to `frictionless`, `pow`, `image`.
+
+## Frictionless CAPTCHA
+
+Procaptcha's default `frictionless` feature dynamically detects if the user is using a normal browser or automated,
+headless browsers such as [playwright](https://playwright.dev/) or [selenium](https://www.selenium.dev/). If the user is
+likely to be a bot, the user will be presented with an image CAPTCHA challenge. If the user is likely to be a human, the
+user will not be presented with an image CAPTCHA challenge and will instead solve a simple, invisible Proof of Work
+(PoW) challenge.
+
+## Proof of Work (PoW) CAPTCHA
+
+A Proof of Work (`pow`) CAPTCHA challenge requires the user to solve a computational puzzle before submitting the form. It is easy for humans to solve but computationally expensive for bots.
+
+<Image src={ProcaptchaGIF} alt={'prosopo procaptcha pow captcha challenge'} style="margin: 20px auto;"/>
+
+The Proof of Work CAPTCHA type does not interrogate the user's browser environment, use `frictionless` for that (above).
+
+## Image CAPTCHA
+
+An image CAPTCHA challenge requires the user to select the correct image(s) that match the given prompt.
+
+<Image
+    src={ImageCaptcha}
+    alt="prosopo procaptcha image captcha challenge"
+    style="margin: 0 auto;"
+/>
+
+The Image CAPTCHA type does not interrogate the user's browser environment, use `frictionless` for that (above).
 
 ## Set Type Implicitly
 
@@ -26,6 +52,10 @@ Here we are setting the `captchaType` to Proof-of-Work `pow`.
 ### 2. Set the type in the portal
 
 Navigate to the [Prosopo portal](https://portal.prosopo.io) and update the CAPTCHA type in the settings to `pow`.
+
+<Image
+    src={PoWSettings}
+    alt="prosopo pow setting"/>
 
 ## Set Type Explicitly
 
@@ -53,20 +83,7 @@ document.getElementById('procaptcha-script').addEventListener('load', function (
 
 Navigate to the [Prosopo portal](https://portal.prosopo.io) and update the CAPTCHA type in the settings to `image`.
 
-## Proof of Work (PoW) CAPTCHA
-
-A Proof of Work (PoW) CAPTCHA challenge requires the user to solve a computational puzzle before submitting the form. It is easy for humans to solve but computationally expensive for bots.
-
-<Image src={ProcaptchaGIF} alt={'prosopo procaptcha pow captcha challenge'}/>
-
-The Proof of Work CAPTCHA type does not interrogate the user's browser environment, use `frictionless` for that (above).
-
-## Image CAPTCHA
-
-An image CAPTCHA challenge requires the user to select the correct image(s) that match the given prompt.
-
 <Image
-    src={ImageCaptcha}
-    alt="prosopo procaptcha image captcha challenge"/>
+    src={ImageSettings}
+    alt="prosopo image setting"/>
 
-The Image CAPTCHA type does not interrogate the user's browser environment, use `frictionless` for that (above).
