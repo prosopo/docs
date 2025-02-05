@@ -46,7 +46,13 @@ using
 curl -vv
 ```
 
-in the example above.
+in the example above. The response will be a JSON object with a `verified` key, which will be `true` if the token is valid and `false` if it is not.
+
+```json
+{
+    "verified": true,
+}
+```
 
 ## Verification Package
 
