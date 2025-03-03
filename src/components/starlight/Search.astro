@@ -27,40 +27,12 @@ const docSearchStrings = getDocSearchStrings(Astro);
 <script>
 	import docsearch from '@docsearch/js';
 
-	// @ts-expect-error todo: add proper type casting
-	const translations = JSON.parse(document.querySelector('sl-doc-search').dataset.translations);
 
 	docsearch({
+		appId: "SXFWFR01NQ",
+		apiKey: "db0d120aafac3456280f067640893795",
+		indexName: "prosopo",
 		container: 'sl-doc-search',
-		appId: 'OCM8ZFZOLH',
-		indexName: 'prosopo_docs_pages',
-		apiKey: '6945155a60a9005eb656b393296bc9a3',
-		searchParameters: { facetFilters: [[`lang:${location.pathname.split('/')[1]}`]] },
-		insights: true,
-		getMissingResultsUrl: ({ query }: { query: string }) =>
-			`https://github.com/prosopo/docs/issues/new?title=Missing+results+for+query+%22${encodeURIComponent(
-				query
-			)}%22`,
-		transformItems: (items) => {
-			return items.map((item) => {
-				// We transform the absolute URL into a relative URL to
-				// work better on localhost, preview URLS.
-				const url = new URL(item.url);
-				if (url.hash === '#_top') url.hash = '';
-				return {
-					...item,
-					url: url.href.replace(url.origin, ''),
-				};
-			});
-		},
-		placeholder: translations.placeholder,
-		translations: {
-			...translations,
-			button: {
-				buttonText: translations.button,
-				buttonAriaLabel: translations.button,
-			},
-		},
 		sitemaps: [
 			{
 				url: new URL('https://docs.prosopo.io/sitemap-0.xml').href,
