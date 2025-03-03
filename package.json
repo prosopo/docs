@@ -36,6 +36,7 @@
     "netlify:build": "pnpm ${NETLIFY_BUILD_SCRIPT:-build}",
     "lunaria:build": "lunaria build",
     "lunaria:preview": "lunaria preview",
+    "prepare": "husky",
     "pkgjson": "f() { npx -w $1 node -e 'console.log(process.cwd()+\"/package.json\")' ;}; f",
 		"pkgdir": "f() { npx -w $1 node -e 'console.log(process.cwd())' ;}; f",
 		"depcheck": "npm run --silent ws:pkg | xargs -P 1 --verbose -I {} bash -c 'cd $(dirname {}) && npx depcheck --ignores vite,vitest,@vitest/coverage-v8,del-cli,concurrently,npm-run-all,tslib,typescript,tsx || true; echo \"\"'",
