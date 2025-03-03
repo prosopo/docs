@@ -46,12 +46,123 @@ using
 curl -vv
 ```
 
-in the example above.
+in the example above. The response will be a JSON object with a `verified` key, which will be `true` if the token is valid and `false` if it is not.
+
+```json
+{
+    "verified": true,
+}
+```
+
+If you are a [Premium Tier customer](https://prosopo.io/pricing/) then you will also receive a risk score associated
+with the request. The closer the score is to 1, the more likely it is that the request is from a bot.
+
+```json
+{
+    "verified": true,
+    "score": 0.1
+}
+```
+
+## Verification Code Examples
+
+### JavaScript
+
+<section id="js">
+```javascript
+const fetch = require('node-fetch');
+
+async function verifyToken(token) {
+    const response = await fetch('https://api.prosopo.io/siteverify', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({secret: 'your_secret_key', token}),
+    });
+    return response.json().verified || false; // Return verified field, default to false
+}
+```
+</section>
+
+### PHP
+
+<section id="php">
+```php
+<?php
+function verifyToken($token) {
+    $url = 'https://api.prosopo.io/siteverify';
+    $data = json_encode(["secret" => "your_secret_key", "token" => $token]);
+    $options = [
+        'http' => [
+            'header'  => "Content-Type: application/json\r\n",
+            'method'  => 'POST',
+            'content' => $data,
+        ],
+    ];
+    $context  = stream_context_create($options);
+    $result = file_get_contents($url, false, $context);
+    $response = json_decode($result, true);
+
+    return $response["verified"] ?? false; // Return verified field, default to false
+}
+?>
+```
+</section>
+
+### Python
+
+<section id="python">
+```python
+import requests
+
+def verify_token(token):
+    url = "https://api.prosopo.io/siteverify"
+    data = {"secret": "your_secret_key", "token": token}
+    response = requests.post(url, json=data)
+    return response.json().get("verified", False)  # Return verified field, default to False
+```
+</section>
+
+### Java
+
+<section id="java">
+```java
+import java.io.*;
+import java.net.*;
+import org.json.JSONObject;
+
+public class ProcaptchaVerification {
+    public static boolean verifyToken(String token) throws Exception {
+        URL url = new URL("https://api.prosopo.io/siteverify");
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("POST");
+        con.setRequestProperty("Content-Type", "application/json");
+        con.setDoOutput(true);
+
+        String jsonInputString = "{\"secret\":\"your_secret_key\", \"token\":\"" + token + "\"}";
+        try (OutputStream os = con.getOutputStream()) {
+            byte[] input = jsonInputString.getBytes("utf-8");
+            os.write(input, 0, input.length);
+        }
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
+        StringBuilder response = new StringBuilder();
+        String responseLine;
+        while ((responseLine = br.readLine()) != null) {
+            response.append(responseLine.trim());
+        }
+
+        // Parse JSON response
+        JSONObject jsonResponse = new JSONObject(response.toString());
+        return jsonResponse.optBoolean("verified", false); // Default to false if not found
+    }
+}
+```
+</section>
+
 
 ## Verification Package
 
-We have a JavaScript implementation of the Procaptcha verification package and we are working on
-delivering additional language support.
+We have a JavaScript implementation of the Procaptcha verification package [available on npm](https://www.npmjs.com/package/@prosopo/server).
 
 ### JavaScript / TypeScript Verification
 
