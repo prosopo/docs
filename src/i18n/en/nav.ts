@@ -18,7 +18,7 @@
  * `src/i18n/ja/nav.ts`: `'getting-started': 'はじめに',`
  */
 export default [
-	{ text: 'Learn the Basics', header: true, type: 'learn', key: 'basics' },
+	{text: 'Learn the Basics', header: true, type: 'learn', key: 'basics'},
 	{
 		text: 'Get Started',
 		slug: 'basics/',
@@ -49,7 +49,7 @@ export default [
 		slug: 'basics/faq',
 		key: 'basics/faq',
 	},
-	{ text: 'Demos', header: true, type: 'learn', key: 'demos' },
+	{text: 'Demos', header: true, type: 'learn', key: 'demos'},
 	{
 		text: 'React Frontend Client Example',
 		slug: 'demos/client-example',
@@ -65,7 +65,7 @@ export default [
 		slug: 'demos/client-example-bundle',
 		key: 'demos/client-example-bundle',
 	},
-	{ text: 'Wordpress Plugin', header: true, type: 'learn', key: 'wordpress-plugin' },
+	{text: 'Wordpress Plugin', header: true, type: 'learn', key: 'wordpress-plugin'},
 	{
 		text: 'Get Started With Wordpress',
 		slug: 'wordpress-plugin/',
@@ -75,6 +75,13 @@ export default [
 		text: 'Hooks',
 		slug: 'wordpress-plugin/hooks',
 		key: 'wordpress-plugin/hooks',
+	},
+	{
+		text: 'Form Integration Guides',
+		header: true,
+		type: 'learn',
+		key: 'form-integration-guides',
+		nested: true,
 	},
 	{
 		text: 'Contact Form 7',
@@ -102,11 +109,6 @@ export default [
 		key: 'wordpress-plugin/gravity-forms',
 	},
 	{
-		text: 'JetPack',
-		slug: 'wordpress-plugin/jetpack',
-		key: 'wordpress-plugin/jetpack',
-	},
-	{
 		text: 'Ninja Forms',
 		slug: 'wordpress-plugin/ninja-forms',
 		key: 'wordpress-plugin/ninja-forms',
@@ -122,9 +124,16 @@ export default [
 		key: 'wordpress-plugin/wpforms',
 	},
 	{
-		text: 'WooCommerce',
-		slug: 'wordpress-plugin/woocommerce',
-		key: 'wordpress-plugin/woocommerce',
+		text: 'Other Integrations Guides',
+		header: true,
+		type: 'learn',
+		key: 'other-integration-guides',
+		nested: true,
+	},
+	{
+		text: 'bbPress',
+		slug: 'wordpress-plugin/bbpress',
+		key: 'wordpress-plugin/bbpress',
 	},
 	{
 		text: 'Elementor Pro',
@@ -132,9 +141,14 @@ export default [
 		key: 'wordpress-plugin/elementor-pro',
 	},
 	{
-		text: 'bbPress',
-		slug: 'wordpress-plugin/bbpress',
-		key: 'wordpress-plugin/bbpress',
+		text: 'JetPack',
+		slug: 'wordpress-plugin/jetpack',
+		key: 'wordpress-plugin/jetpack',
+	},
+	{
+		text: 'WooCommerce',
+		slug: 'wordpress-plugin/woocommerce',
+		key: 'wordpress-plugin/woocommerce',
 	},
 ] satisfies NavEntry[];
 
@@ -148,17 +162,17 @@ type NavEntry = {
 	key: string;
 } & (
 	| {
-			/** The content collection slug for this page *without* the language code. */
-			slug: string;
-	  }
+	/** The content collection slug for this page *without* the language code. */
+	slug: string;
+}
 	| {
-			/** Marks this entry as a group heading and starts a new group. */
-			header: true;
-			/** Whether this group is in the learn or API category (currently unused). */
-			type: 'learn' | 'api';
-			/** Whether this group should be nested inside the preceding group. */
-			nested?: boolean;
-			/** Whether this group should be collapsed by default. */
-			collapsed?: boolean;
-	  }
-);
+	/** Marks this entry as a group heading and starts a new group. */
+	header: true;
+	/** Whether this group is in the learn or API category (currently unused). */
+	type: 'learn' | 'api';
+	/** Whether this group should be nested inside the preceding group. */
+	nested?: boolean;
+	/** Whether this group should be collapsed by default. */
+	collapsed?: boolean;
+}
+	);
