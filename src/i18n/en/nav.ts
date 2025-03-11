@@ -76,7 +76,13 @@ export default [
 		slug: 'wordpress-plugin/hooks',
 		key: 'wordpress-plugin/hooks',
 	},
-	{text: 'Form Integration Guides', header: true, type: 'learn', key: 'form-integration-guides', nested: true},
+	{
+		text: 'Form Integration Guides',
+		header: true,
+		type: 'learn',
+		key: 'form-integration-guides',
+		nested: true,
+	},
 	{
 		text: 'Contact Form 7',
 		slug: 'wordpress-plugin/contact-form-7',
@@ -117,7 +123,13 @@ export default [
 		slug: 'wordpress-plugin/wpforms',
 		key: 'wordpress-plugin/wpforms',
 	},
-	{text: 'Other integrations Guides', header: true, type: 'learn', key: 'other-integration-guides', nested: true},
+	{
+		text: 'Other Integrations Guides',
+		header: true,
+		type: 'learn',
+		key: 'other-integration-guides',
+		nested: true,
+	},
 	{
 		text: 'bbPress',
 		slug: 'wordpress-plugin/bbpress',
