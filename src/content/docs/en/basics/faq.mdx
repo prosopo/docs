@@ -1,5 +1,6 @@
 ---
 title: Frequently Asked Questions
+description: Common questions and answers about Procaptcha.
 i18nReady: true
 ---
 
@@ -20,4 +21,10 @@ logging in to the [Prosopo portal](https://portal.prosopo.io) and updating the d
 ## What does `Error parsing captcha` mean?
 This error will occur if incorrect data has been sent with the captcha response. To resolve this error, ensure that the
 data sent with the captcha response is correct.
+
+## What does `Incorrect CAPTCHA type` mean?
+This error occurs when the [captcha type](/en/basics/captcha-types) is not set correctly. The default `captchaType` is
+`frictionless`. If you wish to use `pow` or `image` you must set your `captchaType` in the widget configuration to `pow`
+or `image`. You must also update your [portal settings](https://portal.prosopo.io) to match.
+
 
