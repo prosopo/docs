@@ -40,11 +40,6 @@ export default [
 		key: 'basics/captcha-types',
 	},
 	{
-		text: 'Timeouts',
-		slug: 'basics/timeouts',
-		key: 'basics/timeouts',
-	},
-	{
 		text: 'Frequently Asked Questions',
 		slug: 'basics/faq',
 		key: 'basics/faq',
