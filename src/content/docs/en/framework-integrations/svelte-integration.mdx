@@ -1,10 +1,10 @@
 ---
 title: "Svelte Integration"
-description: "Procaptcha has an official Svelte component, that provides seamless integration of Prosopo Procaptcha into any Svelte project."
+description: "Procaptcha has an official Svelte component, that provides simple integration of Prosopo Procaptcha into any Svelte project."
 i18nReady: true
 ---
 
-Procaptcha has an official Svelte component, that provides seamless integration of Prosopo Procaptcha into any Svelte project.
+Procaptcha provides an official Svelte component for easy integration of Prosopo Procaptcha into any Svelte project.
 The integration component supports all the [Procaptcha render options](/en/basics/client-side-rendering/#procaptcha-options).
 
 ## 1. Installation
@@ -36,7 +36,6 @@ const handleVerification = (token: string): void => {
 </script>
 
 <ProcaptchaComponent siteKey="{siteKey}"
-captchaType="pow"
 language="en"
 callback={handleVerification}
 htmlAttributes={{class: "my-app__procaptcha"}} />
