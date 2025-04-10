@@ -44,6 +44,27 @@ export default [
 		slug: 'basics/faq',
 		key: 'basics/faq',
 	},
+	{text: 'Framework integrations', header: true, type: 'learn', key: 'framework-integrations'},
+	{
+		text: 'Angular Integration',
+		slug: 'framework-integrations/angular-integration',
+		key: 'framework-integrations/angular-integration',
+	},
+	{
+		text: 'React Integration',
+		slug: 'framework-integrations/react-integration',
+		key: 'framework-integrations/react-integration',
+	},
+	{
+		text: 'Svelte Integration',
+		slug: 'framework-integrations/svelte-integration',
+		key: 'framework-integrations/svelte-integration',
+	},
+	{
+		text: 'Vue Integration',
+		slug: 'framework-integrations/vue-integration',
+		key: 'framework-integrations/vue-integration',
+	},
 	{text: 'Demos', header: true, type: 'learn', key: 'demos'},
 	{
 		text: 'React Frontend Client Example',
