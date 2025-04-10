@@ -67,19 +67,14 @@ export default [
 	},
 	{text: 'Demos', header: true, type: 'learn', key: 'demos'},
 	{
-		text: 'React Frontend Client Example',
-		slug: 'demos/client-example',
-		key: 'demos/client-example',
+		text: 'HTML Frontend Client Example',
+		slug: 'demos/client-example-bundle',
+		key: 'demos/client-example-bundle',
 	},
 	{
 		text: 'NodeJS Server Example',
 		slug: 'demos/client-example-server',
 		key: 'demos/client-example-server',
-	},
-	{
-		text: 'HTML Frontend Client Example',
-		slug: 'demos/client-example-bundle',
-		key: 'demos/client-example-bundle',
 	},
 	{text: 'Wordpress Plugin', header: true, type: 'learn', key: 'wordpress-plugin'},
 	{

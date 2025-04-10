@@ -5,6 +5,7 @@ i18nReady: true
 ---
 import { Image } from 'astro:assets';
 import PortalUserInfo from '~/assets/portal-user-info.png';
+import PortalDomainEditing from '~/assets/prosopo-domain-editing.webp';
 
 This guide will help you set up the Procaptcha widget.
 
@@ -12,7 +13,7 @@ If you are currently using a CAPTCHA service, you can copy and paste our script 
 
 ## Get a sitekey and secret key
 
-To start using the Procaptcha widget, you will need to obtain a sitekey and a secret key. The sitekey and secret key are always associated with one widget and cannot be reused for other widgets.
+To start using the Procaptcha widget, you will need to [obtain a sitekey and a secret key](https://prosopo.io/register/). The sitekey and secret key are always associated with one widget and cannot be reused for other widgets.
 
 The sitekey is public and used to invoke the Procaptcha widget on your site.
 
@@ -20,11 +21,19 @@ Make sure you keep the secret key safe for security reasons.
 
 ### New sites
 
-1. Log in to the [Prosopo user portal](https://portal.prosopo.io) and navigate to Site Management.
+1. Log in to the [Prosopo user portal](https://portal.prosopo.io/) and navigate to Site Management.
 2. Click to reveal your sitekey and secret key.
 4. Copy your sitekey and secret key.
 
-<Image src={PortalUserInfo} alt="" class="hide" />
+<Image src={PortalUserInfo} alt="get your site key from the Portal User Info" class="hide" />
+
+### Set up your domain
+
+1. Navigate to Account.
+2. Make sure your domain is added to the list of domains. If not, add your domain.
+3. `Allow localhost` if you are testing locally but make sure to remove it when you deploy your app.
+
+<Image src={PortalDomainEditing} alt="edit a domain" class="hide" />
 
 ## Add the Procaptcha widget to your site
 
@@ -47,7 +56,8 @@ To add the Procaptcha widget:
 
 ## Verify the server-side response
 
-After you have installed the Procaptcha widget on your site, you should configure your server to validate the Procaptcha response.
+After you have installed the Procaptcha widget on your site, you must configure your server to validate the Procaptcha response.
 Refer to [Server-side verification](/en/basics/server-side-verification/).
 
-Rendering the client-side integration & verifying the server-side response are both necessary to allow Procaptcha to function properly.
+### Important Note
+Rendering the [client-side integration](#add-the-procaptcha-widget-to-your-site) & [verifying the server-side response](/en/basics/server-side-verification/) are **both** necessary to allow Procaptcha to function properly.

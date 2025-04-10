@@ -4,27 +4,34 @@ description: Common questions and answers about Procaptcha.
 i18nReady: true
 ---
 
-## What does `Site Key not Registered` mean?
+### What does `Site Key not Registered` mean?
 You may encounter this error when you set up the Procaptcha widget on your website. This error occurs when the site key
 you are using is not registered in the Prosopo system. To resolve this error, click the Activation link in the email
 or <a href="mailto:support@prosopo.io">contact the Prosopo support team</a>.
 
-## What does `Invalid Site Key` mean?
+### What does `Invalid Site Key` mean?
 This error occurs when the site key you are using is not valid. To resolve this error, ensure that you are using the
 correct site key, which you can find by logging in to the [Prosopo portal](https://portal.prosopo.io).
 
-## What does `Unauthorized origin URL` mean?
+### What does `Unauthorized origin URL` mean?
 This error occurs when the domain of the site key does not match the domain of the website where the Procaptcha widget
 is being used. To resolve this error, ensure that the domain of the site key matches the domain of the website by
 logging in to the [Prosopo portal](https://portal.prosopo.io) and updating the domain.
 
-## What does `Error parsing captcha` mean?
-This error will occur if incorrect data has been sent with the captcha response. To resolve this error, ensure that the
-data sent with the captcha response is correct.
-
-## What does `Incorrect CAPTCHA type` mean?
+### What does `Incorrect CAPTCHA type` mean?
 This error occurs when the [captcha type](/en/basics/captcha-types) is not set correctly. The default `captchaType` is
 `frictionless`. If you wish to use `pow` or `image` you must set your `captchaType` in the widget configuration to `pow`
 or `image`. You must also update your [portal settings](https://portal.prosopo.io) to match.
+
+### What does `Session not found` mean?
+This error occurs when the session is not found. This can happen if the session has expired or if the session ID is
+not valid. To resolve this error, either wait for the widget to reload (3s) or refresh the page. If the error persists,
+try clearing your browser cache and cookies. If the error still persists, please [contact the Prosopo support team](https://discord.com/invite/3nMYAHecZT).
+
+### What does `Error parsing captcha` mean?
+This error will occur if incorrect data has been sent with the captcha response. To resolve this error, ensure that the
+data sent with the captcha response is correct.
+
+
 
 
