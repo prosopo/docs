@@ -56,7 +56,7 @@ export default defineConfig({
 			sidebar: makeSidebar(),
 			social: {
 				github: 'https://github.com/prosopo/captcha',
-				discord: 'https://discord.gg/3nMYAHecZT',
+				discord: 'https://discord.gg/dwQx2w9Tgm',
 			},
 			pagefind: false,
 			head: [

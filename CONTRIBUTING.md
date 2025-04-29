@@ -80,7 +80,7 @@ Helpful issues usually include:
 
 ## Making PRs (pull requests)
 
-> Need help making a PR? [Join us on Discord](https://discord.gg/3nMYAHecZT), we'll be more than glad to help you out!
+> Need help making a PR? [Join us on Discord](https://discord.gg/dwQx2w9Tgm), we'll be more than glad to help you out!
 
 Contributions to the documentation site are made by editing the docs repository. You can do this directly on GitHub.com or by creating a copy of the repository locally, making your changes there, and contributing back to our repository.
 
@@ -210,5 +210,5 @@ In the terminal on your computer:
 - [Read the docs](https://docs.astro.build/)
 - [Fork the docs](https://github.com/prosopo/docs/fork)
 - [Raise an issue](https://github.com/prosopo/docs/issues/new)
-- [Discuss the docs](https://discord.gg/cZDZU3hJHc)
+- [Discuss the docs](https://discord.gg/dwQx2w9Tgm)
 - [Visit the Astro Docs Docs to see even more documentation about contributing to Astro docs!](https://contribute.docs.astro.build)
