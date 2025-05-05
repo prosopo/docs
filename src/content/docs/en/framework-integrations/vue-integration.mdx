@@ -17,12 +17,16 @@ The integration component supports all the [Procaptcha render options](/en/basic
 
 ```vue
 <script setup lang="ts">
-import {ProcaptchaComponent} from "@prosopo/vue-procaptcha-wrapper";
+import { ProcaptchaComponent } from "@prosopo/vue-procaptcha-wrapper";
 </script>
 
 <template>
-<ProcaptchaComponent :siteKey={"my-site-key"}/>
+  <ProcaptchaComponent :siteKey="siteKey" />
 </template>
+
+<script setup lang="ts">
+const siteKey = 'my-site-key';
+</script>
 ```
 
 ### 2.2) Advanced usage
@@ -30,18 +34,31 @@ import {ProcaptchaComponent} from "@prosopo/vue-procaptcha-wrapper";
 ```vue
 // ...
 
-<ProcaptchaComponent
-    :siteKey={"my-site-key"}
-    :callbacks={{
-        onVerified: (token: string): void => {
-            console.log("verified", token);
-        },
-    }}
-    :htmlAttributes={{
-        className: "my-app__procaptcha",
-        style: {
-            maxWidth: "600px",
-        },
-    }}
-/>;
+<script setup lang="ts">
+import { ProcaptchaComponent } from "@prosopo/vue-procaptcha-wrapper";
+
+const siteKey = 'my-site-key';
+
+const callbacks = {
+  onVerified: (token: string) => {
+    console.log("verified", token);
+  },
+};
+
+const htmlAttributes = {
+  class: "my-app__procaptcha",
+  style: {
+    maxWidth: "600px",
+  },
+};
+</script>
+
+<template>
+  <ProcaptchaComponent
+    :siteKey="siteKey"
+    :callbacks="callbacks"
+    :htmlAttributes="htmlAttributes"
+  />
+</template>
+
 ```
