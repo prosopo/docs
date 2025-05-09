@@ -63,7 +63,7 @@ Questa documentazione fa riferimento sempre all'ultima versione stabile di Astro
 
 L'account Twitter [@astrodotbuild](https://twitter.com/astrodotbuild) è la fonte ufficiale del team Astro per rimanere aggiornati.
 
-Pubblichiamo anche annunci sui rilasci nella nostra [community Discord](https://discord.gg/3nMYAHecZT) nel canale #announcements.
+Pubblichiamo anche annunci sui rilasci nella nostra [community Discord](https://discord.gg/dwQx2w9Tgm) nel canale #announcements.
 
 Non tutte le release di Astro saranno accompagnate da un post sul blog, ma puoi sempre trovare un changelog dettagliato per ogni release nel [file `CHANGELOG.md` nella repository Astro](https://github.com/prosopo/captcha/blob/main/packages/astro/CHANGELOG.md).
 

@@ -44,7 +44,7 @@ Tämä dokumentaatio edustaa aina Astron viimeisintä vakaata versiota. Saavutet
 
 Twitterin [@astrodotbuild](https://twitter.com/astrodotbuild)-tunnus on virallinen lähde Astro-tiimin päivityksille.
 
-Tulemme kertomaan julkaisuista myös [Discord-yhteisössä](https://discord.gg/3nMYAHecZT) kanavalla #announcements.
+Tulemme kertomaan julkaisuista myös [Discord-yhteisössä](https://discord.gg/dwQx2w9Tgm) kanavalla #announcements.
 
 Kaikki Astro-julkaisut eivät tule olemaan oman blogikirjoituksensa arvoisia, mutta löydät yksityiskohtaisen muutoslokin jokaiselle julkaisulle [`CHANGELOG.md`-tiedostosta Astron repossa](https://github.com/prosopo/captcha/blob/main/packages/astro/CHANGELOG.md).
 
