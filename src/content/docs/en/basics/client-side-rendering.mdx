@@ -108,20 +108,20 @@ document.getElementById('procaptcha-script').addEventListener('load', function (
 The `Procaptcha.render()` function takes an options object as its second argument. The options object can contain the
 following fields:
 
-| Key                    | Type               | Description                                                                                              | Required |
-|------------------------|--------------------|----------------------------------------------------------------------------------------------------------|----------|
-| siteKey                | string             | The site key of your application / website. This is required.                                            | ✓        |
-| callback               | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is verified.        | ✗        |
-| theme                  | string             | The theme of the CAPTCHA widget. The default is `light`. The other option is `dark`.                     | ✗        |
-| captchaType            | string             | The type of CAPTCHA to render. The default is `frictionless`. Other options are `image`, `pow`.          | ✗        |
-| chalexpired-callback   | string or function | The name of the window function, or a function, that will be called when the CAPTCHA challenge expires.  | ✗        |
-| error-callback         | string or function | The name of the window function, or a function, that will be called when an error occurs.                | ✗        |
-| close-callback         | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is closed.          | ✗        |
-| open-callback          | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is opened.          | ✗        |
-| expired-callback       | string or function | The name of the window function, or a function, that will be called when the CAPTCHA solution expires.   | ✗        |
-| failed-callback        | string or function | The name of the window function, or a function, that will be called when the CAPTCHA challenge fails.    | ✗        |
-| reset-callback         | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is reset.           | ✗        |
-| language               | string             | The language of the CAPTCHA widget. The default is `en`.                                                 | ✗        |
+| Key                  | Type               | Description                                                                                                                                                          | Required |
+|----------------------|--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
+| siteKey              | string             | The site key of your application / website. This is required.                                                                                                        | ✓        |
+| callback             | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is verified.                                                                    | ✗        |
+| theme                | string             | The theme of the CAPTCHA widget. The default is `light`. The other option is `dark`.                                                                                 | ✗        |
+| captchaType          | string             | The type of CAPTCHA to render. The default is `frictionless`. Other options are `image`, `pow`.                                                                      | ✗        |
+| chalexpired-callback | string or function | The name of the window function, or a function, that will be called when the CAPTCHA challenge expires.                                                              | ✗        |
+| error-callback       | string or function | The name of the window function, or a function, that will be called when an error occurs.                                                                            | ✗        |
+| close-callback       | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is closed.                                                                      | ✗        |
+| open-callback        | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is opened.                                                                      | ✗        |
+| expired-callback     | string or function | The name of the window function, or a function, that will be called when the CAPTCHA solution expires.                                                               | ✗        |
+| failed-callback      | string or function | The name of the window function, or a function, that will be called when the CAPTCHA challenge fails.                                                                | ✗        |
+| reset-callback       | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is reset.                                                                       | ✗        |
+| language             | string             | The language of the CAPTCHA widget. The default is `en`. All languages can be found [here](https://github.com/prosopo/captcha/tree/main/packages/locale/src/locales). | ✗        |
 
 ### Data Attributes
 
@@ -149,28 +149,20 @@ You can choose to implement any of the following types of captcha when rendering
 | `pow`          | The `pow` CAPTCHA type requires the user to solve a cryptographic puzzle. This puzzle simply requires a small amount of computational work to solve, and slows down bots significantly, making it difficult for them to scrape in high volumes.                                       |
 | `image`        | The `image` CAPTCHA type requires the user to solve a simple image CAPTCHA. This is CAPTCHA type most people are familiar with, created by Google reCAPTCHA.                                                                                                                          |
 
-Please note, the client side CAPTCHA type must be set to the same value as in the portal, or a more secure version. For example, if your portal CAPTCHA Type is `frictionless`, you may only set the client side CAPTCHA Type to `frictionless` or `image`. If your portal CAPTCHA Type is `pow`, you may only set the client side CAPTCHA Type to `pow`.
 
-## React Component
 
-To use the Procaptcha React Component, import Procaptcha, define a config with `ProcaptchaConfigSchema`, optionally define callbacks, and render via the Procaptcha component. A minimal example would be as follows:
+**Please note**, if using `image` or `pow`, the client side [CAPTCHA type](/en/basics/captcha-types/) must be set to the same value as in the [portal](https://portal.prosopo.io):
+- If your portal CAPTCHA Type is `image`, you must set the client side CAPTCHA Type to `image`.
+- If your portal CAPTCHA Type is `pow`, you must set the client side CAPTCHA Type to `pow`.
+- If your portal CAPTCHA Type is `frictionless`, you must set the client side CAPTCHA Type to `frictionless` or leave it blank.
 
-```javascript
-import { Procaptcha } from '@prosopo/procaptcha-react'
-import { ProcaptchaConfigSchema } from '@prosopo/types'
+### Framework Integrations
 
-const MyApp = () => {
-    const config = ProcaptchaConfigSchema.parse({
-        account: {
-            address: 'YOUR_SITEKEY',
-        },
-        // Other config options, see demos/client-example for more details
-    })
+Various frameworks have been integrated with Procaptcha. You can find the documentation for each framework below:
 
-    return <Procaptcha config={config} />
-}
+- [React Integration](/en/framework-integrations/angular-integration/)
+- [Vue Integration](/en/framework-integrations/vue-integration/)
+- [Angular Integration](/en/framework-integrations/angular-integration/)
+- [Svelte Integration](/en/framework-integrations/svelte-integration/)
 
-export default MyApp
-```
 
-Further example usage can be seen in [demos/client-example](https://github.com/prosopo/captcha/blob/main/demos/client-example/src/App.tsx#L220C1-L223C43)

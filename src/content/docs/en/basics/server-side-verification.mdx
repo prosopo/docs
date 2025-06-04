@@ -64,6 +64,19 @@ with the request. The closer the score is to 1, the more likely it is that the r
 }
 ```
 
+### Optional IP Address
+
+You can also pass the user's IP address to the verification endpoint, which will allow Prosopo to perform additional checks
+on the request. This is optional, but recommended for better accuracy. To do this, include the `ip` field in your POST data:
+
+```json
+{
+    "secret": "your_secret_key",
+    "token": "PROCAPTCHA-RESPONSE",
+    "ip": "USER_IP_ADDRESS"
+}
+```
+
 ## Verification Code Examples
 
 ### JavaScript
@@ -76,7 +89,7 @@ async function verifyToken(token) {
     const response = await fetch('https://api.prosopo.io/siteverify', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({secret: 'your_secret_key', token}),
+        body: JSON.stringify({ secret: 'your_secret_key', token }),
     });
     return response.json().verified || false; // Return verified field, default to false
 }
@@ -116,7 +129,7 @@ import requests
 
 def verify_token(token):
     url = "https://api.prosopo.io/siteverify"
-    data = {"secret": "your_secret_key", "token": token}
+    data = { "secret": "your_secret_key", "token": token }
     response = requests.post(url, json=data)
     return response.json().get("verified", False)  # Return verified field, default to False
 ```

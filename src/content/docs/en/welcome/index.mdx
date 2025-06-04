@@ -1,12 +1,12 @@
 ---
 title: 'Prosopo Procaptcha Documentation'
-description: 'Prosopo Procaptcha is a drop-replacement for reCAPTCHA and hCaptcha that protects user privacy and collects zero data.'
+description: 'Prosopo Procaptcha is a drop-replacement for reCAPTCHA and hCaptcha that protects user privacy and collects minimal data.'
 i18nReady: true
 ---
 import { Image } from 'astro:assets';
 import ProcaptchaGIF from '~/assets/procaptcha-pow.gif';
 
-Prosopo Procaptcha is a drop-replacement for reCAPTCHA, hCaptcha, and Cloudflare Turnstile that protects user privacy and collects zero data.
+Prosopo Procaptcha is an [open-source](https://github.com/prosopo/captcha), drop-in replacement for reCAPTCHA, hCaptcha, and Cloudflare Turnstile that protects user privacy and collects minimal data.
 
 <Image src={ProcaptchaGIF} alt={'prosopo procaptcha pow captcha challenge'} />
 
@@ -19,15 +19,19 @@ Once you have your site key and secret key, follow our guide on [how to get star
 
 ## Demos
 
-### React Demo
+### HTML Demo
 
-You can view an end-to-end example of how to implement Procaptcha in a React application in
-our [client-example](/en/demos/client-example/)
+You can view an end-to-end example of how to implement Procaptcha in a simple HTML page in
+our [client-bundle-example](/en/demos/client-example-bundle/)
 and [client-example-server](/en/demos/client-example-server/) packages. Details
 of how to run the examples are in the documentation at the previous links.
 
-### HTML Demo
+### Framework Integrations
 
-You can view an example of the bundle being used in a simple HTML page in
-the [client-bundle-example](/en/demos/client-example-bundle/). This example is
-frontend only.
+Various frameworks have been integrated with Procaptcha. You can find the documentation for each framework below:
+
+- [React Integration](/en/framework-integrations/angular-integration/)
+- [Vue Integration](/en/framework-integrations/vue-integration/)
+- [Angular Integration](/en/framework-integrations/angular-integration/)
+- [Svelte Integration](/en/framework-integrations/svelte-integration/)
+
