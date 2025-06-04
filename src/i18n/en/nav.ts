@@ -18,7 +18,7 @@
  * `src/i18n/ja/nav.ts`: `'getting-started': 'はじめに',`
  */
 export default [
-	{text: 'Learn the Basics', header: true, type: 'learn', key: 'basics'},
+	{ text: 'Learn the Basics', header: true, type: 'learn', key: 'basics' },
 	{
 		text: 'Get Started',
 		slug: 'basics/',
@@ -44,7 +44,7 @@ export default [
 		slug: 'basics/faq',
 		key: 'basics/faq',
 	},
-	{text: 'Framework integrations', header: true, type: 'learn', key: 'framework-integrations'},
+	{ text: 'Framework integrations', header: true, type: 'learn', key: 'framework-integrations' },
 	{
 		text: 'Angular Integration',
 		slug: 'framework-integrations/angular-integration',
@@ -65,7 +65,7 @@ export default [
 		slug: 'framework-integrations/vue-integration',
 		key: 'framework-integrations/vue-integration',
 	},
-	{text: 'Demos', header: true, type: 'learn', key: 'demos'},
+	{ text: 'Demos', header: true, type: 'learn', key: 'demos' },
 	{
 		text: 'HTML Frontend Client Example',
 		slug: 'demos/client-example-bundle',
@@ -76,7 +76,7 @@ export default [
 		slug: 'demos/client-example-server',
 		key: 'demos/client-example-server',
 	},
-	{text: 'Wordpress Plugin', header: true, type: 'learn', key: 'wordpress-plugin'},
+	{ text: 'Wordpress Plugin', header: true, type: 'learn', key: 'wordpress-plugin' },
 	{
 		text: 'Get Started With Wordpress',
 		slug: 'wordpress-plugin/',
@@ -142,6 +142,16 @@ export default [
 		nested: true,
 	},
 	{
+		text: 'Beaver Builder',
+		slug: 'wordpress-plugin/beaver-builder',
+		key: 'wordpress-plugin/beaver-builder',
+	},
+	{
+		text: 'Memberpress',
+		slug: 'wordpress-plugin/memberpress',
+		key: 'wordpress-plugin/memberpress',
+	},
+	{
 		text: 'bbPress',
 		slug: 'wordpress-plugin/bbpress',
 		key: 'wordpress-plugin/bbpress',
@@ -161,6 +171,11 @@ export default [
 		slug: 'wordpress-plugin/woocommerce',
 		key: 'wordpress-plugin/woocommerce',
 	},
+	{
+		text: 'Spectra',
+		slug: 'wordpress-plugin/spectra',
+		key: 'wordpress-plugin/spectra',
+	},
 ] satisfies NavEntry[];
 
 type NavEntry = {
@@ -173,17 +188,17 @@ type NavEntry = {
 	key: string;
 } & (
 	| {
-	/** The content collection slug for this page *without* the language code. */
-	slug: string;
-}
+			/** The content collection slug for this page *without* the language code. */
+			slug: string;
+	  }
 	| {
-	/** Marks this entry as a group heading and starts a new group. */
-	header: true;
-	/** Whether this group is in the learn or API category (currently unused). */
-	type: 'learn' | 'api';
-	/** Whether this group should be nested inside the preceding group. */
-	nested?: boolean;
-	/** Whether this group should be collapsed by default. */
-	collapsed?: boolean;
-}
-	);
+			/** Marks this entry as a group heading and starts a new group. */
+			header: true;
+			/** Whether this group is in the learn or API category (currently unused). */
+			type: 'learn' | 'api';
+			/** Whether this group should be nested inside the preceding group. */
+			nested?: boolean;
+			/** Whether this group should be collapsed by default. */
+			collapsed?: boolean;
+	  }
+);
