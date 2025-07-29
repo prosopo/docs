@@ -1,0 +1,88 @@
+---
+title: Safety Threshold
+description: Understanding and configuring the Safety Threshold in your Prosopo portal settings to balance security and user experience.
+i18nReady: true
+---
+
+The **Safety Threshold** is a critical setting in your Prosopo portal that determines how strict your bot detection system is. It controls the balance between security (blocking bots) and user experience (minimizing CAPTCHA challenges for legitimate users).
+
+## What is Safety Threshold?
+
+The Safety Threshold is a numerical value between 0.2 and 0.8 that represents the confidence level required before a user is considered legitimate. When Prosopo's frictionless system analyzes a user's behavior, it generates a "bot score" - a number indicating how likely the user is to be a bot.
+
+- **Lower scores** = More likely to be human
+- **Higher scores** = More likely to be a bot
+
+The Safety Threshold determines the cutoff point: users with bot scores above your threshold will be presented with a CAPTCHA challenge, while those below will pass through without interruption, simply completing a PoW CAPTCHA in the background.
+
+## How Safety Threshold Works
+
+### The Bot Detection Process
+
+1. **User visits your site** - Prosopo's frictionless system begins analyzing browser behavior
+2. **Behavioral analysis** - The system examines factors like:
+   - Browser data
+   - Site interaction characteristics
+   - Device and environment signals
+   
+   This is used to securely determine a user's likelihood to be a bot without sending this user data to Prosopo, maintaining full privacy and GDPR compliance.
+3. **Score generation** - A bot score (0.0 to 1.0) is calculated
+4. **Threshold comparison** - The score is compared to your Safety Threshold
+5. **Action taken**:
+   - **Score < Threshold**: User passes through (invisible PoW challenge)
+   - **Score ≥ Threshold**: User receives CAPTCHA challenge
+
+### Threshold Ranges
+
+| Range | Label | Description | Use Case |
+|-------|-------|-------------|----------|
+| 0.2 - 0.4 | **Low** | Permissive detection | High-traffic sites prioritizing user experience |
+| 0.4 - 0.6 | **Medium** ⭐ | Balanced approach | **Recommended** for most websites |
+| 0.6 - 0.8 | **High** | Strict detection | Sites under attack or requiring high security |
+
+## Configuring Your Safety Threshold
+
+### Accessing the Settings
+
+1. Log in to the [Prosopo portal](https://portal.prosopo.io/)
+2. Navigate to your site settings
+3. Find the "Safety Threshold" section
+4. Use the slider to adjust your threshold
+5. Click "Save" to apply changes
+
+### Choosing the Right Threshold
+
+#### Start with Medium (0.4 - 0.6)
+The medium setting is recommended for most websites as it provides a good balance between security and user experience.
+
+#### When to Use Low Threshold (0.2 - 0.4)
+- **High-traffic e-commerce sites** where user friction must be minimized
+- **Content sites** where occasional bot traffic is acceptable
+- **During promotional periods** when you expect high legitimate traffic
+
+#### When to Use High Threshold (0.6 - 0.8)
+- **Under active bot attack** - temporarily increase to block more suspicious traffic
+- **Financial or sensitive applications** requiring maximum security
+- **Form submissions** with high-value outcomes (registrations, purchases)
+
+## Real-World Examples
+
+### E-commerce Site Example
+**Scenario**: Online store with 10,000 daily visitors
+- **Normal operations**: Medium threshold (0.5)
+- **During sales**: Lower the Safety Threshold to reduce friction
+- **Under attack**: Raise the Safety Threshold temporarily
+
+### Blog/Content Site Example
+**Scenario**: News website with comment system
+- **Article reading**: Low threshold (0.3) - minimal friction
+- **Comment posting**: Medium threshold (0.5) - prevent spam
+
+## Getting Help
+
+If you need assistance with Safety Threshold configuration:
+- Contact Prosopo support through the portal
+- Join our Discord
+- Review your analytics data with our team for optimization recommendations
+
+The Safety Threshold is a powerful tool for balancing security and user experience. With proper configuration and monitoring, it can significantly improve your site's protection while maintaining a smooth user experience.
