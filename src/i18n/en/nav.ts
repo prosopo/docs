@@ -40,6 +40,11 @@ export default [
 		key: 'basics/captcha-types',
 	},
 	{
+		text: 'Safety Threshold',
+		slug: 'basics/safety-threshold',
+		key: 'basics/safety-threshold',
+	},
+	{
 		text: 'Frequently Asked Questions',
 		slug: 'basics/faq',
 		key: 'basics/faq',
