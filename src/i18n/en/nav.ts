@@ -40,6 +40,11 @@ export default [
 		key: 'basics/captcha-types',
 	},
 	{
+		text: 'Invisible CAPTCHA (Beta)',
+		slug: 'basics/invisible-captcha',
+		key: 'basics/invisible-captcha',
+	},
+	{
 		text: 'Safety Threshold',
 		slug: 'basics/safety-threshold',
 		key: 'basics/safety-threshold',
