@@ -1,0 +1,64 @@
+---
+title: Context Awareness
+description: Protect CAPTCHA verification by applying environment-sensitive checks and configurable context thresholds to reduce fraudulent or unexpected origin usage.
+i18nReady: true
+---
+
+Context Awareness helps prevent your CAPTCHA from being used on forged or unexpected origins by applying environment-sensitive checks and a configurable sensitivity threshold. It increases challenge difficulty for suspicious contexts while allowing legitimate traffic to pass with minimal friction.
+
+## What is Context Awareness?
+
+Context Awareness compares runtime signals from incoming requests (origin, frame/embedding context, environment) to your expected site context. When discrepancies are detected, the system can raise verification difficulty or fail verification to reduce abuse from embedded or forged origins.
+
+## How Context Awareness Works
+
+### Detection Flow
+
+1. **Request arrives** - The system gathers environment signals such as origin, embedding/frame status, and client indicators.
+2. **Context comparison** - Signals are compared against the configured expected site context.
+3. **Score & decision** - A contextual risk score is derived and evaluated against the selected sensitivity threshold.
+4. **Action taken**:
+- **Below threshold**: Normal verification (invisible PoW or light verification).
+- **At or above threshold**: Increase CAPTCHA difficulty or fail verification (depending on controls).
+
+## Controls
+
+- Disallow Webview
+Prevents successful verification from in-app webviews. Users can still complete CAPTCHAs, but verification fails if the request originates from a webview.
+
+- Context Awareness (toggle)
+Enables contextual checks that compare request environment signals to your expected site context. When enabled, the system may increase challenge difficulty for suspicious contexts.
+
+- Threshold Slider (Low / Medium / High)
+Three-position slider controlling sensitivity. Medium is recommended; Low is permissive, High is strict.
+
+### Threshold Ranges
+
+| Range | Label | Description |
+|-------|-------|-------------|
+| Low |  Permissive | Allows more solves; may permit fraudulent or embedded origins. |
+| Medium |  Balanced | Recommended default — good tradeoff between UX and security. |
+| High |  Strict | Blocks more suspicious contexts; may increase false positives. |
+
+## Permissions & Behavior
+
+- Free tier users cannot enable `Disallow Webview` nor `Context Awareness`. Attempting to toggle will show the upgrade CTA.
+- Viewer mode renders controls read-only and displays an informational hint.
+
+## Real-World Examples
+
+- E-commerce: Start with Medium. During promotions, monitor traffic before lowering sensitivity to reduce friction. If under attack, raise to High temporarily.
+- Embedded widget: If your site is intended to be embedded, avoid High sensitivity or explicitly whitelist integration contexts.
+
+## Configuring Context Awareness
+
+1. Log in to the Prosopo portal.
+2. Navigate to your site settings.
+3. Locate the "Context Awareness" section.
+4. Toggle the feature and set the Threshold Slider to Low / Medium / High.
+5. Save changes and monitor analytics to validate behavior.
+
+## Getting Help
+
+- Contact Prosopo support via [Discord](https://discord.com/invite/dwQx2w9Tgm).
+- Review analytics data with our team to fine-tune settings.
