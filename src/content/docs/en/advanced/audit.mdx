@@ -1,0 +1,104 @@
+---
+title: Audit
+description: Learn how to use the Audit page in the Prosopo portal to review and analyze CAPTCHA records for security and compliance.
+i18nReady: true
+---
+import { Image } from 'astro:assets';
+import AuditPageImage from '~/assets/prosopo-audit-page.webp';
+
+The **Audit** page in the Prosopo portal allows administrators to search, review, and analyze individual CAPTCHA records. This feature is essential for ensuring security, monitoring user activity, and maintaining compliance.
+
+The Audit feature is not available on the Free tier. Please [upgrade](https://prosopo.io/pricing/) to access this functionality.
+
+
+## What is Audit?
+
+The Audit page provides detailed insights into CAPTCHA interactions on your site. It enables you to:
+
+- Search for specific CAPTCHA records based on criteria like IP address, user agent, geolocation, and more.
+- Review the status and scores of CAPTCHA challenges.
+- Analyze user behavior and detect suspicious activity.
+
+
+## Key Features
+
+### Search Criteria
+
+The Audit page offers a variety of filters to narrow down your search:
+
+- **IP Address**: Search by specific IP addresses.
+- **JA4 Fingerprint**: Filter by JA4 fingerprints for device identification.
+- **User Agent**: Analyze browser and device information.
+- **VPN Status**: Identify users accessing through VPNs.
+- **Geolocation**: Filter by country or region.
+- **CAPTCHA Type**: Choose between Proof of Work (PoW), Image, or both.
+- **Date Range**: Specify a start and end date for your search (7-day maximum range).
+
+### Results Overview
+
+Search results include detailed information for each CAPTCHA record:
+
+- **Timestamp**: When the CAPTCHA was requested.
+- **Type**: CAPTCHA type (PoW or Image).
+- **IP Address**: The user's IP address.
+- **JA4**: Device fingerprint.
+- **User Agent**: Browser and device details.
+- **VPN**: Whether the user was using a VPN.
+- **Geolocation**: The user's location.
+- **Status**: CAPTCHA result (Approved or Denied).
+- **Session Score**: The user's session score.
+- **Base Score**: The base score used for evaluation.
+- **Threshold**: The configured threshold for the CAPTCHA.
+- **Captcha Type**: The type of CAPTCHA presented.
+
+### Pagination and Load More
+
+The results are paginated, and you can load more records as needed. This ensures smooth navigation even with large datasets.
+
+## How to Use the Audit Page
+
+<Image src={AuditPageImage} alt={'prosopo audit page'} />
+
+
+### Accessing the Page
+
+1. Log in to the [Prosopo portal](https://portal.prosopo.io/).
+2. Navigate to the **Audit** section from the main menu.
+
+### Performing a Search
+
+1. Fill in the desired search criteria in the form.
+2. Adjust the date range and CAPTCHA type as needed.
+3. Click the **Search** button to retrieve results.
+
+### Reviewing Results
+
+- Use the table to review individual records.
+- Click on specific rows for more detailed information.
+- Use the **Load More** button to view additional records.
+
+## Best Practices
+
+### Regular Monitoring
+
+- Regularly review CAPTCHA records to detect unusual patterns or suspicious activity.
+- Pay attention to high bot scores and repeated failed attempts.
+
+### Adjusting Thresholds
+
+- Use the insights from the Audit page to fine-tune your **Safety Threshold** settings for optimal security and user experience.
+
+### Investigating Suspicious Activity
+
+- Look for patterns in IP addresses, geolocations, or user agents that may indicate bot activity.
+- Use the VPN status and JA4 fingerprints to identify potential threats.
+
+## Getting Help
+
+If you encounter issues or need assistance:
+
+- Contact Prosopo support through the portal.
+- Join our Discord community for real-time help.
+- Refer to the [documentation](https://docs.prosopo.io/) for additional guidance.
+
+The Audit page is a powerful tool for maintaining the integrity of your site. By leveraging its features, you can ensure a secure and seamless experience for your users.

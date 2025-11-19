@@ -3,8 +3,13 @@ title: Context Awareness
 description: Protect CAPTCHA verification by applying environment-sensitive checks and configurable context thresholds to reduce fraudulent or unexpected origin usage.
 i18nReady: true
 ---
+import { Image } from 'astro:assets';
+import ContextAwarenessSettings from '~/assets/prosopo-context-settings.webp';
 
 Context Awareness helps prevent your CAPTCHA from being used on forged or unexpected origins by applying environment-sensitive checks and a configurable sensitivity threshold. It increases challenge difficulty for suspicious contexts while allowing legitimate traffic to pass with minimal friction.
+
+Context Awareness is not available on the Free tier. Please [upgrade](https://prosopo.io/pricing/) to access this functionality.
+
 
 ## What is Context Awareness?
 
@@ -31,6 +36,8 @@ Enables contextual checks that compare request environment signals to your expec
 
 - Threshold Slider (Low / Medium / High)
 Three-position slider controlling sensitivity. Medium is recommended; Low is permissive, High is strict.
+
+<Image src={ContextAwarenessSettings} alt={'prosopo context awareness settings'} />
 
 ### Threshold Ranges
 

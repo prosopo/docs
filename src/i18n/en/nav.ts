@@ -49,15 +49,22 @@ export default [
         slug: 'basics/safety-threshold',
         key: 'basics/safety-threshold',
     },
-    {
-        text: 'Context Awareness',
-        slug: 'basics/context-awareness',
-        key: 'basics/context-awareness',
-    },
+
     {
         text: 'Frequently Asked Questions',
         slug: 'basics/faq',
         key: 'basics/faq',
+    },
+    {text: 'Advanced Usage', header: true, type: 'learn', key: 'advanced'},
+        {
+        text: 'Context Awareness',
+        slug: 'advanced/context-awareness',
+        key: 'advanced/context-awareness',
+    },
+    {
+        text: 'Audit',
+        slug: 'advanced/audit',
+        key: 'advanced/audit',
     },
     {text: 'Framework integrations', header: true, type: 'learn', key: 'framework-integrations'},
     {
