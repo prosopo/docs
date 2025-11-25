@@ -18,7 +18,7 @@ Invisible CAPTCHA is only available for **Pro and Enterprise** tier users. Free 
 
 Invisible CAPTCHA works by:
 1. Running verification challenges in the background
-2. Analyzing user behavior and browser characteristics  
+2. Analyzing user behavior and browser characteristics
 3. Only showing a visible challenge if the user appears suspicious
 4. Providing a smooth experience for legitimate users
 
@@ -28,9 +28,9 @@ Invisible CAPTCHA works by:
 The most intelligent option that dynamically adapts based on user behavior:
 
 ```html
-<button 
-    class="procaptcha" 
-    data-sitekey="your_site_key" 
+<button
+    class="procaptcha"
+    data-sitekey="your_site_key"
     data-captcha-type="frictionless"
     data-size="invisible"
     data-callback="onCaptchaSuccess">
@@ -42,11 +42,11 @@ The most intelligent option that dynamically adapts based on user behavior:
 Runs a computational challenge invisibly in the background:
 
 ```html
-<button 
-    class="procaptcha" 
-    data-sitekey="your_site_key" 
+<button
+    class="procaptcha"
+    data-sitekey="your_site_key"
     data-captcha-type="pow"
-    data-size="invisible" 
+    data-size="invisible"
     data-callback="onCaptchaSuccess">
     Submit
 </button>
@@ -56,9 +56,9 @@ Runs a computational challenge invisibly in the background:
 Shows visible challenges to verify the user on form submission:
 
 ```html
-<button 
-    class="procaptcha" 
-    data-sitekey="your_site_key" 
+<button
+    class="procaptcha"
+    data-sitekey="your_site_key"
     data-captcha-type="image"
     data-size="invisible"
     data-callback="onCaptchaSuccess">
@@ -81,9 +81,9 @@ Add the `procaptcha` class and data attributes directly to your form elements:
 <body>
     <form>
         <input type="email" name="email" required>
-        <button 
+        <button
             type="button"
-            class="procaptcha" 
+            class="procaptcha"
             data-sitekey="your_site_key"
             data-captcha-type="frictionless"
             data-size="invisible"
@@ -115,13 +115,13 @@ For more control over the CAPTCHA lifecycle:
 ```html
 <!DOCTYPE html>
 <html>
-<head>    
+<head>
     <script src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
 </head>
 <body>
     <form id="demo-form">
         <input type="email" name="email" required>
-        <div id="captcha-container"></div>
+        <div id="procaptcha"></div>
         <button type="submit">Submit Form</button>
     </form>
 
@@ -266,6 +266,6 @@ To convert existing visible CAPTCHA implementations:
 
 ## Next Steps
 
-- [Server-side verification](/en/basics/server-side-verification/) 
+- [Server-side verification](/en/basics/server-side-verification/)
 - [CAPTCHA Types](/en/basics/captcha-types/)
 - [Client-side rendering options](/en/basics/client-side-rendering/)
