@@ -65,7 +65,7 @@ Denne dokumentation afspejler altid den seneste stabile version af Astro. Når v
 
 Twitter-kontoen [@astrodotbuild](https://twitter.com/astrodotbuild) er den officielle kilde til opdateringer fra Astro-teamet.
 
-Vi sender også udgivelsesmeddelelser til vores [Discord-fællesskab](https://discord.gg/3nMYAHecZT) i #announcements kanalen.
+Vi sender også udgivelsesmeddelelser til vores [Discord-fællesskab](https://discord.gg/dwQx2w9Tgm) i #announcements kanalen.
 
 Ikke hver Astro udgivelse fortjener sit eget blogindlæg, men du kan finde en detaljeret ændringsliste for hver udgivelse i [`CHANGELOG.md` filen i Astro-repositoriet](https://github.com/prosopo/captcha/blob/main/packages/astro/CHANGELOG.md).
 

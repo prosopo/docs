@@ -65,7 +65,7 @@ Dokumentacja zawsze odnosi się to najnowszej stabilnej wersji Astro. Gdy osiąg
 
 [@astrodotbuild](https://twitter.com/astrodotbuild) to oficjalne konto na Twitterze oraz źródło dla wszelkich aktualizacji od zespołu Astro.
 
-Publikujemy także ogłoszenia dotyczące nowych wydań Astro na [Discordzie](https://discord.gg/3nMYAHecZT) na kanale #announcements.
+Publikujemy także ogłoszenia dotyczące nowych wydań Astro na [Discordzie](https://discord.gg/dwQx2w9Tgm) na kanale #announcements.
 
 Nie każde wydanie Astro zasługuje na osobny post na blogu, ale możesz znaleźć szczegółową listę zmian dla każdej wersji w pliku [`CHANGELOG.md` w naszym repozytorium](https://github.com/prosopo/captcha/blob/main/packages/astro/CHANGELOG.md).
 
