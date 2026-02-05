@@ -1,0 +1,334 @@
+---
+title: Access Control Rules
+description: Configure access control rules to apply custom CAPTCHA policies based on user attributes.
+i18nReady: true
+---
+import {Image} from 'astro:assets';
+import AccessControlRules from '~/assets/access-control-rules.png';
+
+Access Control Rules allow you to configure custom CAPTCHA policies for specific users or groups based on their attributes. You can increase or decrease CAPTCHA difficulty, or block access entirely, based on combinations of IP addresses, user IDs, browser fingerprints, and other identifiers.
+
+:::note[Account-Wide Rules]
+Access control rules are applied **account-wide** to all site keys in your account. A rule created for one site will affect CAPTCHA verification for all sites in your account.
+:::
+
+## Overview
+
+Access control rules evaluate incoming CAPTCHA requests against configured conditions. When a request matches a rule's conditions, the specified policy is applied instead of your site's default CAPTCHA settings.
+
+<Image src={AccessControlRules} alt={'Access Control Rules'} style="margin: 20px auto;"/>
+
+## Rule Matching
+
+### Matching Logic
+
+Rules use **AND logic** - all conditions within a rule must match for the rule to apply. Each condition specifies a field, operator, and value that must be satisfied.
+
+For example, a rule with conditions for IP address AND country code will only match requests that satisfy both conditions simultaneously.
+
+### Match Precedence
+
+When multiple rules could apply to a request, rules are matched in order of **specificity** - the number of conditions that match the request. Rules with more matching conditions take precedence over rules with fewer matching conditions.
+
+**Example:**
+- Rule A: IP = 1.1.1.1 AND Country = US (2 conditions)
+- Rule B: IP = 1.1.1.1 (1 condition)
+
+A request from IP 1.1.1.1 in the US would match Rule A because it has more matching conditions.
+
+## Conditions
+
+### Available Fields
+
+Access control rules can match on the following fields:
+
+#### IP Address
+
+Match exact IPv4 addresses.
+
+**Format:** `1.1.1.1`
+
+**Use case:** Target specific IP addresses for blocking or custom CAPTCHA policies.
+
+#### IP Mask (CIDR)
+
+Match ranges of IPv4 addresses using CIDR notation.
+
+**Format:** `1.1.1.0/24`
+
+**Example:** `192.168.1.0/24` matches all IPs from 192.168.1.0 to 192.168.1.255
+
+**Use case:** Apply policies to entire IP ranges, such as corporate networks or VPN services.
+
+#### User ID
+
+Match specific user identifiers passed in the CAPTCHA request.
+
+**Format:** Alphanumeric string
+
+**Use case:** Apply different CAPTCHA policies to known users versus anonymous users.
+
+#### JA4 Hash
+
+Match browser fingerprints using JA4 TLS fingerprinting.
+
+**Format:** `t13d1516h2_8daaf6152771_a278895b5b6a`
+
+**Use case:** Identify and respond to specific browser/TLS configurations associated with bots or automation tools.
+
+#### User Agent
+
+Match HTTP User-Agent strings.
+
+**Format:** Full User-Agent string
+
+**Example:** `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36`
+
+**Use case:** Apply policies based on browser type, version, or operating system.
+
+#### Country Code
+
+Match requests from specific countries using ISO 3166-1 alpha-2 country codes.
+
+**Format:** Two-letter country code (e.g., `US`, `GB`, `FR`)
+
+**Use case:** Apply stricter or more lenient policies for specific geographic regions.
+
+### Operators
+
+Currently, only the **equals** operator is supported. The condition matches when the field value exactly equals the specified value.
+
+## Policies
+
+When a rule matches, one of the following policies is applied:
+
+### Block
+
+Completely blocks the request. The CAPTCHA verification will fail regardless of whether the user completes the challenge.
+
+**Use case:** Block known malicious IPs, bot networks, or abusive users.
+
+### Restrict with Custom CAPTCHA
+
+Override the site's default CAPTCHA settings with a custom configuration:
+
+#### Image CAPTCHA
+
+Require the user to solve image-based CAPTCHA challenges.
+
+**Configuration:**
+- **Number of rounds**: How many image challenges the user must solve (1-10)
+
+**Use case:** Apply stricter verification to suspicious traffic while allowing legitimate users to proceed.
+
+#### Proof of Work
+
+Require the user to complete a computational challenge.
+
+**Configuration:**
+- **Difficulty level**: Computational difficulty (1-10, higher is more difficult)
+
+**Use case:** Slow down automated requests without requiring user interaction.
+
+## Rule Expiry
+
+All rules have an expiration time. When a rule expires, it is no longer evaluated and will not affect incoming requests.
+
+**Expiry units:**
+- Minutes
+- Hours
+- Days
+
+**Use case:** Temporarily block an IP address during an active attack, or apply stricter policies during high-risk periods.
+
+## Configuration via Portal
+
+Access control rules can be managed through the [Prosopo Portal](https://portal.prosopo.io) in the Access Control page. The interface provides three tabs:
+
+### Editor Tab
+
+Create custom rules by:
+1. Adding one or more conditions (field, operator, value)
+2. Configuring the policy (block or custom CAPTCHA)
+3. Setting the expiration time
+4. Adding an optional description
+
+### Display Tab
+
+View all active and expired rules for your site. Rules can be deleted individually.
+
+## Examples
+
+### Block Specific IP Address
+
+**Conditions:**
+- IP Address equals `203.0.113.45`
+
+**Policy:** Block
+
+**Expiry:** 24 hours
+
+**Description:** Blocking detected bot IP
+
+---
+
+### Strict Verification for VPN Range
+
+**Conditions:**
+- IP Mask equals `10.8.0.0/16`
+
+**Policy:** Image CAPTCHA, 3 rounds
+
+**Expiry:** 7 days
+
+**Description:** Additional verification for VPN traffic
+
+---
+
+### Country-Specific Policy
+
+**Conditions:**
+- Country Code equals `CN`
+
+**Policy:** Proof of Work, difficulty 7
+
+**Expiry:** 30 days
+
+**Description:** PoW verification for China
+
+---
+
+### Multi-Condition Rule
+
+**Conditions:**
+- Country Code equals `US`
+- IP Mask equals `1.1.1.0/24`
+
+**Policy:** Block
+
+**Expiry:** 1 hour
+
+**Description:** Block specific range in US during incident
+
+This rule only matches requests that satisfy both the country AND IP mask conditions.
+
+## Rule Creation Workflow
+
+1. **Navigate** to Access Control page in the portal
+2. **Switch** to the Editor tab
+3. **Add conditions** by selecting field, operator, and entering value
+4. **Configure policy** - choose between block or custom CAPTCHA type
+5. **Set expiry** - choose duration and unit
+6. **Add description** (optional) - explain the rule's purpose
+7. **Submit** the rule
+
+The rule becomes active immediately and begins evaluating incoming requests.
+
+## Rule Management
+
+### Viewing Rules
+
+The Display tab shows all rules with:
+- Description
+- Conditions (field, operator, value)
+- Policy details
+- Expiration date/time
+- Status (active or expired)
+
+### Deleting Rules
+
+Rules can be deleted at any time by clicking the "Delete" button on the Display tab. Deletion is immediate and cannot be undone.
+
+### Expired Rules
+
+Expired rules remain visible in the Display tab but are marked as expired. They no longer affect incoming requests. Expired rules can be deleted manually.
+
+## Use Cases
+
+### Bot Mitigation
+
+Block or restrict known bot IP addresses and user agents:
+
+```typescript
+// Block known bot IP
+IP Address equals "192.0.2.100"
+Policy: Block
+```
+
+### Geographic Access Control
+
+Apply different policies based on geographic origin:
+
+```typescript
+// Stricter verification for high-risk regions
+Country Code equals "XX"
+Policy: Image CAPTCHA, 5 rounds
+```
+
+### Network-Based Policies
+
+Apply policies to specific networks or organizations:
+
+```typescript
+// Custom policy for corporate VPN
+IP Mask equals "10.0.0.0/8"
+Policy: Proof of Work, difficulty 3
+```
+
+### Incident Response
+
+Quickly respond to active attacks:
+
+```typescript
+// Block attacking subnet during incident
+IP Mask equals "203.0.113.0/24"
+Policy: Block
+Expiry: 1 hour
+```
+
+### Fingerprint-Based Detection
+
+Target specific browser fingerprints associated with automation:
+
+```typescript
+// Block known bot fingerprint
+JA4 Hash equals "t13d1516h2_8daaf6152771_a278895b5b6a"
+Policy: Block
+```
+
+## Considerations
+
+### Account-Wide Scope
+
+Access control rules apply to **all site keys** in your account. When creating a rule, consider:
+- The rule will affect CAPTCHA verification for all your sites
+- Blocking an IP address will block it across all sites
+- Custom CAPTCHA policies will apply to all sites
+- Use appropriate conditions to avoid unintended impacts across multiple sites
+
+### Rule Limits
+
+Each site can have multiple active rules. However, a large number of rules may impact performance. Consider consolidating rules where possible using IP masks instead of individual IP addresses.
+
+### AND Logic
+
+Remember that all conditions within a rule must match. If you need to match requests that satisfy condition A OR condition B, create two separate rules.
+
+### False Positives
+
+Be cautious when creating broad rules (e.g., blocking entire countries or large IP ranges) as this may block legitimate users. Start with stricter policies (Image CAPTCHA or PoW) before resorting to complete blocks.
+
+### Testing
+
+Test rules with specific conditions before deploying broadly. Create a rule with a short expiry time and monitor its impact before extending the duration.
+
+### Expiry Management
+
+Set appropriate expiry times based on your use case:
+- **Minutes/Hours:** Active incidents, temporary blocks
+- **Days:** Known malicious sources, ongoing threats
+- **Review regularly:** Check and remove expired rules to keep the rules list clean
+
+## Availability
+
+Access Control Rules are available to customers with the Access Rules feature flag enabled. Contact support to enable this feature for your account.

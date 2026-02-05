@@ -62,6 +62,16 @@ export default [
         key: 'advanced/context-awareness',
     },
     {
+        text: 'IP Validation Rules',
+        slug: 'advanced/ip-validation-rules',
+        key: 'advanced/ip-validation-rules',
+    },
+    {
+        text: 'Access Control Rules',
+        slug: 'advanced/access-control-rules',
+        key: 'advanced/access-control-rules',
+    },
+    {
         text: 'Audit',
         slug: 'advanced/audit',
         key: 'advanced/audit',
