@@ -46,7 +46,7 @@ API 참조 섹션은 특정 Astro API를 자세히 배우고 싶을 때 유용�
 
 [@astrodotbuild](https://twitter.com/astrodotbuild) 트위터 계정을 통해 Astro 팀이 게시하는 공식적인 업데이트 소식을 받아볼 수 있습니다.
 
-또한 [디스코드](https://discord.gg/3nMYAHecZT)의 #announcements 채널에서도 릴리즈 소식을 찾아볼 수 있습니다.
+또한 [디스코드](https://discord.gg/dwQx2w9Tgm)의 #announcements 채널에서도 릴리즈 소식을 찾아볼 수 있습니다.
 
 모든 릴리즈가 블로그에 게시되는 것은 아닙니다. 블로그에 게시되지 않은 버전 릴리즈에 관한 자세한 수정사항은 [Astro 리포지터리 안의 `CHANGELOG.md`](https://github.com/prosopo/captcha/blob/main/packages/astro/CHANGELOG.md) 파일에서 읽어볼 수 있습니다.
 

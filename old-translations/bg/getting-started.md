@@ -47,7 +47,7 @@ _Бележка: някои функционалности (например: Fa
 
 Официалният източник за новини от екипа на Astro е Twitter акаунтът - [@astrodotbuild](https://twitter.com/astrodotbuild).
 
-Публикуваме и съобщения относно нови версии в [нашия Discord сървър](https://discord.gg/3nMYAHecZT) в #announcements канала.
+Публикуваме и съобщения относно нови версии в [нашия Discord сървър](https://discord.gg/dwQx2w9Tgm) в #announcements канала.
 
 Не всяка нова версия на Astro заслужава собствен блог пост, но можете да намерите регистър на промените за всеки релийз в [`CHANGELOG.MD` файла, намиращ се в репото на Astro](https://github.com/prosopo/captcha/blob/main/packages/astro/CHANGELOG.md).
 

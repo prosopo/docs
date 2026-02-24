@@ -67,7 +67,7 @@ Ez a dokumentáció mindig a legfrissebb stabil Astro verziót tükrözi. Amint 
 
 Az [@astrodotbuild](https://twitter.com/astrodotbuild) Twitter felhasználó a hivatalos csatornánk ahol új információkat szerezhetsz az Astro csapattól.
 
-Ezen felül az egyes verziók megjelenését bejelentjük a [Discord szerverünkön](https://discord.gg/3nMYAHecZT) is az #announcements csatornán.
+Ezen felül az egyes verziók megjelenését bejelentjük a [Discord szerverünkön](https://discord.gg/dwQx2w9Tgm) is az #announcements csatornán.
 
 Nem minden verizó kiadás érdemel meg egy külön posztot, de minden verzióhoz találsz részletes naplót, - ahol láthatod mi változott - a [`CHANGELOG.md` fájlban GitHubon](https://github.com/prosopo/captcha/blob/main/packages/astro/CHANGELOG.md).
 
