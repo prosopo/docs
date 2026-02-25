@@ -12,6 +12,11 @@ Para verificar que el token es realmente real y válido, ahora debe verificarlo 
 
 https://api.prosopo.io/siteverify
 
+También están disponibles endpoints específicos de la UE y EE. UU. si prefiere que sus datos se procesen en una región específica:
+
+- https://eu-api.prosopo.io/siteverify
+- https://us-api.prosopo.io/siteverify
+
 El endpoint espera una solicitud POST con el token `procaptcha-response`. También debe pasar su **clave secreta**, que puede obtener [iniciando sesión en nuestro portal de clientes](https://portal.prosopo.io).
 
 Una prueba simple se verá así, donde el contenido en data es el token `procaptcha-response`, después de ser analizado:

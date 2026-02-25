@@ -50,14 +50,30 @@ export default [
         key: 'basics/safety-threshold',
     },
     {
-        text: 'Context Awareness',
-        slug: 'basics/context-awareness',
-        key: 'basics/context-awareness',
-    },
-    {
         text: 'Frequently Asked Questions',
         slug: 'basics/faq',
         key: 'basics/faq',
+    },
+    {text: 'Advanced Usage', header: true, type: 'learn', key: 'advanced'},
+        {
+        text: 'Context Awareness',
+        slug: 'advanced/context-awareness',
+        key: 'advanced/context-awareness',
+    },
+    {
+        text: 'IP Validation Rules',
+        slug: 'advanced/ip-validation-rules',
+        key: 'advanced/ip-validation-rules',
+    },
+    {
+        text: 'Access Control Rules',
+        slug: 'advanced/access-control-rules',
+        key: 'advanced/access-control-rules',
+    },
+    {
+        text: 'Audit',
+        slug: 'advanced/audit',
+        key: 'advanced/audit',
     },
     {text: 'Framework integrations', header: true, type: 'learn', key: 'framework-integrations'},
     {

@@ -8,8 +8,13 @@ export default NavDictionary({
 	'basics/captcha-types': 'Types de CAPTCHA',
 	'basics/invisible-captcha': 'CAPTCHA invisible (Bêta)',
 	'basics/safety-threshold': 'Seuil de sécurité',
-	'basics/context-awareness': 'Sensibilité au contexte',
 	'basics/faq': 'Questions fréquemment posées',
+
+	'advanced': 'Utilisation avancée',
+	'advanced/context-awareness': 'Sensibilité au contexte',
+	'advanced/ip-validation-rules': 'Règles de validation IP',
+	'advanced/access-control-rules': 'Règles de contrôle d\'accès',
+	'advanced/audit': 'Audit',
 
 	'framework-integrations': 'Intégrations de framework',
 	'framework-integrations/angular-integration': 'Intégration Angular',

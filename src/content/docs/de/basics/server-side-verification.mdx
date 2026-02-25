@@ -14,6 +14,11 @@ Um zu verifizieren, dass das Token tatsächlich echt und gültig ist, müssen Si
 
 https://api.prosopo.io/siteverify
 
+EU- und US-spezifische Endpunkte sind ebenfalls verfügbar, wenn Sie möchten, dass Ihre Daten in einer bestimmten Region verarbeitet werden:
+
+- https://eu-api.prosopo.io/siteverify
+- https://us-api.prosopo.io/siteverify
+
 Der Endpunkt erwartet eine POST-Anfrage mit dem `procaptcha-response`-Token. Sie müssen auch Ihren **secret key** übergeben, den Sie durch [Anmeldung in unserem Kundenportal](https://portal.prosopo.io) erhalten können.
 
 Ein einfacher Test sieht folgendermaßen aus, wobei der Inhalt in data das `procaptcha-response`-Token nach dem
