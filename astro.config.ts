@@ -9,7 +9,7 @@ import rehypeSlug from 'rehype-slug';
 import remarkSmartypants from 'remark-smartypants';
 import starlight from '@astrojs/starlight';
 import tailwind from '@astrojs/tailwind';
-import json5Plugin from 'vite-plugin-json5'
+import json5Plugin from 'vite-plugin-json5';
 import { builtinModules } from 'module';
 
 /* https://vercel.com/docs/projects/environment-variables/system-environment-variables#system-environment-variables */
@@ -107,8 +107,42 @@ export default defineConfig({
 		directRenderScript: true,
 	},
 	vite: {
-
-		plugins: [json5Plugin()],
+		plugins: [
+			json5Plugin(),
+			{
+				name: 'raw-jsonc-loader',
+				transform(code, id) {
+					// Handle .jsonc files (with or without ?raw suffix)
+					if (id.includes('.jsonc')) {
+						const json = JSON.stringify(code)
+							.replace(/\u2028/g, '\\u2028')
+							.replace(/\u2029/g, '\\u2029');
+						return {
+							code: `export default ${json}`,
+							map: null
+						};
+					}
+					return null;
+				}
+			}
+		],
+		optimizeDeps: {
+			esbuildOptions: {
+				loader: {
+					'.jsonc': 'text',
+				},
+			},
+		},
+		ssr: {
+			noExternal: ['@astrojs/starlight'],
+			esbuild: {
+				options: {
+					loader: {
+						'.jsonc': 'text',
+					},
+				},
+			},
+		},
 		build: {
 			modulePreload: { polyfill: true },
 			rollupOptions: {

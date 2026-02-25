@@ -1,0 +1,85 @@
+---
+title: Tipos de CAPTCHA
+description: Sirva diferentes tipos de CAPTCHA configurando el `captchaType` a `frictionless`, `pow`, `image`.
+i18nReady: true
+---
+import {Image} from 'astro:assets';
+import ProcaptchaGIF from '~/assets/procaptcha-pow.gif';
+import ImageCaptcha from '~/assets/image-captcha.png';
+import PoWSettings from '~/assets/pow-settings.png';
+import ImageSettings from '~/assets/image-settings.png';
+
+Sirva **diferentes** tipos de CAPTCHA configurando el `captchaType` a `frictionless`, `pow`, `image`.
+
+## CAPTCHA sin fricción
+
+La característica predeterminada `frictionless` de Procaptcha detecta dinámicamente si el usuario está utilizando un navegador normal o navegadores automatizados sin cabeza como [playwright](https://playwright.dev/) o [selenium](https://www.selenium.dev/). Si es probable que el usuario sea un bot, se le presentará un desafío de CAPTCHA de imagen. Si es probable que el usuario sea un *humano*, *no* se le presentará un desafío de CAPTCHA de imagen y en su lugar resolverá un desafío simple e invisible de Proof of Work (PoW).
+
+## CAPTCHA de Proof of Work (PoW)
+
+Un desafío de CAPTCHA de Proof of Work (`pow`) requiere que el usuario resuelva un rompecabezas computacional antes de enviar el formulario. Es fácil de resolver para los humanos, pero computacionalmente costoso para los bots.
+
+<Image src={ProcaptchaGIF} alt={'desafío de captcha pow de prosopo procaptcha'} style="margin: 20px auto;"/>
+
+El tipo de CAPTCHA Proof of Work no interroga el entorno del navegador del usuario, use `frictionless` para eso (arriba).
+
+## CAPTCHA de imagen
+
+Un desafío de CAPTCHA de imagen requiere que el usuario seleccione la(s) imagen(es) correcta(s) que coincidan con la solicitud dada.
+
+<Image
+    src={ImageCaptcha}
+    alt="desafío de captcha de imagen de prosopo procaptcha"
+    style="margin: 0 auto;"
+/>
+
+El tipo de CAPTCHA de imagen no interroga el entorno del navegador del usuario, use `frictionless` para eso (arriba).
+
+## Establecer tipo implícitamente
+
+### 1. Establecer el tipo en la configuración del widget
+
+Aquí estamos estableciendo el `captchaType` a Proof-of-Work `pow`.
+
+```html
+<div class="procaptcha" data-sitekey="your_site_key" data-captcha-type="pow"></div>
+```
+
+### 2. Establecer el tipo en el portal
+
+Navegue al [portal de Prosopo](https://portal.prosopo.io) y actualice el tipo de CAPTCHA en la configuración a `pow`.
+
+<Image
+    src={PoWSettings}
+    alt="configuración de pow de prosopo"/>
+
+## Establecer tipo explícitamente
+
+### 1. Establecer el tipo en la configuración del widget
+
+Aquí estamos estableciendo el `captchaType` a imagen `image`.
+
+```javascript
+document.getElementById('procaptcha-script').addEventListener('load', function () {
+    function onCaptchaVerified(output) {
+        console.log('Captcha verified, output: ' + JSON.stringify(output))
+    }
+    // Get the Element using elementId
+    const captchaContainer = document.getElementById('procaptcha-container')
+    window.procaptcha.render(captchaContainer, {
+        siteKey: 'YOUR_SITE_KEY',
+        theme: 'dark',
+        callback: onCaptchaVerified,
+        captchaType: 'image', // `pow` or leave blank for `frictionless`
+    })
+})
+```
+
+### 2. Establecer el tipo en el portal
+
+Navegue al [portal de Prosopo](https://portal.prosopo.io) y actualice el tipo de CAPTCHA en la configuración a `image`.
+
+<Image
+    src={ImageSettings}
+    alt="configuración de imagen de prosopo"/>
+

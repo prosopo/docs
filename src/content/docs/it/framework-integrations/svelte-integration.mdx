@@ -1,0 +1,42 @@
+---
+title: "Integrazione Svelte"
+description: "Procaptcha ha un componente ufficiale Svelte che fornisce una semplice integrazione di Prosopo Procaptcha in qualsiasi progetto Svelte."
+i18nReady: true
+---
+
+Procaptcha fornisce un componente ufficiale Svelte per una facile integrazione di Prosopo Procaptcha in qualsiasi progetto Svelte.
+Il componente di integrazione supporta tutte le [opzioni di rendering Procaptcha](/it/basics/client-side-rendering/#procaptcha-options).
+
+## 1. Installazione
+
+`npm install @prosopo/svelte-procaptcha-wrapper`
+
+## 2. Esempio di utilizzo
+
+### 2.1) Configurazione base
+
+```svelte
+<script lang="ts">
+import {ProcaptchaComponent} from "@prosopo/svelte-procaptcha-wrapper";
+</script>
+
+<ProcaptchaComponent siteKey={"my-site-key"}/>;
+```
+
+### 2.2) Utilizzo avanzato
+
+```svelte
+<script lang="ts">
+import {ProcaptchaComponent} from "@prosopo/svelte-procaptcha-wrapper";
+
+const siteKey = "my-site-key";
+const handleVerification = (token: string): void => {
+    console.log('verified', token);
+};
+</script>
+
+<ProcaptchaComponent siteKey="{siteKey}"
+language="en"
+callback={handleVerification}
+htmlAttributes={{class: "my-app__procaptcha"}} />
+```

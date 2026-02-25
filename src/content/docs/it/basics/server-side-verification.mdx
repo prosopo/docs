@@ -1,0 +1,209 @@
+---
+title: Verifica lato server
+description: Verificare la risposta Procaptcha sul suo server per verificare che l'utente sia una persona reale.
+i18nReady: true
+---
+
+Aggiungendo il codice lato client, è stato in grado di renderizzare un widget Procaptcha che ha identificato se gli utenti erano persone reali o bot automatizzati. Quando il captcha ha avuto successo, lo script Procaptcha ha inserito dati unici nei dati del suo form, che vengono quindi inviati al suo server per la verifica. Attualmente ci sono due opzioni per verificare la risposta dell'utente lato server:
+
+## Verifica API
+
+Per verificare che il token sia effettivamente reale e valido, deve ora verificarlo all'endpoint API:
+
+https://api.prosopo.io/siteverify
+
+Sono disponibili anche endpoint specifici per UE e Stati Uniti se preferisce che i suoi dati vengano elaborati in una regione specifica:
+
+- https://eu-api.prosopo.io/siteverify
+- https://us-api.prosopo.io/siteverify
+
+L'endpoint si aspetta una richiesta POST con il token `procaptcha-response`. Deve anche passare la sua **secret key**, che può ottenere [effettuando l'accesso al nostro portale clienti](https://portal.prosopo.io).
+
+Un semplice test avrà questo aspetto, dove il contenuto in data è il token `procaptcha-response`, dopo essere stato analizzato:
+
+```javascript
+// pseudocode
+// get the contents of the procaptcha-response token
+data = req.body['procaptcha-response']
+
+// send a POST application/json request to the API endpoint
+response = POST('https://api.prosopo.io/siteverify', {
+    token: data.token,
+    secret: 'your_secret_key',
+})
+```
+
+Oppure, come comando CURL:
+
+```bash
+curl --location 'https://api.prosopo.io/siteverify' \
+--header 'Content-Type: application/json' \
+--data '{"secret":"your secret key copied from within the customer portal","token":"PROCAPTCHA-RESPONSE"}''
+```
+
+Si noti che l'endpoint si aspetta il Content-Type application/json. Può vedere esattamente cosa viene inviato utilizzando
+
+```bash
+curl -vv
+```
+
+nell'esempio sopra. La risposta sarà un oggetto JSON con una chiave `verified`, che sarà `true` se il token è valido e `false` se non lo è.
+
+```json
+{
+    "verified": true,
+}
+```
+
+Se è un [cliente Premium Tier](https://prosopo.io/pricing/) riceverà anche un punteggio di rischio associato alla richiesta. Più il punteggio è vicino a 1, più è probabile che la richiesta provenga da un bot.
+
+```json
+{
+    "verified": true,
+    "score": 0.1
+}
+```
+
+### Indirizzo IP opzionale
+
+Può anche passare l'indirizzo IP dell'utente all'endpoint di verifica, che consentirà a Prosopo di eseguire controlli aggiuntivi sulla richiesta. Questo è facoltativo, ma consigliato per una migliore accuratezza. Per farlo, includa il campo `ip` nei suoi dati POST:
+
+```json
+{
+    "secret": "your_secret_key",
+    "token": "PROCAPTCHA-RESPONSE",
+    "ip": "USER_IP_ADDRESS"
+}
+```
+
+## Esempi di codice di verifica
+
+### JavaScript
+
+<section id="js">
+```javascript
+const fetch = require('node-fetch');
+
+async function verifyToken(token) {
+    const response = await fetch('https://api.prosopo.io/siteverify', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ secret: 'your_secret_key', token }),
+    });
+    return response.json().verified || false; // Return verified field, default to false
+}
+```
+</section>
+
+### PHP
+
+<section id="php">
+```php
+<?php
+function verifyToken($token) {
+    $url = 'https://api.prosopo.io/siteverify';
+    $data = json_encode(["secret" => "your_secret_key", "token" => $token]);
+    $options = [
+        'http' => [
+            'header'  => "Content-Type: application/json\r\n",
+            'method'  => 'POST',
+            'content' => $data,
+        ],
+    ];
+    $context  = stream_context_create($options);
+    $result = file_get_contents($url, false, $context);
+    $response = json_decode($result, true);
+
+    return $response["verified"] ?? false; // Return verified field, default to false
+}
+?>
+```
+</section>
+
+### Python
+
+<section id="python">
+```python
+import requests
+
+def verify_token(token):
+    url = "https://api.prosopo.io/siteverify"
+    data = { "secret": "your_secret_key", "token": token }
+    response = requests.post(url, json=data)
+    return response.json().get("verified", False)  # Return verified field, default to False
+```
+</section>
+
+### Java
+
+<section id="java">
+```java
+import java.io.*;
+import java.net.*;
+import org.json.JSONObject;
+
+public class ProcaptchaVerification {
+    public static boolean verifyToken(String token) throws Exception {
+        URL url = new URL("https://api.prosopo.io/siteverify");
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("POST");
+        con.setRequestProperty("Content-Type", "application/json");
+        con.setDoOutput(true);
+
+        String jsonInputString = "{\"secret\":\"your_secret_key\", \"token\":\"" + token + "\"}";
+        try (OutputStream os = con.getOutputStream()) {
+            byte[] input = jsonInputString.getBytes("utf-8");
+            os.write(input, 0, input.length);
+        }
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
+        StringBuilder response = new StringBuilder();
+        String responseLine;
+        while ((responseLine = br.readLine()) != null) {
+            response.append(responseLine.trim());
+        }
+
+        // Parse JSON response
+        JSONObject jsonResponse = new JSONObject(response.toString());
+        return jsonResponse.optBoolean("verified", false); // Default to false if not found
+    }
+}
+```
+</section>
+
+
+## Package di verifica
+
+Abbiamo un'implementazione JavaScript del package di verifica Procaptcha [disponibile su npm](https://www.npmjs.com/package/@prosopo/server).
+
+### Verifica JavaScript / TypeScript
+
+Il package `@prosopo/server` è disponibile su NPM e può essere installato utilizzando:
+
+```bash
+npm install @prosopo/server
+```
+
+Per verificare la risposta di un utente utilizzando JavaScript / TypeScript, importi semplicemente la funzione `verify` da `@prosopo/server` e le passi i dati POST `procaptcha-response`. I tipi possono essere importati da `@prosopo/types`.
+
+```typescript
+import {ProsopoServer} from '@prosopo/server'
+import {ApiParams} from '@prosopo/types'
+
+...
+// parse the body received from the frontend
+const payload = JSON.parse(event.body)
+
+// parse the procaptcha response token
+const procaptchaResponse = payload[ApiParams.procaptchaResponse]
+
+// initialise the `ProsopoServer` class
+const prosopoServer = new ProsopoServer(config)
+
+// check if the captcha response is verified
+if (await prosopoServer.isVerified(procaptchaResponse)) {
+    // perform CAPTCHA protected action
+}
+```
+
+C'è un esempio di server TypeScript [NodeJS Server Side Example](/it/demos/client-example-server/) che può eseguire localmente.

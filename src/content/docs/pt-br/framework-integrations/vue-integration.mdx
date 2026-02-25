@@ -1,0 +1,64 @@
+---
+title: "Integração Vue"
+description: "Procaptcha tem um component Vue oficial, que fornece integração simples do Prosopo Procaptcha em qualquer projeto Vue."
+i18nReady: true
+---
+
+Procaptcha fornece um component Vue oficial para fácil integração do Prosopo Procaptcha em qualquer projeto Vue.
+O component de integração suporta todas as [opções de renderização do Procaptcha](/pt-br/basics/client-side-rendering/#procaptcha-options).
+
+## 1. Instalação
+
+`npm install @prosopo/vue-procaptcha-wrapper`
+
+## 2. Exemplo de uso
+
+### 2.1) Configuração básica
+
+```vue
+<script setup lang="ts">
+import { ProcaptchaComponent } from "@prosopo/vue-procaptcha-wrapper";
+</script>
+
+<template>
+  <ProcaptchaComponent :siteKey="siteKey" />
+</template>
+
+<script setup lang="ts">
+const siteKey = 'my-site-key';
+</script>
+```
+
+### 2.2) Uso avançado
+
+```vue
+// ...
+
+<script setup lang="ts">
+import { ProcaptchaComponent } from "@prosopo/vue-procaptcha-wrapper";
+
+const siteKey = 'my-site-key';
+
+const callbacks = {
+  onVerified: (token: string) => {
+    console.log("verified", token);
+  },
+};
+
+const htmlAttributes = {
+  class: "my-app__procaptcha",
+  style: {
+    maxWidth: "600px",
+  },
+};
+</script>
+
+<template>
+  <ProcaptchaComponent
+    :siteKey="siteKey"
+    :callbacks="callbacks"
+    :htmlAttributes="htmlAttributes"
+  />
+</template>
+
+```

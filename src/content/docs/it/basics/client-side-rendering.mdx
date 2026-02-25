@@ -1,0 +1,156 @@
+---
+title: Rendering lato client
+description: Renderizzare il widget Procaptcha sul suo sito web utilizzando la risorsa JavaScript Procaptcha.
+i18nReady: true
+---
+
+Prima di tutto, deve includere la risorsa JavaScript Procaptcha da qualche parte nella sua pagina HTML. Lo `<script>` deve essere caricato tramite HTTPS e può essere posizionato ovunque nella pagina. All'interno del tag `<head>` o immediatamente dopo il contenitore `.procaptcha` vanno entrambi bene.
+
+```html
+<script type="module" src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+```
+
+Ora, può renderizzare il widget Procaptcha implicitamente o esplicitamente.
+
+## Rendering implicito
+
+Aggiunga un contenitore DOM vuoto dove il widget Procaptcha sarà inserito automaticamente. Il contenitore è tipicamente un `<div>` (ma può essere qualsiasi elemento) e deve avere la classe `procaptcha` e un attributo `data-sitekey` impostato sulla sua site key pubblica.
+
+```html
+<body>
+    <div class="procaptcha" data-sitekey="your_site_key"></div>
+</body>
+```
+
+Tipicamente, vorrà includere il contenitore vuoto `.procaptcha` all'interno di un form HTML. Quando un captcha viene risolto con successo, un payload JSON nascosto verrà automaticamente aggiunto al suo form che può quindi inviare tramite POST al suo server per la verifica. Può recuperarlo lato server con il parametro POST `procaptcha-response`.
+
+Ecco un esempio completo dove Procaptcha viene utilizzato per proteggere un form di registrazione dall'abuso automatizzato. Quando il form viene inviato, il token `procaptcha-response` sarà incluso con i dati POST di email e password dopo che il captcha è stato risolto.
+
+### Esempio di rendering implicito
+
+```html
+<html>
+    <head>
+        <title>Procaptcha Demo</title>
+        <script type="module" src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+    </head>
+    <body>
+        <form action="" method="POST">
+            <input type="text" name="email" placeholder="Email" />
+            <input type="password" name="password" placeholder="Password" />
+            <div class="procaptcha" data-sitekey="your_site_key"></div>
+            <br />
+            <input type="submit" value="Submit" />
+        </form>
+    </body>
+</html>
+```
+
+## Rendering esplicito
+
+Se preferisce renderizzare il widget lei stesso, può utilizzare il metodo `Procaptcha.render()`. Il metodo `Procaptcha.render()` deve essere chiamato dopo che lo script procaptcha.bundle.js è stato caricato.
+
+### Esempio di rendering esplicito
+
+Lo script viene caricato nell'head del documento e gli viene assegnato l'id `procaptcha-script`. Un contenitore viene creato con l'id `procaptcha-container` dove il widget sarà renderizzato.
+
+```html
+<html>
+    <head>
+        <script
+            type="module"
+            id="procaptcha-script"
+            src="https://js.prosopo.io/js/procaptcha.bundle.js"
+            async
+            defer
+        ></script>
+    </head>
+    <body>
+        <div id="procaptcha-container"></div>
+    </body>
+</html>
+```
+
+Un evento `onload` viene aggiunto al tag script per chiamare la funzione render quando lo script è stato caricato.
+
+```javascript
+// A function that will call the render Procaptcha function when the procaptcha script has loaded
+document.getElementById('procaptcha-script').addEventListener('load', function () {
+    // Define a callback function to be called when the CAPTCHA is verified
+    function onCaptchaVerified(output) {
+        console.log('Captcha verified, output: ' + JSON.stringify(output))
+    }
+
+    // Get the Element using elementId
+    const captchaContainer = document.getElementById('procaptcha-container')
+    // Render the CAPTCHA explicitly on a container with id "procaptcha-container"
+    window.procaptcha.render(captchaContainer, {
+        siteKey: 'YOUR_SITE_KEY',
+        theme: 'dark',
+        callback: onCaptchaVerified,
+    })
+})
+```
+
+## Opzioni Procaptcha
+
+La funzione `Procaptcha.render()` accetta un oggetto opzioni come secondo argomento. L'oggetto opzioni può contenere i seguenti campi:
+
+| Key                  | Type               | Description                                                                                                                                                          | Required |
+|----------------------|--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
+| siteKey              | string             | La site key della sua applicazione / sito web. Questo è obbligatorio.                                                                                                        | ✓        |
+| callback             | string or function | Il nome della funzione window, o una funzione, che sarà chiamata quando il CAPTCHA è verificato.                                                                    | ✗        |
+| theme                | string             | Il tema del widget CAPTCHA. Il valore predefinito è `light`. L'altra opzione è `dark`.                                                                                 | ✗        |
+| captchaType          | string             | Il tipo di CAPTCHA da renderizzare. Il valore predefinito è `frictionless`. Le altre opzioni sono `image`, `pow`.                                                                      | ✗        |
+| chalexpired-callback | string or function | Il nome della funzione window, o una funzione, che sarà chiamata quando la sfida CAPTCHA scade.                                                              | ✗        |
+| error-callback       | string or function | Il nome della funzione window, o una funzione, che sarà chiamata quando si verifica un errore.                                                                            | ✗        |
+| close-callback       | string or function | Il nome della funzione window, o una funzione, che sarà chiamata quando il CAPTCHA viene chiuso.                                                                      | ✗        |
+| open-callback        | string or function | Il nome della funzione window, o una funzione, che sarà chiamata quando il CAPTCHA viene aperto.                                                                      | ✗        |
+| expired-callback     | string or function | Il nome della funzione window, o una funzione, che sarà chiamata quando la soluzione CAPTCHA scade.                                                               | ✗        |
+| failed-callback      | string or function | Il nome della funzione window, o una funzione, che sarà chiamata quando la sfida CAPTCHA fallisce.                                                                | ✗        |
+| reset-callback       | string or function | Il nome della funzione window, o una funzione, che sarà chiamata quando il CAPTCHA viene resettato.                                                                       | ✗        |
+| language             | string             | La lingua del widget CAPTCHA. Il valore predefinito è `en`. Tutte le lingue possono essere trovate [qui](https://github.com/prosopo/captcha/tree/main/packages/locale/src/locales). | ✗        |
+
+### Attributi data
+
+Le stesse opzioni possono essere passate al metodo di rendering implicito aggiungendole come attributi data al contenitore `.procaptcha`.
+Per esempio, per impostare il tema su dark, aggiungerebbe `data-theme="dark"` al contenitore `.procaptcha`.
+
+```html
+<div class="procaptcha" data-sitekey="your_site_key" data-theme="dark"></div>
+```
+
+Per impostare un callback utilizzando un tag data, aggiungerebbe `data-callback="yourCallbackFunction"` al contenitore `.procaptcha`,
+e definirebbe la funzione callback sull'oggetto window.
+
+```html
+<div class="procaptcha" data-sitekey="your_site_key" data-callback="yourCallbackFunction"></div>
+```
+
+### `captchaType`
+
+Può scegliere di implementare uno qualsiasi dei seguenti tipi di captcha quando renderizza il componente Procaptcha:
+
+| Type           | Description                                                                                                                                                                                                                                                                           |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `frictionless` | Il tipo di CAPTCHA predefinito è `frictionless`. Questo tipo di CAPTCHA è invisibile all'utente, richiedendogli solo di completare una sfida invisibile [Proof of Work](https://en.wikipedia.org/wiki/Proof_of_work) (`pow`). I bot sospetti ricevono sfide captcha con immagini (`image`). |
+| `pow`          | Il tipo di CAPTCHA `pow` richiede all'utente di risolvere un puzzle crittografico. Questo puzzle richiede semplicemente una piccola quantità di lavoro computazionale da risolvere e rallenta significativamente i bot, rendendo difficile per loro eseguire scraping in grandi volumi.                                       |
+| `image`        | Il tipo di CAPTCHA `image` richiede all'utente di risolvere un semplice CAPTCHA con immagini. Questo è il tipo di CAPTCHA con cui la maggior parte delle persone ha familiarità, creato da Google reCAPTCHA.                                                                                                                          |
+
+
+
+**Si noti**, se si utilizza `image` o `pow`, il [tipo di CAPTCHA](/it/basics/captcha-types/) lato client deve essere impostato sullo stesso valore che nel [portale](https://portal.prosopo.io):
+- Se il tipo di CAPTCHA del portale è `image`, deve impostare il tipo di CAPTCHA lato client su `image`.
+- Se il tipo di CAPTCHA del portale è `pow`, deve impostare il tipo di CAPTCHA lato client su `pow`.
+- Se il tipo di CAPTCHA del portale è `frictionless`, deve impostare il tipo di CAPTCHA lato client su `frictionless` o lasciarlo vuoto.
+
+### Integrazioni con i Framework
+
+Vari framework sono stati integrati con Procaptcha. Può trovare la documentazione per ciascun framework qui sotto:
+
+- [Integrazione React](/it/framework-integrations/angular-integration/)
+- [Integrazione Vue](/it/framework-integrations/vue-integration/)
+- [Integrazione Angular](/it/framework-integrations/angular-integration/)
+- [Integrazione Svelte](/it/framework-integrations/svelte-integration/)
+
+

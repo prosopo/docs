@@ -1,0 +1,63 @@
+---
+title: "Erste Schritte"
+description: "Diese Anleitung hilft Ihnen bei der Einrichtung des Procaptcha Widgets."
+i18nReady: true
+---
+import { Image } from 'astro:assets';
+import PortalUserInfo from '~/assets/portal-user-info.png';
+import PortalDomainEditing from '~/assets/prosopo-domain-editing.webp';
+
+Diese Anleitung hilft Ihnen bei der Einrichtung des Procaptcha Widgets.
+
+Wenn Sie derzeit einen CAPTCHA-Dienst verwenden, können Sie unser Skript einfach dort kopieren und einfügen, wo Sie das vorhandene Skript heute bereitgestellt haben.
+
+## Sitekey und Secret Key erhalten
+
+Um das Procaptcha Widget zu nutzen, müssen Sie [einen sitekey und einen secret key erhalten](https://prosopo.io/register/). Der sitekey und secret key sind immer mit einem Widget verknüpft und können nicht für andere Widgets wiederverwendet werden.
+
+Der sitekey ist öffentlich und wird verwendet, um das Procaptcha Widget auf Ihrer Website aufzurufen.
+
+Stellen Sie sicher, dass Sie den secret key aus Sicherheitsgründen sicher aufbewahren.
+
+### Neue Websites
+
+1. Melden Sie sich im [Prosopo Benutzerportal](https://portal.prosopo.io/) an und navigieren Sie zur Website-Verwaltung.
+2. Klicken Sie, um Ihren sitekey und secret key anzuzeigen.
+4. Kopieren Sie Ihren sitekey und secret key.
+
+<Image src={PortalUserInfo} alt="get your site key from the Portal User Info" class="hide" />
+
+### Ihre Domain einrichten
+
+1. Navigieren Sie zu Account.
+2. Stellen Sie sicher, dass Ihre Domain zur Liste der Domains hinzugefügt wurde. Falls nicht, fügen Sie Ihre Domain hinzu.
+3. Aktivieren Sie `Allow localhost`, wenn Sie lokal testen, aber stellen Sie sicher, dass Sie dies entfernen, wenn Sie Ihre App bereitstellen.
+
+<Image src={PortalDomainEditing} alt="edit a domain" class="hide" />
+
+## Das Procaptcha Widget zu Ihrer Website hinzufügen
+
+So fügen Sie das Procaptcha Widget hinzu:
+
+1. Fügen Sie das Procaptcha-Skript-Snippet in das `<head>`-Element Ihres HTML ein:
+
+<div>
+
+```html
+<script src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+```
+</div>
+
+
+2. [Rendering-Optionen](/de/basics/client-side-rendering/)
+
+    * [Explizites Rendering (empfohlen)](/de/basics/client-side-rendering/#explicit-rendering)
+    * [Implizites Rendering](/de/basics/client-side-rendering/#implicit-rendering)
+
+## Die serverseitige Antwort verifizieren
+
+Nachdem Sie das Procaptcha Widget auf Ihrer Website installiert haben, müssen Sie Ihren Server so konfigurieren, dass er die Procaptcha-Antwort validiert.
+Siehe [Serverseitige Verifizierung](/de/basics/server-side-verification/).
+
+### Wichtiger Hinweis
+Das Rendern der [clientseitigen Integration](#das-procaptcha-widget-zu-ihrer-website-hinzufügen) & [Verifizieren der serverseitigen Antwort](/de/basics/server-side-verification/) sind **beide** notwendig, damit Procaptcha ordnungsgemäß funktioniert.

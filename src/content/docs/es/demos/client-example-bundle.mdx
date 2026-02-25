@@ -1,0 +1,72 @@
+---
+tags: [documentation]
+title: Ejemplo de cliente frontend HTML
+length: 2
+description: Este proyecto es un ejemplo _mínimo_ que demuestra cómo incluir el paquete Procaptcha de Prosopo en una página HTML.
+i18nReady: true
+---
+El código a continuación es un ejemplo _mínimo_ que demuestra cómo incluir el paquete Procaptcha de Prosopo en una página HTML sin verificaciones del lado del servidor. Una versión más completa del ejemplo del paquete de cliente se puede encontrar [aquí](https://github.com/prosopo/captcha/tree/main/demos/client-bundle-example). Puede ejecutarlo junto con la demostración de [client-example-server](https://github.com/prosopo/captcha/tree/main/demos/client-example-server) para ver la experiencia completa de extremo a extremo.
+
+
+## Inicio rápido
+
+Guarde este archivo en su máquina local y ábralo en un navegador para ver el paquete Procaptcha de Prosopo en acción. Recuerde
+reemplazar el marcador de posición `<YOUR SITE KEY HERE>` con su propio sitekey. Puede obtenerlo iniciando sesión en
+el [portal de Prosopo](https://portal.prosopo.io).
+
+```html
+<!doctype html>
+<html lang="en">
+    <head>
+        <link href="//cdn.muicss.com/mui-0.10.3/css/mui.min.css" rel="stylesheet" type="text/css" />
+        <title>Procaptcha demo: Simple page</title>
+        <script id="procaptchaScript" type="module" src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+    </head>
+    <body>
+        <div class="mui-container">
+            <form action="?" class="mui-form">
+                <legend>Login</legend>
+                <div class="mui-textfield mui-textfield--float-label">
+                    <label>Email Address</label>
+                    <input type="email" required />
+                </div>
+                <div class="mui-textfield mui-textfield--float-label">
+                    <label>Password</label>
+                    <input type="password" required />
+                </div>
+                <div class="mui-textfield mui-textfield--float-label">
+                    <div id="procaptcha-container"></div>
+                </div>
+                <div class="mui-textfield mui-textfield--float-label">
+                    <!-- Dev sitekey -->
+                    <div
+                        class="procaptcha"
+                        data-theme="light"
+                        data-sitekey="<YOUR SITE KEY HERE>"
+                    ></div>
+                </div>
+                <input type="submit" class="mui-btn mui-btn--raised" />
+            </form>
+        </div>
+        <script type="module">
+            // Pattern to avoid race condition between Procaptcha script loading and Procaptcha render function call
+            import { render } from './assets/procaptcha.bundle.js'
+
+            // Define a callback function to be called when the CAPTCHA is verified
+            function onCaptchaVerified(output) {
+                console.log('Captcha verified, output: ' + JSON.stringify(output))
+            }
+
+            // Get the Element using elementId
+            const captchaContainer = document.getElementById('procaptcha-container')
+            // Render the CAPTCHA explicitly on a container with id "procaptcha-container"
+            render(captchaContainer, {
+                siteKey: '<YOUR SITE KEY HERE>',
+                theme: 'dark',
+                callback: onCaptchaVerified,
+            })
+        </script>
+    </body>
+</html>
+
+```

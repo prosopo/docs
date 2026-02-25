@@ -1,0 +1,63 @@
+---
+title: 'Commencer'
+description: 'Ce guide vous aidera à configurer le widget Procaptcha.'
+i18nReady: true
+---
+import { Image } from 'astro:assets';
+import PortalUserInfo from '~/assets/portal-user-info.png';
+import PortalDomainEditing from '~/assets/prosopo-domain-editing.webp';
+
+Ce guide vous aidera à configurer le widget Procaptcha.
+
+Si vous utilisez actuellement un service CAPTCHA, vous pouvez copier et coller notre script là où vous avez déployé le script existant aujourd'hui.
+
+## Obtenir un sitekey et une clé secrète
+
+Pour commencer à utiliser le widget Procaptcha, vous devrez [obtenir un sitekey et une clé secrète](https://prosopo.io/register/). Le sitekey et la clé secrète sont toujours associés à un widget et ne peuvent pas être réutilisés pour d'autres widgets.
+
+Le sitekey est public et utilisé pour invoquer le widget Procaptcha sur votre site.
+
+Assurez-vous de conserver la clé secrète en sécurité pour des raisons de sécurité.
+
+### Nouveaux sites
+
+1. Connectez-vous au [portail utilisateur Prosopo](https://portal.prosopo.io/) et accédez à la gestion des sites.
+2. Cliquez pour révéler votre sitekey et votre clé secrète.
+4. Copiez votre sitekey et votre clé secrète.
+
+<Image src={PortalUserInfo} alt="obtenez votre clé de site depuis le portail utilisateur" class="hide" />
+
+### Configurer votre domaine
+
+1. Accédez au compte.
+2. Assurez-vous que votre domaine est ajouté à la liste des domaines. Sinon, ajoutez votre domaine.
+3. `Autoriser localhost` si vous testez localement, mais assurez-vous de le retirer lorsque vous déployez votre application.
+
+<Image src={PortalDomainEditing} alt="modifier un domaine" class="hide" />
+
+## Ajouter le widget Procaptcha à votre site
+
+Pour ajouter le widget Procaptcha :
+
+1. Insérez l'extrait de script Procaptcha dans l'élément `<head>` de votre HTML :
+
+<div>
+
+```html
+<script src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+```
+</div>
+
+
+2. [Options de rendu](/fr/basics/client-side-rendering/)
+
+    * [Rendu explicite (recommandé)](/fr/basics/client-side-rendering/#explicit-rendering)
+    * [Rendu implicite](/fr/basics/client-side-rendering/#implicit-rendering)
+
+## Vérifier la réponse côté serveur
+
+Après avoir installé le widget Procaptcha sur votre site, vous devez configurer votre serveur pour valider la réponse Procaptcha.
+Consultez [Vérification côté serveur](/fr/basics/server-side-verification/).
+
+### Note importante
+Le rendu de [l'intégration côté client](#add-the-procaptcha-widget-to-your-site) et la [vérification de la réponse côté serveur](/fr/basics/server-side-verification/) sont **tous deux** nécessaires pour permettre à Procaptcha de fonctionner correctement.

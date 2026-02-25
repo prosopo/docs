@@ -1,0 +1,88 @@
+---
+title: Seuil de sécurité
+description: Comprendre et configurer le seuil de sécurité dans vos paramètres du portail Prosopo pour équilibrer sécurité et expérience utilisateur.
+i18nReady: true
+---
+
+Le **seuil de sécurité** est un paramètre critique dans votre portail Prosopo qui détermine à quel point votre système de détection de bots est strict. Il contrôle l'équilibre entre la sécurité (bloquer les bots) et l'expérience utilisateur (minimiser les défis CAPTCHA pour les utilisateurs légitimes).
+
+## Qu'est-ce que le seuil de sécurité ?
+
+Le seuil de sécurité est une valeur numérique entre 0,2 et 0,8 qui représente le niveau de confiance requis avant qu'un utilisateur soit considéré comme légitime. Lorsque le système sans friction de Prosopo analyse le comportement d'un utilisateur, il génère un "score de bot" - un nombre indiquant la probabilité que l'utilisateur soit un bot.
+
+- **Scores plus bas** = Plus susceptible d'être humain
+- **Scores plus élevés** = Plus susceptible d'être un bot
+
+Le seuil de sécurité détermine le point de coupure : les utilisateurs dont les scores de bot sont supérieurs à votre seuil se verront présenter un défi CAPTCHA, tandis que ceux en dessous passeront sans interruption, en complétant simplement un CAPTCHA PoW en arrière-plan.
+
+## Comment fonctionne le seuil de sécurité
+
+### Le processus de détection de bots
+
+1. **L'utilisateur visite votre site** - Le système sans friction de Prosopo commence à analyser le comportement du navigateur
+2. **Analyse comportementale** - Le système examine des facteurs tels que :
+   - Données du navigateur
+   - Caractéristiques d'interaction avec le site
+   - Signaux de l'appareil et de l'environnement
+   
+   Ceci est utilisé pour déterminer de manière sécurisée la probabilité qu'un utilisateur soit un bot sans envoyer ces données utilisateur à Prosopo, maintenant une confidentialité complète et la conformité RGPD.
+3. **Génération du score** - Un score de bot (0,0 à 1,0) est calculé
+4. **Comparaison du seuil** - Le score est comparé à votre seuil de sécurité
+5. **Action prise** :
+   - **Score < Seuil** : L'utilisateur passe (défi PoW invisible)
+   - **Score ≥ Seuil** : L'utilisateur reçoit un défi CAPTCHA
+
+### Plages de seuil
+
+| Plage | Étiquette | Description | Cas d'utilisation |
+|-------|-------|-------------|----------|
+| 0,2 - 0,4 | **Faible** | Détection permissive | Sites à fort trafic priorisant l'expérience utilisateur |
+| 0,4 - 0,6 | **Moyen** ⭐ | Approche équilibrée | **Recommandé** pour la plupart des sites web |
+| 0,6 - 0,8 | **Élevé** | Détection stricte | Sites sous attaque ou nécessitant une haute sécurité |
+
+## Configuration de votre seuil de sécurité
+
+### Accès aux paramètres
+
+1. Connectez-vous au [portail Prosopo](https://portal.prosopo.io/)
+2. Accédez aux paramètres de votre site
+3. Trouvez la section "Seuil de sécurité"
+4. Utilisez le curseur pour ajuster votre seuil
+5. Cliquez sur "Enregistrer" pour appliquer les modifications
+
+### Choisir le bon seuil
+
+#### Commencer avec Moyen (0,4 - 0,6)
+Le paramètre moyen est recommandé pour la plupart des sites web car il offre un bon équilibre entre sécurité et expérience utilisateur.
+
+#### Quand utiliser un seuil faible (0,2 - 0,4)
+- **Sites e-commerce à fort trafic** où la friction utilisateur doit être minimisée
+- **Sites de contenu** où le trafic de bots occasionnel est acceptable
+- **Pendant les périodes promotionnelles** lorsque vous attendez un trafic légitime élevé
+
+#### Quand utiliser un seuil élevé (0,6 - 0,8)
+- **Sous attaque active de bots** - augmentez temporairement pour bloquer plus de trafic suspect
+- **Applications financières ou sensibles** nécessitant une sécurité maximale
+- **Soumissions de formulaires** avec des résultats de grande valeur (inscriptions, achats)
+
+## Exemples concrets
+
+### Exemple de site e-commerce
+**Scénario** : Boutique en ligne avec 10 000 visiteurs quotidiens
+- **Opérations normales** : Seuil moyen (0,5)
+- **Pendant les soldes** : Réduisez le seuil de sécurité pour réduire la friction
+- **Sous attaque** : Augmentez temporairement le seuil de sécurité
+
+### Exemple de site de blog/contenu
+**Scénario** : Site d'actualités avec système de commentaires
+- **Lecture d'articles** : Seuil faible (0,3) - friction minimale
+- **Publication de commentaires** : Seuil moyen (0,5) - prévenir le spam
+
+## Obtenir de l'aide
+
+Si vous avez besoin d'aide pour la configuration du seuil de sécurité :
+- Contactez le support Prosopo via le portail
+- Rejoignez notre Discord
+- Examinez vos données d'analyse avec notre équipe pour des recommandations d'optimisation
+
+Le seuil de sécurité est un outil puissant pour équilibrer sécurité et expérience utilisateur. Avec une configuration et une surveillance appropriées, il peut considérablement améliorer la protection de votre site tout en maintenant une expérience utilisateur fluide.
