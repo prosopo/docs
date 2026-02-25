@@ -1,0 +1,50 @@
+---
+title: "Filter und Hooks"
+description: "Filter und Hooks."
+---
+
+Das Procaptcha-Plugin führt neue WordPress-Filter und Hooks ein, die es Ihnen ermöglichen, sein Verhalten anzupassen.
+
+## 1. CAPTCHA-Sichtbarkeit
+
+Standardmäßig wird Procaptcha nur nicht autorisierten Benutzern angezeigt.
+
+Um dieses Verhalten zu steuern, können Sie neben den Plugin-Einstellungen auch den `is_captcha_present`-Hook verwenden.
+Um beispielsweise Procaptcha für alle erforderlich zu machen, fügen Sie folgenden Code zur functions.php-Datei Ihres Themes hinzu:
+
+```php
+add_filter('prosopo/procaptcha/is_captcha_present', '__return_true');`
+```
+
+## 2. Benutzerdefinierte Fehlermeldung
+
+Sie können die Standard-Fehlermeldung anpassen, indem Sie diesen Code zur functions.php-Datei Ihres Themes hinzufügen:
+
+```php
+add_filter('prosopo/procaptcha/validation_error_message', function (string $message): string {
+    return __('Custom error message', 'my-theme');
+});
+```
+
+## 3. Anpassen von Procaptcha-Attributen
+
+Über die Stilpräferenzen in den Plugin-Einstellungen hinaus können Sie alle unterstützten [Procaptcha-Datenattribute](https://docs.prosopo.io/de/basics/client-side-rendering/#procaptcha-optionen) mit dem **prosopo/procaptcha/captcha_attributes**-Filter anpassen.
+
+```php
+add_filter('prosopo/procaptcha/captcha_attributes', function (array $attributes): array {
+    $attributes['lang'] = 'de';
+    return $attributes;
+});
+```
+
+## 4. Formulare mit Procaptcha in Tests
+
+Wenn Ihre Tests Formulare mit Procaptcha umfassen, können Sie das Procaptcha umgehen, indem Sie die folgende Konstante zu Ihrer wp-config.php-Datei hinzufügen:
+
+```php
+define('PROSOPO_PROCAPTCHA_ALLOW_BYPASS', true);
+```
+
+Fügen Sie in Ihren Tests ein **input[name=procaptcha-response]**-Element mit dem Wert **bypass** zu jedem Formular hinzu, um den Procaptcha-Abschluss zu simulieren.
+
+**Wichtig:** Diese Bypass-Konstante sollte nur in Entwicklungsumgebungen verwendet werden.

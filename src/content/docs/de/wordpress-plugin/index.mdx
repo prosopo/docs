@@ -1,0 +1,98 @@
+---
+title: "WordPress Plugin"
+description: "Procaptcha bietet ein offizielles WordPress-Plugin, das eine nahtlose Integration mit Ihrer WordPress-Website ermöglicht."
+---
+
+Procaptcha bietet ein [offizielles WordPress-Plugin](https://wordpress.org/plugins/prosopo-procaptcha/), das eine nahtlose Integration mit Ihrer WordPress-Website ermöglicht.
+
+## 1. Installation
+
+1. Besuchen Sie Ihr WordPress-Admin-Panel und gehen Sie zu **Plugins** > **Installieren**, suchen Sie dann nach **Procaptcha** und klicken Sie auf **Jetzt installieren**.
+2. Sobald die Installation abgeschlossen ist, klicken Sie auf **Aktivieren**.
+3. Navigieren Sie zu den Plugin-Einstellungen (**Einstellungen > Procaptcha**) und geben Sie Ihren sitekey und secret key ein, die Sie im [Prosopo Benutzerportal](https://portal.prosopo.io/) erhalten können.
+4. Speichern Sie die Einstellungen
+
+Wenn die Anmeldeinformationen korrekt sind, sehen Sie das Procaptcha auf der rechten Seite der Einstellungsseite angezeigt.
+
+## 2. Unterstützte Formular-Plugins
+
+Procaptcha integriert sich mit vielen beliebten Formular-Plugins.
+
+Besuchen Sie nach der Installation die Plugin-Einstellungen und öffnen Sie den Tab "Aktive Integrationen", um eine Liste kompatibler Plugins und Links zu den Integrationsleitfäden zu sehen.
+Alternativ durchsuchen Sie die Seiten im linken Menü dieser Dokumentation.
+
+Können Sie Ihr Plugin nicht finden? Lassen Sie es uns über das [Support-Forum](https://wordpress.org/support/plugin/prosopo-procaptcha/) wissen, und wir werden in Erwägung ziehen, es hinzuzufügen!
+
+## 3. Unterstützte Core WordPress Formulare
+
+Procaptcha unterstützt WordPress-Core-Formulare out-of-the-box:
+
+1. Login
+2. Registrierung
+3. Passwort vergessen
+4. Kommentare
+5. Beitrags-/Seiten-Passwortschutz
+
+Besuchen Sie die Plugin-Einstellungen, um den Schutz für diese Formulare zu aktivieren.
+
+## 4. Unterstützte Account-Plugins
+
+Das Procaptcha-Plugin ist offiziell kompatibel mit den folgenden Plugins, die die WordPress-Account-Funktionen erweitern:
+
+Sicherheit:
+
+1. [All-In-One Security](https://wordpress.org/plugins/all-in-one-wp-security-and-firewall/) (Backend verbergen-Funktion)
+2. [LWS Hide Login](https://wordpress.org/plugins/lws-hide-login/) (Backend verbergen-Funktion)
+3. [Login With Ajax](https://wordpress.org/plugins/login-with-ajax/) (AJAXify Login Forms-Funktion)
+4. [Security Optimizer](https://wordpress.org/plugins/sg-security/) (Backend verbergen-Funktion)
+5. [Solid Security](https://wordpress.org/plugins/better-wp-security/) (Backend verbergen-Funktion)
+6. [WPS Hide Login](https://wordpress.org/plugins/wps-hide-login/)
+
+Branding:
+
+1. [Branda White Labeling](https://wordpress.org/plugins/branda-white-labeling/)
+2. [Custom Login](https://wordpress.org/plugins/custom-login/)
+3. [Login Customizer](https://wordpress.org/plugins/login-customizer/)
+4. [Login Designer](https://wordpress.org/plugins/login-designer/)
+5. [Login Page Customizer by Colorlib](https://wordpress.org/plugins/colorlib-login-customizer/)
+6. [Loginpress](https://wordpress.org/plugins/loginpress/)
+7. [Theme My Login](https://wordpress.org/plugins/theme-my-login/)
+8. [Ultimate Dashboard](https://wordpress.org/plugins/ultimate-dashboard/)
+9. [White label](https://wordpress.org/plugins/white-label/)
+10. [YITH Custom Login](https://wordpress.org/plugins/yith-custom-login/)
+
+Account-bezogen:
+
+1. [Simple Membership](https://wordpress.org/plugins/simple-membership/)
+2. [User Registration](https://wordpress.org/plugins/user-registration/)
+3. [Memberpress](https://memberpress.com/) – Login, Passwort zurücksetzen: über Procaptcha Plugin-Einstellungen -> Core-Formulare. Mitgliedschaftsregistrierung – über Mitgliedschaftseinstellungen
+
+Während nur die oben genannten Elemente getestet werden, unterstützt das Procaptcha-Plugin insgesamt alle Plugins mit benutzerdefinierten Account-Formularen, die die nativen WordPress-Account-Hooks verwenden.
+
+## 5. Weitere unterstützte Integrationen
+
+1. [BBPress](https://wordpress.org/plugins/bbpress/) - [lesen Sie den Integrationsleitfaden](/de/wordpress-plugin/bbpress/).
+2. [Elementor Pro](https://elementor.com/) - [lesen Sie den Integrationsleitfaden](/de/wordpress-plugin/elementor-pro/).
+3. [JetPack](https://wordpress.org/plugins/jetpack/) - [lesen Sie den Integrationsleitfaden](/de/wordpress-plugin/jetpack/).
+4. [WooCommerce](https://wordpress.org/plugins/woocommerce/) - [lesen Sie den Integrationsleitfaden](/de/wordpress-plugin/woocommerce/).
+5. [Spectra](https://wordpress.org/plugins/ultimate-addons-for-gutenberg/) - [lesen Sie den Integrationsleitfaden](/de/wordpress-plugin/spectra/).
+6. [Beaver Builder](https://wordpress.org/plugins/beaver-builder-lite-version/) – Kontakt-, Abonnieren-Formulare: aktivieren Sie den Schutz in den Zielformulareinstellungen; Login-Formular: Procaptcha Plugin-Einstellungen->Core-Formulare.
+
+## 6. Eingebaute Integration
+
+Einige der Plugins haben Procaptcha-Unterstützung in ihrem Kern, sodass Sie das Procaptcha-Plugin nicht benötigen, um Procaptcha mit ihnen zu verwenden:
+
+1. [Mailchimp for WordPress](https://wordpress.org/plugins/mailchimp-for-wp/)
+2. [Site reviews](https://wordpress.org/plugins/site-reviews/)
+
+## 7. FAQ
+
+**Ist Procaptcha nur für nicht autorisierte Benutzer sichtbar?**
+
+Ja, standardmäßig wird Procaptcha nur nicht autorisierten Benutzern angezeigt. Sie können dies im Abschnitt `behavior` der Plugin-Einstellungen oder mithilfe der Plugin-Hooks ändern.
+
+Hinweis: Einige Plugins wie Contact Form 7 senden jedoch keine Benutzerdaten während der Übermittlung, sodass Procaptcha in diesen Fällen allen Benutzern angezeigt wird.
+
+## 8. Erweiterte Verwendung
+
+Besuchen Sie den Abschnitt Hooks, um zu erfahren, wie Sie das Verhalten des Plugins weiter anpassen können.

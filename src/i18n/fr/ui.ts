@@ -4,12 +4,12 @@ export default UIDictionary({
 	'a11y.sectionLink': 'Titre de la section',
 	'navbar.a11yTitle': 'Navigation principale',
 	// Site settings
-	'site.title': 'Documentation Astro',
+	'site.title': 'Documentation de Prosopo',
 	'site.description':
-		'Compilez des sites plus rapidement avec moins de JavaScript pour vos utilisateurs.',
+		'Protection CAPTCHA intelligente et vérification côté serveur.',
 	'site.og.imageSrc': '/default-og-image.png?v=1',
 	'site.og.imageAlt':
-		"Logo d'Astro dans l'espace, avec une planète violette dans le style de saturne flottant à droite de l'image.",
+		'Logo de Prosopo',
 	// Left Sidebar
 	'leftSidebar.a11yTitle': 'Navigation du site',
 	'leftSidebar.learnTab': 'Apprendre',
@@ -28,21 +28,21 @@ export default UIDictionary({
 	'rightSidebar.contributorGuides': 'Guides des contributeurs',
 	'rightSidebar.editPage': 'Modifier cette page',
 	'rightSidebar.translatePage': 'Traduire cette page',
-	'rightSidebar.github': "La doc d'Astro sur GitHub",
+	'rightSidebar.github': 'Documentation Prosopo sur GitHub',
 	// Footer
 	'footer.privacyPolicy': 'Politique de Confidentialité',
 	// `<ThemeToggleButton>` acessibility labels
-	'themeToggle.useLight': 'Changer vers le thème clair',
-	'themeToggle.useDark': 'Changer vers le thème sombre',
+	'themeToggle.useLight': 'Utiliser le thème clair',
+	'themeToggle.useDark': 'Utiliser le thème sombre',
 	// Used in previous/next page links at the bottom of pages
 	'articleNav.nextPage': 'Page suivante',
-	'articleNav.prevPage': 'Page précédente',
+	'articleNav.prevPage': 'Retour',
 	// Used in `<Since>`: Added in: v0.24.0 [NEW]
 	'since.addedIn': 'Ajouté à la version :',
 	'since.new': 'Nouveau',
 	'since.beta': 'Bêta',
 	// Installation Guide
-	'install.autoTab': "Automatiquement via l'ILC",
+	'install.autoTab': 'Automatique CLI',
 	'install.manualTab': 'Configuration manuelle',
 	// `<DeployGuidesNav>` vocabulary
 	'deploy.sectionTitle': 'Guides de déploiement',
@@ -51,14 +51,14 @@ export default UIDictionary({
 	'deploy.ssrTag': 'SSR',
 	'deploy.staticTag': 'Statique',
 	// CMS Guides vocabulary
-	'cms.navTitle': 'Plus de guides sur les CMS',
+	'cms.navTitle': 'Plus de guides CMS',
 	// Migration Guides vocabulary
-	'migration.navTitle': 'Plus de guides sur les migrations',
+	'migration.navTitle': 'Plus de guides de migration',
 	// Recipes vocabulary
-	'recipes.navTitle': 'Plus de méthodes',
+	'recipes.navTitle': 'Plus de recettes',
 	// `<RecipeLinks>` vocabulary
-	'recipesLink.singular': 'Méthode associée :',
-	'recipesLink.plural': 'Méthodes associées',
+	'recipesLink.singular': 'Recette associée :',
+	'recipesLink.plural': 'Recettes associées',
 	// `<ContributorList>` fallback text
 	'contributors.seeAll': 'Voir tous les contributeurs',
 	// Fallback content notice shown when a page is not yet translated
@@ -98,23 +98,23 @@ export default UIDictionary({
 	// Tutorial
 	'tutorial.getReady': 'Préparez-vous à…',
 	// Feedback Fish widget
-	'feedback.button': 'Laissez un commentaire',
-	'feedback.a11yLabel': 'Formulaire de commentaires',
-	'feedback.formTitle': 'Comment pouvons-nous vous aider ?',
-	'feedback.categoryGroupLabel': 'Choisissez le type de commentaire',
+	'feedback.button': 'Donnez-nous votre avis',
+	'feedback.a11yLabel': 'Formulaire de feedback',
+	'feedback.formTitle': "À quoi pensez-vous ?",
+	'feedback.categoryGroupLabel': 'Choisissez une catégorie de feedback',
 	'feedback.issue': 'Problème',
-	'feedback.createIssue': 'Créer une issue GitHub',
+	'feedback.createIssue': 'Créer un problème GitHub',
 	'feedback.createIssue.description':
-		"Le moyen le plus rapide d'alerter notre équipe d'un problème.",
-	'feedback.sendFeedback': 'Envoyez-nous un commentaire',
-	'feedback.sendFeedback.description': 'Envoyez-nous directement un message.',
+		'Le moyen le plus rapide d’alerter notre équipe.',
+	'feedback.sendFeedback': 'Envoyez-nous un feedback',
+	'feedback.sendFeedback.description': 'Envoyez-nous un message directement.',
 	'feedback.idea': 'Idée',
-	'feedback.other': 'Autres',
+	'feedback.other': 'Autre',
 	'feedback.messageA11yLabel': 'Message',
-	'feedback.placeholder': 'Que faut-il savoir ?',
-	'feedback.submit': 'Envoyez des commentaires',
-	'feedback.close': 'Fermer le formulaire de commentaires',
-	'feedback.success': 'Merci ! Nous avons reçu vos commentaires.',
+	'feedback.placeholder': 'Qu\'aimerions-nous savoir ?',
+	'feedback.submit': 'Soumettre le feedback',
+	'feedback.close': 'Fermer le formulaire de feedback',
+	'feedback.success': 'Merci ! Nous avons reçu votre feedback.',
 	// Code snippet vocabulary
 	'expressiveCode.terminalWindowFallbackTitle': 'Fenêtre du terminal',
 	'expressiveCode.copyButtonTooltip': 'Copier dans le presse-papiers',
@@ -122,15 +122,15 @@ export default UIDictionary({
 	// Backend Guides vocabulary
 	'backend.navTitle': 'Plus de guides sur les services backend',
 	// Stubs vocabulary
-	'stub.title': 'Développez cette ébauche !',
-	'stub.subtitle': 'Ce guide est une ébauche.',
+	'stub.title': 'Développez ce guide !',
+	'stub.subtitle': 'Ce guide est encore en cours.',
 	'stub.description.migration':
-		'Vous souhaitez contribuer à ce guide ? Vous avez un article de blog, une vidéo ou une autre ressource à partager sur la migration de cette technologie vers Astro ?',
-	'stub.description.cms': "En savoir plus sur l'utilisation de ce CMS avec Astro ?",
-	'stub.description.backend': "En savoir plus sur l'utilisation de ce service backend avec Astro ?",
+		'Vous souhaitez contribuer à ce guide ? Vous avez un article de blog, une vidéo ou une autre ressource à partager sur la migration vers Prosopo ?',
+	'stub.description.cms': "En savoir plus sur l'utilisation de ce CMS avec Prosopo ?",
+	'stub.description.backend': "En savoir plus sur l'utilisation de ce service backend avec Prosopo ?",
 	// Starlight banner
-	'starlight.title': 'Vous voulez créer votre propre Doc ?',
-	'starlight.description': 'Prenez ce modèle pour commencer.',
+	'starlight.title': 'Vous voulez créer votre propre documentation ?',
+	'starlight.description': 'Utilisez ce modèle pour commencer.',
 	// `<StudioHeading>` component
 	'studioHeading.label': 'Fonctionnalité Studio',
 });

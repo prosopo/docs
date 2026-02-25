@@ -1,0 +1,88 @@
+---
+title: Limite de Segurança
+description: Compreendendo e configurando o Limite de Segurança nas configurações do seu portal Prosopo para equilibrar segurança e experiência do usuário.
+i18nReady: true
+---
+
+O **Limite de Segurança** é uma configuração crítica no seu portal Prosopo que determina o quão rigoroso é o seu sistema de detecção de bots. Ele controla o equilíbrio entre segurança (bloqueio de bots) e experiência do usuário (minimização de desafios CAPTCHA para usuários legítimos).
+
+## O que é Limite de Segurança?
+
+O Limite de Segurança é um valor numérico entre 0.2 e 0.8 que representa o nível de confiança necessário antes que um usuário seja considerado legítimo. Quando o sistema frictionless da Prosopo analisa o comportamento de um usuário, ele gera uma "pontuação de bot" - um número indicando a probabilidade de o usuário ser um bot.
+
+- **Pontuações menores** = Mais provável ser humano
+- **Pontuações maiores** = Mais provável ser um bot
+
+O Limite de Segurança determina o ponto de corte: usuários com pontuações de bot acima do seu limite receberão um desafio CAPTCHA, enquanto aqueles abaixo passarão sem interrupção, simplesmente completando um CAPTCHA PoW em segundo plano.
+
+## Como o Limite de Segurança Funciona
+
+### O Processo de Detecção de Bot
+
+1. **Usuário visita seu site** - O sistema frictionless da Prosopo começa a analisar o comportamento do navegador
+2. **Análise comportamental** - O sistema examina fatores como:
+   - Dados do navegador
+   - Características de interação com o site
+   - Sinais de dispositivo e ambiente
+   
+   Isso é usado para determinar com segurança a probabilidade de um usuário ser um bot sem enviar esses dados do usuário à Prosopo, mantendo total privacidade e conformidade com GDPR.
+3. **Geração de pontuação** - Uma pontuação de bot (0.0 a 1.0) é calculada
+4. **Comparação com o limite** - A pontuação é comparada com seu Limite de Segurança
+5. **Ação tomada**:
+   - **Pontuação < Limite**: Usuário passa (desafio PoW invisível)
+   - **Pontuação ≥ Limite**: Usuário recebe desafio CAPTCHA
+
+### Faixas de Limite
+
+| Faixa | Rótulo | Descrição | Caso de Uso |
+|-------|-------|-------------|----------|
+| 0.2 - 0.4 | **Baixo** | Detecção permissiva | Sites de alto tráfego priorizando experiência do usuário |
+| 0.4 - 0.6 | **Médio** ⭐ | Abordagem balanceada | **Recomendado** para a maioria dos sites |
+| 0.6 - 0.8 | **Alto** | Detecção rigorosa | Sites sob ataque ou que exigem alta segurança |
+
+## Configurando seu Limite de Segurança
+
+### Acessando as Configurações
+
+1. Faça login no [portal Prosopo](https://portal.prosopo.io/)
+2. Navegue até as configurações do seu site
+3. Encontre a seção "Limite de Segurança"
+4. Use o controle deslizante para ajustar seu limite
+5. Clique em "Salvar" para aplicar as alterações
+
+### Escolhendo o Limite Certo
+
+#### Comece com Médio (0.4 - 0.6)
+A configuração média é recomendada para a maioria dos sites, pois fornece um bom equilíbrio entre segurança e experiência do usuário.
+
+#### Quando Usar Limite Baixo (0.2 - 0.4)
+- **Sites de e-commerce de alto tráfego** onde a fricção do usuário deve ser minimizada
+- **Sites de conteúdo** onde o tráfego ocasional de bots é aceitável
+- **Durante períodos promocionais** quando você espera alto tráfego legítimo
+
+#### Quando Usar Limite Alto (0.6 - 0.8)
+- **Sob ataque ativo de bot** - aumente temporariamente para bloquear mais tráfego suspeito
+- **Aplicações financeiras ou sensíveis** que exigem segurança máxima
+- **Envios de formulário** com resultados de alto valor (registros, compras)
+
+## Exemplos do Mundo Real
+
+### Exemplo de Site de E-commerce
+**Cenário**: Loja online com 10.000 visitantes diários
+- **Operações normais**: Limite médio (0.5)
+- **Durante vendas**: Diminua o Limite de Segurança para reduzir a fricção
+- **Sob ataque**: Aumente o Limite de Segurança temporariamente
+
+### Exemplo de Site de Blog/Conteúdo
+**Cenário**: Site de notícias com sistema de comentários
+- **Leitura de artigos**: Limite baixo (0.3) - fricção mínima
+- **Publicação de comentários**: Limite médio (0.5) - prevenir spam
+
+## Obtendo Ajuda
+
+Se você precisar de assistência com a configuração do Limite de Segurança:
+- Entre em contato com o suporte Prosopo através do portal
+- Junte-se ao nosso Discord
+- Revise seus dados de análise com nossa equipe para recomendações de otimização
+
+O Limite de Segurança é uma ferramenta poderosa para equilibrar segurança e experiência do usuário. Com configuração e monitoramento adequados, pode melhorar significativamente a proteção do seu site mantendo uma experiência de usuário suave.

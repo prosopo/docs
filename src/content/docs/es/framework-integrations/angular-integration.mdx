@@ -1,0 +1,54 @@
+---
+title: "Integración con Angular"
+description: "Procaptcha tiene un componente oficial de Angular que proporciona una integración simple de Prosopo Procaptcha en cualquier proyecto Angular."
+i18nReady: true
+---
+
+Procaptcha proporciona un componente oficial de Angular para una fácil integración de Prosopo Procaptcha en cualquier proyecto Angular.
+El componente de integración admite todas las [opciones de renderizado de Procaptcha](/es/basics/client-side-rendering/#procaptcha-options).
+
+## 1. Instalación
+
+`npm install @prosopo/angular-procaptcha-wrapper`
+
+## 2. Ejemplo de uso
+
+### 2.1) Configuración básica
+
+```typescript
+import { Component } from "@angular/core";
+import {
+    ProcaptchaComponent,
+    type ProcaptchaRenderOptions,
+} from "@prosopo/angular-procaptcha-wrapper";
+
+@Component({
+    selector: "app-root",
+    imports: [ProcaptchaComponent],
+    template: `
+    <procaptcha-component [settings]="procaptchaSettings"
+                          [htmlAttributes]="{class:'my-app__procaptcha'}"/>`,
+    styles: "",
+})
+export class AppComponent {
+    procaptchaSettings: ProcaptchaRenderOptions = {
+        siteKey: "your-site-key",
+    };
+}
+```
+
+### 2.2) Uso avanzado
+
+```typescript
+// ...
+
+export class AppComponent {
+    procaptchaSettings: ProcaptchaRenderOptions = {
+        siteKey: environment.PROCAPTCHA_SITE_KEY,
+        language: "en",
+        callback: (token: string) => {
+            console.log("verified", token);
+        },
+    };
+}
+```

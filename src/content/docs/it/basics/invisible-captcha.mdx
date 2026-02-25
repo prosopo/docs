@@ -1,0 +1,271 @@
+---
+title: 'CAPTCHA invisibile (Beta)'
+description: 'Impari come implementare il CAPTCHA invisibile con Procaptcha per esperienze utente senza interruzioni.'
+i18nReady: true
+---
+
+Il CAPTCHA invisibile fornisce protezione bot senza interruzioni senza interrompere l'esperienza utente. La sfida CAPTCHA viene eseguita in background e presenta solo una sfida visibile se è necessaria una verifica aggiuntiva.
+
+:::caution[Funzionalità Beta]
+Il CAPTCHA invisibile è attualmente in **beta**. Funzionalità e comportamento potrebbero cambiare nelle versioni future.
+:::
+
+:::note[Restrizione Tier]
+Il CAPTCHA invisibile è disponibile solo per gli utenti dei tier **Pro ed Enterprise**. Gli utenti del tier gratuito non possono accedere a questa funzionalità.
+:::
+
+## Panoramica
+
+Il CAPTCHA invisibile funziona:
+1. Eseguendo sfide di verifica in background
+2. Analizzando il comportamento dell'utente e le caratteristiche del browser  
+3. Mostrando solo una sfida visibile se l'utente appare sospetto
+4. Fornendo un'esperienza fluida per gli utenti legittimi
+
+## Tipi di CAPTCHA
+
+### Frictionless invisibile
+L'opzione più intelligente che si adatta dinamicamente in base al comportamento dell'utente:
+
+```html
+<button 
+    class="procaptcha" 
+    data-sitekey="your_site_key" 
+    data-captcha-type="frictionless"
+    data-size="invisible"
+    data-callback="onCaptchaSuccess">
+    Submit
+</button>
+```
+
+### Proof of Work invisibile
+Esegue una sfida computazionale invisibilmente in background:
+
+```html
+<button 
+    class="procaptcha" 
+    data-sitekey="your_site_key" 
+    data-captcha-type="pow"
+    data-size="invisible" 
+    data-callback="onCaptchaSuccess">
+    Submit
+</button>
+```
+
+### Immagine invisibile
+Mostra sfide visibili per verificare l'utente all'invio del modulo:
+
+```html
+<button 
+    class="procaptcha" 
+    data-sitekey="your_site_key" 
+    data-captcha-type="image"
+    data-size="invisible"
+    data-callback="onCaptchaSuccess">
+    Submit
+</button>
+```
+
+## Metodi di implementazione
+
+### Rendering implicito
+
+Aggiunga la classe `procaptcha` e gli attributi data direttamente agli elementi del suo form:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+</head>
+<body>
+    <form>
+        <input type="email" name="email" required>
+        <button 
+            type="button"
+            class="procaptcha" 
+            data-sitekey="your_site_key"
+            data-captcha-type="frictionless"
+            data-size="invisible"
+            data-callback="handleSubmit"
+            data-failed-callback="handleFailure">
+            Submit Form
+        </button>
+    </form>
+
+    <script>
+        function handleSubmit(token) {
+            console.log('CAPTCHA verified:', token);
+            // Submit your form with the token
+        }
+
+        function handleFailure() {
+            console.log('CAPTCHA verification failed');
+            // Handle failure case
+        }
+    </script>
+</body>
+</html>
+```
+
+### Rendering esplicito
+
+Per un maggiore controllo sul ciclo di vita del CAPTCHA:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>    
+    <script src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+</head>
+<body>
+    <form id="demo-form">
+        <input type="email" name="email" required>
+        <div id="captcha-container"></div>
+        <button type="submit">Submit Form</button>
+    </form>
+
+    <script type="module">
+        import { render, execute } from "https://js.prosopo.io/js/procaptcha.bundle.js"
+
+        let widgetId;
+
+        function handleCaptchaSuccess(token) {
+            console.log('CAPTCHA verified:', token);
+            // Process form submission with token
+        }
+
+        function handleCaptchaFailure() {
+            console.log('CAPTCHA verification failed');
+            // Handle failure
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Render invisible CAPTCHA
+            widgetId = render(document.getElementById('captcha-container'), {
+                siteKey: 'your_site_key',
+                captchaType: 'frictionless',
+                size: 'invisible',
+                callback: handleCaptchaSuccess,
+                'failed-callback': handleCaptchaFailure
+            });
+
+            // Handle form submission
+            document.getElementById('demo-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                // Trigger CAPTCHA verification
+                execute();
+            });
+        });
+    </script>
+</body>
+</html>
+```
+
+## Opzioni di configurazione
+
+| Attribute | Value | Description |
+|-----------|-------|-------------|
+| `data-size` | `"invisible"` | **Obbligatorio.** Abilita la modalità invisibile |
+| `data-captcha-type` | `"frictionless"`, `"pow"`, `"image"` | Tipo di sfida CAPTCHA |
+| `data-callback` | Nome funzione | Chiamata quando il CAPTCHA è verificato con successo |
+| `data-failed-callback` | Nome funzione | Chiamata quando la verifica CAPTCHA fallisce |
+| `data-sitekey` | La sua site key | **Obbligatorio.** La sua site key Procaptcha |
+
+## Best practice
+
+### 1. Scegliere il tipo giusto
+- **Frictionless**: Migliore per la maggior parte dei casi d'uso, si adatta automaticamente
+- **PoW**: Buono per form dove si desidera sfide invisibili consistenti
+- **Image**: Utilizzare quando si ha bisogno di verifica basata su immagini con fallback invisibile
+
+### 2. Gestire i fallimenti con eleganza
+Implementi sempre un callback di fallimento per gestire i fallimenti di verifica:
+
+```javascript
+function onCaptchaFailed() {
+    // Show user-friendly error message
+    alert('Verification failed. Please try again.');
+    // Reset form or provide alternative
+}
+```
+
+### 3. Fornire indicatori di caricamento
+Poiché la verifica avviene in background, consideri di mostrare stati di caricamento:
+
+```javascript
+function onCaptchaStart() {
+    document.getElementById('submit-btn').disabled = true;
+    document.getElementById('submit-btn').textContent = 'Verifying...';
+}
+
+function onCaptchaComplete(token) {
+    document.getElementById('submit-btn').disabled = false;
+    document.getElementById('submit-btn').textContent = 'Submit';
+    // Process with token
+}
+```
+
+## Verifica lato server
+
+Verifichi sempre la risposta Procaptcha sul suo server:
+
+```javascript
+// Node.js example
+const response = await fetch('https://api.prosopo.io/siteverify', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+        secret: 'your_secret_key',
+        response: token, // Token from Procaptcha callback
+        remoteip: userIP // Optional
+    })
+});
+
+const result = await response.json();
+if (result.success) {
+    // Procaptcha verified successfully
+    console.log('Verification successful');
+} else {
+    // Verification failed
+    console.log('Verification failed:', result['error-codes']);
+}
+```
+
+## Risoluzione problemi
+
+### CAPTCHA non si attiva
+- Si assicuri che `data-size="invisible"` sia impostato
+- Verifichi che la sua site key sia corretta e attiva
+- Verifichi che il suo dominio sia registrato nel portale
+- Confermi di essere sul tier Pro o Enterprise
+
+### Sfide visibili inaspettate
+Questo è un comportamento normale quando:
+- Il comportamento dell'utente appare sospetto
+- Le caratteristiche del browser suggeriscono automazione
+- È necessaria una verifica aggiuntiva per la sicurezza
+
+### Problemi di integrazione
+- Si assicuri che lo script Procaptcha si carichi prima che il suo codice venga eseguito
+- Verifichi nella console del browser eventuali messaggi di errore
+- Verifichi che le funzioni callback siano definite globalmente
+- Testi con diversi tipi di CAPTCHA per isolare i problemi
+
+## Migrazione da CAPTCHA visibile
+
+Per convertire le implementazioni CAPTCHA visibili esistenti:
+
+1. Aggiunga `data-size="invisible"` alle configurazioni esistenti
+2. Aggiorni l'UI per rimuovere il contenitore CAPTCHA (per il rendering implicito)
+3. Adatti lo stile del form poiché non apparirà alcun widget visibile
+4. Testi i flussi utente per garantire un'esperienza fluida
+5. Aggiorni qualsiasi CSS o JavaScript dipendente dalle dimensioni
+
+## Prossimi passi
+
+- [Verifica lato server](/it/basics/server-side-verification/) 
+- [Tipi di CAPTCHA](/it/basics/captcha-types/)
+- [Opzioni di rendering lato client](/it/basics/client-side-rendering/)
