@@ -1,0 +1,90 @@
+---
+title: Spam Filter
+description: Block submissions from VPN, proxy and Tor networks, and reject email addresses that match suspicious patterns such as the Gmail dot/+tag evasion trick.
+i18nReady: true
+---
+
+The Spam Filter rejects suspicious submissions before they reach your application. It complements [IP Validation Rules](/en/advanced/ip-validation-rules/) by acting on two extra signals: the *connection type* (VPN, proxy, Tor) and the *shape of the submitted email address* (regex patterns and Gmail-specific normalisation).
+
+The Spam Filter is a paid feature. Free-tier accounts can see the settings but cannot enable them.
+
+## Why this exists
+
+Modern spam campaigns frequently abuse Gmail's "dots are ignored" rule and `+tag` aliases to flood signup forms while looking, on paper, like distinct addresses. For example, all of the following point to the same Gmail mailbox:
+
+- `alice@gmail.com`
+- `a.l.i.c.e@gmail.com`
+- `alice+anything@gmail.com`
+- `a.l.i.c.e+vkd38uoukd5@gmail.com`
+
+The Spam Filter lets you reject these patterns at the CAPTCHA layer so you don't have to deduplicate them downstream. It also lets you reject submissions from connections that resolve to a known VPN, proxy or Tor exit node — a common pattern for automated spam.
+
+## Enabling the spam filter
+
+Settings live under **Settings → Spam Filter** in the portal. You must:
+
+1. Toggle **Enable Spam Filter** on (the master switch).
+2. Enable the individual rules you want.
+3. Save.
+
+The rules are evaluated server-side during `/verify` (image and PoW). When a rule matches, the verification response will be `{ verified: false }` and the `status` field will indicate which rule fired (e.g. `"API.SPAM_EMAIL_RULE"` or `"API.VPN_BLOCKED"`). You can use this to show a tailored message to legitimate users — for example, prompting them to disable a VPN.
+
+## VPN, proxy and Tor blocking
+
+When **Block VPN, proxy and Tor traffic** is enabled, every verify call performs an IP reputation lookup on the user's IP. If the IP resolves as a VPN exit node, public proxy or Tor exit node, the verification fails with status `API.VPN_BLOCKED`.
+
+**Caveats**
+
+- Some legitimate users connect via corporate or privacy-focused VPNs. You should communicate the policy to them — for example, by mapping `API.VPN_BLOCKED` to a user-facing message like "We don't accept submissions from VPNs. Please disable your VPN and try again."
+- Lookups are best-effort. If the IP reputation service is unavailable for a request, the request is **allowed through** so an upstream outage can't block all your traffic.
+
+## Email pattern rules
+
+Enable **Email pattern rules** to apply per-site rules to the email address submitted with the CAPTCHA. The address is taken from the `email` parameter on the verify request — if you don't pass it, no email rule fires.
+
+### Maximum dots in the local part
+
+Reject addresses where the part before `@` contains more dots than the configured limit. A value of `2` rejects addresses like `b.u.eltame.ki.a@gmail.com` (5 dots) while leaving `first.last@example.com` (1 dot) untouched.
+
+Leave the field blank to disable this check.
+
+### Curated default patterns
+
+A small, conservative regex set kept up-to-date by Prosopo. Currently covers:
+
+- Local parts with 4 or more dots (the most common Gmail evasion).
+- Random alphanumeric suffix tags on Gmail (e.g. `meredithgeronimo241+vkd38uoukd5@gmail.com`).
+
+Defaults are deliberately narrow to avoid false positives. If you want to be stricter, add your own patterns under **Custom regex blocklist**.
+
+### Normalise Gmail addresses
+
+When enabled, Gmail/Googlemail addresses are normalised before being matched against the **Custom regex blocklist** (dots in the local part are stripped, and any `+tag` suffix is removed). This means that a single regex like `^alice@gmail\.com$` matches all of:
+
+- `alice@gmail.com`
+- `a.l.i.c.e@gmail.com`
+- `alice+promo@googlemail.com`
+
+Default patterns and the dot-count check both run against the *raw* address so they remain effective regardless of this setting.
+
+### Custom regex blocklist
+
+A list of JavaScript regular expressions, evaluated case-insensitively. The whole address is tested. Invalid regex entered through the portal cannot be saved; if a stored regex becomes invalid (e.g. a JS engine update), it is silently skipped at runtime so a single bad pattern can't take the filter offline.
+
+Examples:
+
+| Pattern | Matches |
+| --- | --- |
+| `@disposable\.tld$` | Any address on `disposable.tld` |
+| `^test\d+@` | `test1@…`, `test99@…` |
+| `\+spam\d*@gmail\.com$` | Gmail addresses tagged with `+spam`, `+spam1`, … |
+
+## Status codes returned to your app
+
+| Status | Meaning |
+| --- | --- |
+| `API.SPAM_EMAIL_DOMAIN` | Email domain is on the global disposable-domain list |
+| `API.SPAM_EMAIL_RULE`   | Email matched one of your configured spam filter rules |
+| `API.VPN_BLOCKED`       | IP resolves to a known VPN, proxy or Tor exit node |
+
+Show these to the user (translated via the standard locale files) so a legitimate user understands why their submission was blocked.

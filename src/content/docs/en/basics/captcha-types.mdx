@@ -1,6 +1,6 @@
 ---
 title: CAPTCHA Types
-description: Serve different types of CAPTCHA by setting the `captchaType` to `frictionless`, `pow`, `image`.
+description: Serve different types of CAPTCHA by setting the `captchaType` to `frictionless`, `pow`, `image`, or `puzzle`.
 i18nReady: true
 ---
 import {Image} from 'astro:assets';
@@ -9,7 +9,7 @@ import ImageCaptcha from '~/assets/image-captcha.png';
 import PoWSettings from '~/assets/pow-settings.png';
 import ImageSettings from '~/assets/image-settings.png';
 
-Serve **different** types of CAPTCHA by setting the `captchaType` to `frictionless`, `pow`, `image`.
+Serve **different** types of CAPTCHA by setting the `captchaType` to `frictionless`, `pow`, `image`, or `puzzle`.
 
 ## Frictionless CAPTCHA
 
@@ -38,6 +38,12 @@ An image CAPTCHA challenge requires the user to select the correct image(s) that
 />
 
 The Image CAPTCHA type does not interrogate the user's browser environment, use `frictionless` for that (above).
+
+## Puzzle CAPTCHA
+
+A Puzzle (`puzzle`) CAPTCHA challenge requires the user to drag a puzzle piece to a target location. The server validates that the piece was placed within tolerance of the correct position, and the drag telemetry is recorded for behavioral analysis.
+
+The Puzzle CAPTCHA type does not interrogate the user's browser environment, use `frictionless` for that (above).
 
 ## Set Type Implicitly
 
@@ -74,7 +80,7 @@ document.getElementById('procaptcha-script').addEventListener('load', function (
         siteKey: 'YOUR_SITE_KEY',
         theme: 'dark',
         callback: onCaptchaVerified,
-        captchaType: 'image', // `pow` or leave blank for `frictionless`
+        captchaType: 'image', // `pow`, `puzzle`, or leave blank for `frictionless`
     })
 })
 ```

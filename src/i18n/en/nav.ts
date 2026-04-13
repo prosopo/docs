@@ -76,6 +76,11 @@ export default [
         slug: 'advanced/audit',
         key: 'advanced/audit',
     },
+    {
+        text: 'Spam Filter',
+        slug: 'advanced/spam-filter',
+        key: 'advanced/spam-filter',
+    },
     {text: 'Framework integrations', header: true, type: 'learn', key: 'framework-integrations'},
     {
         text: 'Angular Integration',
