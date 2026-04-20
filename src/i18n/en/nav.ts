@@ -82,6 +82,16 @@ export default [
         key: 'advanced/spam-filter',
     },
     {
+        text: 'Image Accuracy Threshold',
+        slug: 'advanced/image-threshold',
+        key: 'advanced/image-threshold',
+    },
+    {
+        text: 'API Keys',
+        slug: 'advanced/api-keys',
+        key: 'advanced/api-keys',
+    },
+    {
         text: 'Audit',
         slug: 'advanced/audit',
         key: 'advanced/audit',
