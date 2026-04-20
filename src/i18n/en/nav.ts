@@ -72,6 +72,26 @@ export default [
         key: 'advanced/access-control-rules',
     },
     {
+        text: 'Traffic Filter',
+        slug: 'advanced/traffic-filter',
+        key: 'advanced/traffic-filter',
+    },
+    {
+        text: 'Email Filter',
+        slug: 'advanced/spam-filter',
+        key: 'advanced/spam-filter',
+    },
+    {
+        text: 'Image Accuracy Threshold',
+        slug: 'advanced/image-threshold',
+        key: 'advanced/image-threshold',
+    },
+    {
+        text: 'API Keys',
+        slug: 'advanced/api-keys',
+        key: 'advanced/api-keys',
+    },
+    {
         text: 'Audit',
         slug: 'advanced/audit',
         key: 'advanced/audit',

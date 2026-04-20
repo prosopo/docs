@@ -1,0 +1,170 @@
+---
+title: Email Filter
+description: Block CAPTCHA verification requests that use suspicious email addresses, including Gmail dot/plus-tag tricks and custom regex patterns.
+i18nReady: true
+---
+
+The Email Filter (configured under the Spam Filter in site settings) lets you reject CAPTCHA verifications whose associated email address matches suspicious patterns. It is designed to catch common signup-spam evasion techniques — particularly the Gmail dot and plus-tag tricks — while keeping false positives low.
+
+Email filtering is available to Professional and Enterprise tier customers.
+
+## Overview
+
+When a dapp calls the Prosopo verification endpoint with an optional `email` field, the email address is evaluated against the configured rules before the CAPTCHA solution is checked. If any rule matches, verification is rejected immediately.
+
+## Providing the Email Address
+
+Pass the email in the `email` field when calling the server-side verification endpoint:
+
+```json
+{
+    "secret": "your_secret_key",
+    "token": "PROCAPTCHA-RESPONSE",
+    "email": "USER_EMAIL_ADDRESS"
+}
+```
+
+If no email is provided, email filter rules are skipped.
+
+## Filter Rules
+
+### Maximum Dots in Local Part
+
+Limits the number of dots allowed in the part of the email address before the `@` symbol. For example, with a limit of `2`:
+
+- `alice@example.com` — allowed (0 dots)
+- `a.lice@example.com` — allowed (1 dot)
+- `a.l.ice@example.com` — allowed (2 dots)
+- `a.l.i.ce@example.com` — **blocked** (3 dots)
+
+This is effective against the Gmail dot trick, where `a.l.i.c.e@gmail.com` and `alice@gmail.com` are the same Gmail inbox but appear as different addresses to most systems.
+
+Leave blank to disable the dot limit.
+
+### Default Patterns
+
+A curated set of regex patterns targeting common evasion techniques:
+
+- **Many-dots local part**: Catches addresses with excessive dots in the local part (more than 3), which are almost always evasion attempts.
+- **Gmail random plus-tag**: Catches addresses like `user+vkd38uoukd5@gmail.com` where a random alphanumeric suffix is appended via a plus tag.
+
+Enable with the **Apply curated default patterns** toggle.
+
+### Gmail Address Normalisation
+
+When enabled, Gmail and Googlemail addresses are normalised before evaluating custom regex patterns:
+
+1. Dots are stripped from the local part (`a.l.i.c.e` becomes `alice`)
+2. Plus-tag suffixes are removed (`alice+tag` becomes `alice`)
+3. `@googlemail.com` is rewritten to `@gmail.com`
+
+This means a single custom regex pattern like `^alice@gmail\.com$` will match all of the following:
+
+- `alice@gmail.com`
+- `a.l.i.c.e@gmail.com`
+- `alice+spam123@gmail.com`
+- `a.l.i.c.e+tag@googlemail.com`
+
+Normalisation only affects Gmail/Googlemail addresses. Other domains are evaluated as-is.
+
+### Custom Regex Blocklist
+
+Add your own JavaScript regular expressions to block specific email patterns. Patterns are evaluated case-insensitively against the (optionally normalised) email address.
+
+Examples:
+
+| Pattern | What it catches |
+|---------|----------------|
+| `@disposable\.tld$` | Any address at `disposable.tld` |
+| `^spam@` | Any address starting with `spam@` |
+| `@(tempmail\|throwaway)\.` | Addresses at `tempmail.*` or `throwaway.*` domains |
+| `^test[0-9]+@` | Addresses like `test123@...`, `test99@...` |
+
+Patterns are validated when saved:
+- Maximum 256 characters per pattern
+- Maximum 50 patterns per site
+- Lookahead, lookbehind, and large quantifiers are rejected to prevent regex-based denial of service
+- Invalid regex syntax is rejected at save time
+
+### Spam Email Domain List
+
+A separate toggle (`spamEmailDomainCheckEnabled`) checks the email domain against a maintained list of known disposable/spam email providers. This runs independently of the rules above.
+
+## Evaluation Order
+
+When the email filter is enabled and an email is provided, rules are evaluated in this order:
+
+1. **Email validity** — malformed addresses are rejected
+2. **Maximum dots** — if configured, checked first
+3. **Default patterns** — if enabled, evaluated next
+4. **Custom regex blocklist** — each pattern is tested in order; first match wins
+
+Evaluation stops at the first match. The rejection reason is recorded for audit purposes.
+
+## Configuration via Portal
+
+Email filter rules are configured in the [Prosopo Portal](https://portal.prosopo.io) under **Site Settings > Email Filter**:
+
+1. **Enable Spam Filter** — master toggle for all email rules
+2. **Email pattern rules** — sub-toggle to activate pattern matching
+3. **Maximum dots in the local part** — numeric input
+4. **Apply curated default patterns** — toggle
+5. **Normalise Gmail addresses before matching** — toggle
+6. **Custom regex blocklist** — add/remove patterns with validation
+
+All changes are saved together via the **Save All Changes** button.
+
+## Verification Response
+
+When an email rule blocks a request, the verification endpoint returns:
+
+```json
+{
+    "verified": false,
+    "status": "API.SPAM_EMAIL_RULE"
+}
+```
+
+Possible status codes:
+
+| Status | Meaning |
+|--------|---------|
+| `API.SPAM_EMAIL_RULE` | Email matched a custom regex pattern |
+| `API.SPAM_EMAIL_DOMAIN` | Email domain is on the known-spam list |
+
+## Use Cases
+
+### Stopping Gmail Dot/Plus-Tag Abuse
+
+A single Gmail account can generate thousands of apparent email addresses using dots and plus tags. To block this:
+
+1. Enable **Email pattern rules**
+2. Enable **Apply curated default patterns** (catches random plus-tags and excessive dots automatically)
+3. Set **Maximum dots** to `2`
+4. Enable **Normalise Gmail addresses** if you also use custom patterns
+
+### Blocking Disposable Email Domains
+
+To block known throwaway email services:
+
+1. Enable **Spam email domain checking** (uses the maintained domain list)
+2. Optionally add custom patterns for domains not yet on the list:
+   ```
+   @(tempmail|throwaway|guerrillamail)\.
+   ```
+
+### Organisation-Specific Patterns
+
+If you see abuse from specific patterns unique to your service:
+
+1. Add targeted custom regex patterns
+2. Monitor the `API.SPAM_EMAIL_RULE` status in your verification responses
+3. Adjust patterns based on what you observe
+
+## Availability
+
+| Tier | Email Filter |
+|------|-------------|
+| Free | Not available |
+| Professional | Full access |
+| Enterprise | Full access |
