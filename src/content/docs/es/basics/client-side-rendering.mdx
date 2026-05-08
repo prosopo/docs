@@ -101,7 +101,6 @@ La función `Procaptcha.render()` toma un objeto de opciones como segundo argume
 | siteKey              | string             | El sitekey de su aplicación / sitio web. Esto es requerido.                                                                                                        | ✓        |
 | callback             | string o función | El nombre de la función window, o una función, que se llamará cuando el CAPTCHA sea verificado.                                                                    | ✗        |
 | theme                | string             | El tema del widget de CAPTCHA. El predeterminado es `light`. La otra opción es `dark`.                                                                                 | ✗        |
-| captchaType          | string             | El tipo de CAPTCHA a renderizar. El predeterminado es `frictionless`. Otras opciones son `image`, `pow`.                                                                      | ✗        |
 | chalexpired-callback | string o función | El nombre de la función window, o una función, que se llamará cuando el desafío del CAPTCHA expire.                                                              | ✗        |
 | error-callback       | string o función | El nombre de la función window, o una función, que se llamará cuando ocurra un error.                                                                            | ✗        |
 | close-callback       | string o función | El nombre de la función window, o una función, que se llamará cuando el CAPTCHA se cierre.                                                                      | ✗        |
@@ -126,23 +125,6 @@ y definiría la función callback en el objeto window.
 ```html
 <div class="procaptcha" data-sitekey="your_site_key" data-callback="yourCallbackFunction"></div>
 ```
-
-### `captchaType`
-
-Puede elegir implementar cualquiera de los siguientes tipos de captcha al renderizar el componente de Procaptcha:
-
-| Tipo           | Descripción                                                                                                                                                                                                                                                                           |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `frictionless` | El tipo de CAPTCHA predeterminado es `frictionless`. Este tipo de CAPTCHA es invisible para el usuario, solo requiriendo que complete un [desafío de Proof of Work](https://en.wikipedia.org/wiki/Proof_of_work) invisible (`pow`). Los bots sospechosos reciben desafíos de captcha de imagen (`image`). |
-| `pow`          | El tipo de CAPTCHA `pow` requiere que el usuario resuelva un rompecabezas criptográfico. Este rompecabezas simplemente requiere una pequeña cantidad de trabajo computacional para resolver, y ralentiza significativamente a los bots, dificultando que hagan scraping en grandes volúmenes.                                       |
-| `image`        | El tipo de CAPTCHA `image` requiere que el usuario resuelva un CAPTCHA de imagen simple. Este es el tipo de CAPTCHA con el que la mayoría de las personas están familiarizadas, creado por Google reCAPTCHA.                                                                          |
-
-
-
-**Tenga en cuenta** que, si usa `image` o `pow`, el [tipo de CAPTCHA](/es/basics/captcha-types/) del lado del cliente debe establecerse en el mismo valor que en el [portal](https://portal.prosopo.io):
-- Si su tipo de CAPTCHA del portal es `image`, debe establecer el tipo de CAPTCHA del lado del cliente en `image`.
-- Si su tipo de CAPTCHA del portal es `pow`, debe establecer el tipo de CAPTCHA del lado del cliente en `pow`.
-- Si su tipo de CAPTCHA del portal es `frictionless`, debe establecer el tipo de CAPTCHA del lado del cliente en `frictionless` o dejarlo en blanco.
 
 ### Integraciones de frameworks
 

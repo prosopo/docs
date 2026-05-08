@@ -1,6 +1,6 @@
 ---
 title: "CAPTCHA-Typen"
-description: "Stellen Sie verschiedene CAPTCHA-Typen bereit, indem Sie `captchaType` auf `frictionless`, `pow` oder `image` setzen."
+description: "Stellen Sie verschiedene CAPTCHA-Typen bereit: `frictionless`, `pow` oder `image`."
 i18nReady: true
 ---
 import {Image} from 'astro:assets';
@@ -9,7 +9,7 @@ import ImageCaptcha from '~/assets/image-captcha.png';
 import PoWSettings from '~/assets/pow-settings.png';
 import ImageSettings from '~/assets/image-settings.png';
 
-Stellen Sie **verschiedene** CAPTCHA-Typen bereit, indem Sie `captchaType` auf `frictionless`, `pow` oder `image` setzen.
+Stellen Sie **verschiedene** CAPTCHA-Typen bereit: `frictionless`, `pow` oder `image`.
 
 ## Frictionless CAPTCHA
 
@@ -38,52 +38,3 @@ Eine Bild-CAPTCHA-Herausforderung erfordert, dass der Benutzer das/die richtige(
 />
 
 Der Bild-CAPTCHA-Typ untersucht nicht die Browserumgebung des Benutzers, verwenden Sie dafür `frictionless` (siehe oben).
-
-## Typ implizit setzen
-
-### 1. Setzen Sie den Typ in der Widget-Konfiguration
-
-Hier setzen wir `captchaType` auf Proof-of-Work `pow`.
-
-```html
-<div class="procaptcha" data-sitekey="your_site_key" data-captcha-type="pow"></div>
-```
-
-### 2. Setzen Sie den Typ im Portal
-
-Navigieren Sie zum [Prosopo Portal](https://portal.prosopo.io) und aktualisieren Sie den CAPTCHA-Typ in den Einstellungen auf `pow`.
-
-<Image
-    src={PoWSettings}
-    alt="prosopo pow setting"/>
-
-## Typ explizit setzen
-
-### 1. Setzen Sie den Typ in der Widget-Konfiguration
-
-Hier setzen wir `captchaType` auf Bild `image`.
-
-```javascript
-document.getElementById('procaptcha-script').addEventListener('load', function () {
-    function onCaptchaVerified(output) {
-        console.log('Captcha verified, output: ' + JSON.stringify(output))
-    }
-    // Get the Element using elementId
-    const captchaContainer = document.getElementById('procaptcha-container')
-    window.procaptcha.render(captchaContainer, {
-        siteKey: 'YOUR_SITE_KEY',
-        theme: 'dark',
-        callback: onCaptchaVerified,
-        captchaType: 'image', // `pow` or leave blank for `frictionless`
-    })
-})
-```
-
-### 2. Setzen Sie den Typ im Portal
-
-Navigieren Sie zum [Prosopo Portal](https://portal.prosopo.io) und aktualisieren Sie den CAPTCHA-Typ in den Einstellungen auf `image`.
-
-<Image
-    src={ImageSettings}
-    alt="prosopo image setting"/>
-

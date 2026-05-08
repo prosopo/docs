@@ -101,7 +101,6 @@ La fonction `Procaptcha.render()` prend un objet d'options comme deuxième argum
 | siteKey              | string             | La clé de site de votre application / site web. Ceci est requis.                                                                                                        | ✓        |
 | callback             | string ou function | Le nom de la fonction window, ou une fonction, qui sera appelée lorsque le CAPTCHA est vérifié.                                                                    | ✗        |
 | theme                | string             | Le thème du widget CAPTCHA. La valeur par défaut est `light`. L'autre option est `dark`.                                                                                 | ✗        |
-| captchaType          | string             | Le type de CAPTCHA à rendre. La valeur par défaut est `frictionless`. Les autres options sont `image`, `pow`.                                                                      | ✗        |
 | chalexpired-callback | string ou function | Le nom de la fonction window, ou une fonction, qui sera appelée lorsque le défi CAPTCHA expire.                                                              | ✗        |
 | error-callback       | string ou function | Le nom de la fonction window, ou une fonction, qui sera appelée lorsqu'une erreur se produit.                                                                            | ✗        |
 | close-callback       | string ou function | Le nom de la fonction window, ou une fonction, qui sera appelée lorsque le CAPTCHA est fermé.                                                                      | ✗        |
@@ -125,23 +124,6 @@ Pour définir un callback en utilisant une balise de données, vous ajouteriez `
 ```html
 <div class="procaptcha" data-sitekey="your_site_key" data-callback="yourCallbackFunction"></div>
 ```
-
-### `captchaType`
-
-Vous pouvez choisir d'implémenter l'un des types de captcha suivants lors du rendu du composant Procaptcha :
-
-| Type           | Description                                                                                                                                                                                                                                                                           |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `frictionless` | Le type de CAPTCHA par défaut est `frictionless`. Ce type de CAPTCHA est invisible pour l'utilisateur, ne nécessitant qu'il complète un [défi de preuve de travail](https://en.wikipedia.org/wiki/Proof_of_work) invisible (`pow`). Les bots suspectés se voient servir des défis captcha d'image (`image`). |
-| `pow`          | Le type de CAPTCHA `pow` nécessite que l'utilisateur résolve un puzzle cryptographique. Ce puzzle nécessite simplement une petite quantité de travail de calcul à résoudre, et ralentit considérablement les bots, ce qui rend difficile pour eux de scraper en gros volumes.                                       |
-| `image`        | Le type de CAPTCHA `image` nécessite que l'utilisateur résolve un simple CAPTCHA d'image. C'est le type de CAPTCHA avec lequel la plupart des gens sont familiers, créé par Google reCAPTCHA.                                                                                                                          |
-
-
-
-**Veuillez noter**, si vous utilisez `image` ou `pow`, le [type CAPTCHA](/fr/basics/captcha-types/) côté client doit être défini à la même valeur que dans le [portail](https://portal.prosopo.io) :
-- Si votre type CAPTCHA du portail est `image`, vous devez définir le type CAPTCHA côté client à `image`.
-- Si votre type CAPTCHA du portail est `pow`, vous devez définir le type CAPTCHA côté client à `pow`.
-- Si votre type CAPTCHA du portail est `frictionless`, vous devez définir le type CAPTCHA côté client à `frictionless` ou le laisser vide.
 
 ### Intégrations de frameworks
 

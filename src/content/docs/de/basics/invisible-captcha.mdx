@@ -22,50 +22,6 @@ Unsichtbares CAPTCHA funktioniert durch:
 3. Anzeige einer sichtbaren Herausforderung nur, wenn der Benutzer verdächtig erscheint
 4. Bereitstellung einer reibungslosen Erfahrung für legitime Benutzer
 
-## CAPTCHA-Typen
-
-### Unsichtbares Frictionless
-Die intelligenteste Option, die sich dynamisch an das Benutzerverhalten anpasst:
-
-```html
-<button 
-    class="procaptcha" 
-    data-sitekey="your_site_key" 
-    data-captcha-type="frictionless"
-    data-size="invisible"
-    data-callback="onCaptchaSuccess">
-    Submit
-</button>
-```
-
-### Unsichtbarer Proof of Work
-Führt eine Rechenherausforderung unsichtbar im Hintergrund aus:
-
-```html
-<button 
-    class="procaptcha" 
-    data-sitekey="your_site_key" 
-    data-captcha-type="pow"
-    data-size="invisible" 
-    data-callback="onCaptchaSuccess">
-    Submit
-</button>
-```
-
-### Unsichtbares Bild
-Zeigt sichtbare Herausforderungen an, um den Benutzer bei Formularübermittlung zu verifizieren:
-
-```html
-<button 
-    class="procaptcha" 
-    data-sitekey="your_site_key" 
-    data-captcha-type="image"
-    data-size="invisible"
-    data-callback="onCaptchaSuccess">
-    Submit
-</button>
-```
-
 ## Implementierungsmethoden
 
 ### Implizites Rendering
@@ -85,7 +41,6 @@ Fügen Sie die `procaptcha`-Klasse und Datenattribute direkt zu Ihren Formularel
             type="button"
             class="procaptcha" 
             data-sitekey="your_site_key"
-            data-captcha-type="frictionless"
             data-size="invisible"
             data-callback="handleSubmit"
             data-failed-callback="handleFailure">
@@ -144,7 +99,6 @@ Für mehr Kontrolle über den CAPTCHA-Lebenszyklus:
             // Render invisible CAPTCHA
             widgetId = render(document.getElementById('captcha-container'), {
                 siteKey: 'your_site_key',
-                captchaType: 'frictionless',
                 size: 'invisible',
                 callback: handleCaptchaSuccess,
                 'failed-callback': handleCaptchaFailure
@@ -167,7 +121,6 @@ Für mehr Kontrolle über den CAPTCHA-Lebenszyklus:
 | Attribut | Wert | Beschreibung |
 |----------|------|--------------|
 | `data-size` | `"invisible"` | **Erforderlich.** Aktiviert den unsichtbaren Modus |
-| `data-captcha-type` | `"frictionless"`, `"pow"`, `"image"` | Art der CAPTCHA-Herausforderung |
 | `data-callback` | Funktionsname | Wird aufgerufen, wenn CAPTCHA erfolgreich verifiziert wurde |
 | `data-failed-callback` | Funktionsname | Wird aufgerufen, wenn CAPTCHA-Verifizierung fehlschlägt |
 | `data-sitekey` | Ihr sitekey | **Erforderlich.** Ihr Procaptcha sitekey |

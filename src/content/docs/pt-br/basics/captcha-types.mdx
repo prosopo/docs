@@ -1,6 +1,6 @@
 ---
 title: Tipos de CAPTCHA
-description: Sirva diferentes tipos de CAPTCHA definindo o `captchaType` como `frictionless`, `pow`, `image`.
+description: Sirva diferentes tipos de CAPTCHA: `frictionless`, `pow`, `image`.
 i18nReady: true
 ---
 import {Image} from 'astro:assets';
@@ -9,7 +9,7 @@ import ImageCaptcha from '~/assets/image-captcha.png';
 import PoWSettings from '~/assets/pow-settings.png';
 import ImageSettings from '~/assets/image-settings.png';
 
-Sirva **diferentes** tipos de CAPTCHA definindo o `captchaType` como `frictionless`, `pow`, `image`.
+Sirva **diferentes** tipos de CAPTCHA: `frictionless`, `pow`, `image`.
 
 ## CAPTCHA Frictionless
 
@@ -34,52 +34,3 @@ Um desafio de CAPTCHA de imagem exige que o usuário selecione a(s) imagem(ns) c
 />
 
 O tipo de CAPTCHA de Imagem não interroga o ambiente do navegador do usuário, use `frictionless` para isso (acima).
-
-## Definir Tipo Implicitamente
-
-### 1. Definir o tipo na configuração do widget
-
-Aqui estamos definindo o `captchaType` como Prova de Trabalho `pow`.
-
-```html
-<div class="procaptcha" data-sitekey="your_site_key" data-captcha-type="pow"></div>
-```
-
-### 2. Definir o tipo no portal
-
-Navegue até o [portal Prosopo](https://portal.prosopo.io) e atualize o tipo de CAPTCHA nas configurações para `pow`.
-
-<Image
-    src={PoWSettings}
-    alt="configuração pow prosopo"/>
-
-## Definir Tipo Explicitamente
-
-### 1. Definir o tipo na configuração do widget
-
-Aqui estamos definindo o `captchaType` como Imagem `image`.
-
-```javascript
-document.getElementById('procaptcha-script').addEventListener('load', function () {
-    function onCaptchaVerified(output) {
-        console.log('Captcha verificado, saída: ' + JSON.stringify(output))
-    }
-    // Obter o Elemento usando elementId
-    const captchaContainer = document.getElementById('procaptcha-container')
-    window.procaptcha.render(captchaContainer, {
-        siteKey: 'YOUR_SITE_KEY',
-        theme: 'dark',
-        callback: onCaptchaVerified,
-        captchaType: 'image', // `pow` ou deixe em branco para `frictionless`
-    })
-})
-```
-
-### 2. Definir o tipo no portal
-
-Navegue até o [portal Prosopo](https://portal.prosopo.io) e atualize o tipo de CAPTCHA nas configurações para `image`.
-
-<Image
-    src={ImageSettings}
-    alt="configuração de imagem prosopo"/>
-

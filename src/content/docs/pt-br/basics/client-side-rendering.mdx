@@ -111,7 +111,6 @@ seguintes campos:
 | siteKey              | string             | A chave do site da sua aplicação / website. Isto é obrigatório.                                                                                                      | ✓        |
 | callback             | string ou function | O nome da função window, ou uma função, que será chamada quando o CAPTCHA for verificado.                                                                            | ✗        |
 | theme                | string             | O tema do widget CAPTCHA. O padrão é `light`. A outra opção é `dark`.                                                                                                | ✗        |
-| captchaType          | string             | O tipo de CAPTCHA a renderizar. O padrão é `frictionless`. Outras opções são `image`, `pow`.                                                                         | ✗        |
 | chalexpired-callback | string ou function | O nome da função window, ou uma função, que será chamada quando o desafio CAPTCHA expirar.                                                                           | ✗        |
 | error-callback       | string ou function | O nome da função window, ou uma função, que será chamada quando ocorrer um erro.                                                                                     | ✗        |
 | close-callback       | string ou function | O nome da função window, ou uma função, que será chamada quando o CAPTCHA for fechado.                                                                               | ✗        |
@@ -136,23 +135,6 @@ e definiria a função de callback no objeto window.
 ```html
 <div class="procaptcha" data-sitekey="your_site_key" data-callback="yourCallbackFunction"></div>
 ```
-
-### `captchaType`
-
-Você pode escolher implementar qualquer um dos seguintes tipos de captcha ao renderizar o componente Procaptcha:
-
-| Tipo           | Descrição                                                                                                                                                                                                                                                                             |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `frictionless` | O tipo de CAPTCHA padrão é `frictionless`. Este tipo de CAPTCHA é invisível para o usuário, exigindo apenas que ele complete um [desafio de Prova de Trabalho](https://en.wikipedia.org/wiki/Proof_of_work) invisível (`pow`). Bots suspeitos recebem desafios de captcha de imagem (`image`). |
-| `pow`          | O tipo de CAPTCHA `pow` exige que o usuário resolva um quebra-cabeça criptográfico. Este quebra-cabeça simplesmente requer uma pequena quantidade de trabalho computacional para resolver e retarda significativamente os bots, tornando difícil para eles fazer scraping em grandes volumes.                                       |
-| `image`        | O tipo de CAPTCHA `image` exige que o usuário resolva um CAPTCHA de imagem simples. Este é o tipo de CAPTCHA com o qual a maioria das pessoas está familiarizada, criado pelo Google reCAPTCHA.                                                                                          |
-
-
-
-**Observe**, se estiver usando `image` ou `pow`, o [tipo de CAPTCHA](/pt-br/basics/captcha-types/) no lado do cliente deve ser definido com o mesmo valor do [portal](https://portal.prosopo.io):
-- Se o Tipo de CAPTCHA do seu portal for `image`, você deve definir o Tipo de CAPTCHA no lado do cliente para `image`.
-- Se o Tipo de CAPTCHA do seu portal for `pow`, você deve definir o Tipo de CAPTCHA no lado do cliente para `pow`.
-- Se o Tipo de CAPTCHA do seu portal for `frictionless`, você deve definir o Tipo de CAPTCHA no lado do cliente para `frictionless` ou deixá-lo em branco.
 
 ### Integrações com Frameworks
 

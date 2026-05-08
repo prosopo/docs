@@ -22,50 +22,6 @@ Il CAPTCHA invisibile funziona:
 3. Mostrando solo una sfida visibile se l'utente appare sospetto
 4. Fornendo un'esperienza fluida per gli utenti legittimi
 
-## Tipi di CAPTCHA
-
-### Frictionless invisibile
-L'opzione più intelligente che si adatta dinamicamente in base al comportamento dell'utente:
-
-```html
-<button 
-    class="procaptcha" 
-    data-sitekey="your_site_key" 
-    data-captcha-type="frictionless"
-    data-size="invisible"
-    data-callback="onCaptchaSuccess">
-    Submit
-</button>
-```
-
-### Proof of Work invisibile
-Esegue una sfida computazionale invisibilmente in background:
-
-```html
-<button 
-    class="procaptcha" 
-    data-sitekey="your_site_key" 
-    data-captcha-type="pow"
-    data-size="invisible" 
-    data-callback="onCaptchaSuccess">
-    Submit
-</button>
-```
-
-### Immagine invisibile
-Mostra sfide visibili per verificare l'utente all'invio del modulo:
-
-```html
-<button 
-    class="procaptcha" 
-    data-sitekey="your_site_key" 
-    data-captcha-type="image"
-    data-size="invisible"
-    data-callback="onCaptchaSuccess">
-    Submit
-</button>
-```
-
 ## Metodi di implementazione
 
 ### Rendering implicito
@@ -85,7 +41,6 @@ Aggiunga la classe `procaptcha` e gli attributi data direttamente agli elementi 
             type="button"
             class="procaptcha" 
             data-sitekey="your_site_key"
-            data-captcha-type="frictionless"
             data-size="invisible"
             data-callback="handleSubmit"
             data-failed-callback="handleFailure">
@@ -144,7 +99,6 @@ Per un maggiore controllo sul ciclo di vita del CAPTCHA:
             // Render invisible CAPTCHA
             widgetId = render(document.getElementById('captcha-container'), {
                 siteKey: 'your_site_key',
-                captchaType: 'frictionless',
                 size: 'invisible',
                 callback: handleCaptchaSuccess,
                 'failed-callback': handleCaptchaFailure
@@ -167,7 +121,6 @@ Per un maggiore controllo sul ciclo di vita del CAPTCHA:
 | Attribute | Value | Description |
 |-----------|-------|-------------|
 | `data-size` | `"invisible"` | **Obbligatorio.** Abilita la modalità invisibile |
-| `data-captcha-type` | `"frictionless"`, `"pow"`, `"image"` | Tipo di sfida CAPTCHA |
 | `data-callback` | Nome funzione | Chiamata quando il CAPTCHA è verificato con successo |
 | `data-failed-callback` | Nome funzione | Chiamata quando la verifica CAPTCHA fallisce |
 | `data-sitekey` | La sua site key | **Obbligatorio.** La sua site key Procaptcha |

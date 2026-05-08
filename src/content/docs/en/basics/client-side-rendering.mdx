@@ -113,7 +113,6 @@ following fields:
 | siteKey              | string             | The site key of your application / website. This is required.                                                                                                        | ✓        |
 | callback             | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is verified.                                                                    | ✗        |
 | theme                | string             | The theme of the CAPTCHA widget. The default is `light`. The other option is `dark`.                                                                                 | ✗        |
-| captchaType          | string             | The type of CAPTCHA to render. The default is `frictionless`. Other options are `image`, `pow`.                                                                      | ✗        |
 | chalexpired-callback | string or function | The name of the window function, or a function, that will be called when the CAPTCHA challenge expires.                                                              | ✗        |
 | error-callback       | string or function | The name of the window function, or a function, that will be called when an error occurs.                                                                            | ✗        |
 | close-callback       | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is closed.                                                                      | ✗        |
@@ -138,23 +137,6 @@ and define the callback function on the window object.
 ```html
 <div class="procaptcha" data-sitekey="your_site_key" data-callback="yourCallbackFunction"></div>
 ```
-
-### `captchaType`
-
-You can choose to implement any of the following types of captcha when rendering the Procaptcha component:
-
-| Type           | Description                                                                                                                                                                                                                                                                           |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `frictionless` | The default CAPTCHA type is `frictionless`. This type of CAPTCHA is invisible to the user, only requiring them to complete an invisible [Proof of Work challenge](https://en.wikipedia.org/wiki/Proof_of_work) (`pow`). Suspected bots are served image captcha challenges (`image`). |
-| `pow`          | The `pow` CAPTCHA type requires the user to solve a cryptographic puzzle. This puzzle simply requires a small amount of computational work to solve, and slows down bots significantly, making it difficult for them to scrape in high volumes.                                       |
-| `image`        | The `image` CAPTCHA type requires the user to solve a simple image CAPTCHA. This is CAPTCHA type most people are familiar with, created by Google reCAPTCHA.                                                                                                                          |
-
-
-
-**Please note**, if using `image` or `pow`, the client side [CAPTCHA type](/en/basics/captcha-types/) must be set to the same value as in the [portal](https://portal.prosopo.io):
-- If your portal CAPTCHA Type is `image`, you must set the client side CAPTCHA Type to `image`.
-- If your portal CAPTCHA Type is `pow`, you must set the client side CAPTCHA Type to `pow`.
-- If your portal CAPTCHA Type is `frictionless`, you must set the client side CAPTCHA Type to `frictionless` or leave it blank.
 
 ### Framework Integrations
 

@@ -22,50 +22,6 @@ Invisible CAPTCHA works by:
 3. Only showing a visible challenge if the user appears suspicious
 4. Providing a smooth experience for legitimate users
 
-## CAPTCHA Types
-
-### Invisible Frictionless
-The most intelligent option that dynamically adapts based on user behavior:
-
-```html
-<button
-    class="procaptcha"
-    data-sitekey="your_site_key"
-    data-captcha-type="frictionless"
-    data-size="invisible"
-    data-callback="onCaptchaSuccess">
-    Submit
-</button>
-```
-
-### Invisible Proof of Work
-Runs a computational challenge invisibly in the background:
-
-```html
-<button
-    class="procaptcha"
-    data-sitekey="your_site_key"
-    data-captcha-type="pow"
-    data-size="invisible"
-    data-callback="onCaptchaSuccess">
-    Submit
-</button>
-```
-
-### Invisible Image
-Shows visible challenges to verify the user on form submission:
-
-```html
-<button
-    class="procaptcha"
-    data-sitekey="your_site_key"
-    data-captcha-type="image"
-    data-size="invisible"
-    data-callback="onCaptchaSuccess">
-    Submit
-</button>
-```
-
 ## Implementation Methods
 
 ### Implicit Rendering
@@ -85,7 +41,6 @@ Add the `procaptcha` class and data attributes directly to your form elements:
             type="button"
             class="procaptcha"
             data-sitekey="your_site_key"
-            data-captcha-type="frictionless"
             data-size="invisible"
             data-callback="handleSubmit"
             data-failed-callback="handleFailure">
@@ -144,7 +99,6 @@ For more control over the CAPTCHA lifecycle:
             // Render invisible CAPTCHA
             widgetId = render(document.getElementById('captcha-container'), {
                 siteKey: 'your_site_key',
-                captchaType: 'frictionless',
                 size: 'invisible',
                 callback: handleCaptchaSuccess,
                 'failed-callback': handleCaptchaFailure
@@ -167,7 +121,6 @@ For more control over the CAPTCHA lifecycle:
 | Attribute | Value | Description |
 |-----------|-------|-------------|
 | `data-size` | `"invisible"` | **Required.** Enables invisible mode |
-| `data-captcha-type` | `"frictionless"`, `"pow"`, `"image"` | Type of CAPTCHA challenge |
 | `data-callback` | Function name | Called when CAPTCHA is successfully verified |
 | `data-failed-callback` | Function name | Called when CAPTCHA verification fails |
 | `data-sitekey` | Your site key | **Required.** Your Procaptcha site key |
