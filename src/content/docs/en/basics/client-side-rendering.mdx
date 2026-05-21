@@ -10,7 +10,10 @@ are both fine.
 
 ```html
 <script type="module" src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+<script nomodule src="https://js.prosopo.io/js/procaptcha.bundle.iife.js" async defer></script>
 ```
+
+The `nomodule` fallback ensures the widget also loads in environments that do not execute ES module scripts (older browsers, some crawlers).
 
 Now, you can either render the Procaptcha widget implicitly or explicitly.
 
@@ -42,6 +45,7 @@ is solved.
     <head>
         <title>Procaptcha Demo</title>
         <script type="module" src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+        <script nomodule src="https://js.prosopo.io/js/procaptcha.bundle.iife.js" async defer></script>
     </head>
     <body>
         <form action="" method="POST">
@@ -72,6 +76,12 @@ id `procaptcha-container` where the widget will be rendered.
             type="module"
             id="procaptcha-script"
             src="https://js.prosopo.io/js/procaptcha.bundle.js"
+            async
+            defer
+        ></script>
+        <script
+            nomodule
+            src="https://js.prosopo.io/js/procaptcha.bundle.iife.js"
             async
             defer
         ></script>
