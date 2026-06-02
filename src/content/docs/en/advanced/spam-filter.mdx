@@ -88,44 +88,15 @@ Patterns are validated when saved:
 
 ### Spam Email Domain List
 
-A separate toggle (`spamEmailDomainCheckEnabled`) checks the email domain against a maintained list of known disposable and spam email providers. This runs independently of the pattern rules above and is the most effective single layer against the long tail of throwaway-email services (`tempmail.*`, `guerrillamail.*`, `mailinator.*`, `10minutemail.*`, and the thousands of recycled variants of these).
+Toggle **Spam email domain checking** (`spamEmailDomainCheckEnabled`) on to block signups from known disposable and throwaway email providers — `tempmail.*`, `guerrillamail.*`, `mailinator.*` and the thousands of recycled variants spammers cycle through.
 
-When the toggle is enabled, the verification endpoint performs the following sequence for the email's domain:
+The check goes beyond matching the address's domain directly: Prosopo also follows the domain through any HTTP redirect, CNAME alias and MX record, so newly-registered throwaway domains can't bypass the list by simply pointing at a known disposable backend.
 
-1. **Direct lookup.** The domain is lowercased and looked up in the provider's spam-email-domain collection. If it appears on the list, the request is rejected with status `API.SPAM_EMAIL_DOMAIN`.
-2. **SSRF safety check.** Before any network call, the candidate domain is validated against an allow-list of public DNS namespaces. Loopback, RFC1918 private ranges, link-local addresses and any domain that resolves into an internal network are rejected outright as spam. This makes the next stage safe to expose to attacker-controlled input.
-3. **HTTPS redirect probe.** A short-timeout HTTPS HEAD request is made to the domain. A TLS error is treated as a hard rejection — legitimate email-hosting domains have valid certificates. If the response is a redirect (e.g. `301`/`302`), the redirect target's host is extracted and itself looked up in the spam list. Throwaway services frequently register fresh-looking domains that simply redirect to a known disposable provider; this step catches them.
-4. **CNAME lookup.** If there was no redirect, the provider resolves the domain's CNAME chain. A surprisingly large fraction of "novel" disposable services are CNAME aliases of a small set of well-known underlying providers. The aliased domain is checked against the spam list.
-5. **MX lookup.** Finally, if no CNAME was found, the domain's MX records are resolved. The first MX exchange is checked against the spam list — disposable services often delegate mail handling to a shared backend, and that backend is on the list.
-
-If none of these checks match, the email passes the domain-blocklist stage. The full implementation lives at `packages/provider/src/tasks/spam/checkSpamEmail.ts`.
-
-#### Provider Configuration
-
-The spam-email-domain list is refreshed on a schedule controlled by the provider operator. Two pieces of provider configuration are involved:
-
-```jsonc
-{
-    "spamEmailDomainsUrls": [
-        "https://raw.githubusercontent.com/disposable/disposable-email-domains/master/domains.txt",
-        "https://example.com/your-own-curated-feed.txt"
-    ],
-    "scheduledTasks": {
-        "spamEmailDomainsScheduler": {
-            "schedule": "0 */6 * * *"
-        }
-    }
-}
-```
-
-- **`spamEmailDomainsUrls`** — an array of HTTP(S) URLs that each return a newline-delimited list of domains. Lines beginning with `#` or `//` are treated as comments and skipped. Each domain is validated and lowercased before insertion. Multiple URLs are merged into a single deduplicated set, so operators can combine community-maintained lists with private feeds.
-- **`scheduledTasks.spamEmailDomainsScheduler.schedule`** — a standard cron expression that controls how often the lists are re-fetched. Each URL is cached on disk between runs (default cache directory `./spam-cache`) so that repeated fetches do not hammer upstream providers.
-
-The scheduled task runs as `ScheduledTaskNames.UpdateSpamEmailDomains` and refuses to start a second concurrent invocation, so it is safe to schedule aggressively. Results — including the number of domains processed — are written to the provider's scheduled-task-status collection for audit.
+The blocklist is maintained and refreshed for you — there's nothing to configure beyond the toggle. Rejected requests come back with status `API.SPAM_EMAIL_DOMAIN`.
 
 #### Standalone Endpoint
 
-Once the domain check is enabled for a site, dapps can additionally call the standalone endpoint to check an email address without performing a CAPTCHA verification:
+You can also check an address without running a full CAPTCHA verification:
 
 ```http
 POST /v1/prosopo/provider/client/spam/email
@@ -137,8 +108,6 @@ Content-Type: application/json
 }
 ```
 
-Response:
-
 ```json
 {
     "isSpam": true,
@@ -146,7 +115,7 @@ Response:
 }
 ```
 
-The endpoint enforces the site's `spamEmailDomainCheckEnabled` setting (a request from a site without the feature enabled is rejected with `API.BAD_REQUEST`) and is rate-limited per the provider's configured `rateLimits` for this path.
+Available to sites with the domain check enabled, and rate-limited per site key.
 
 ## Evaluation Order
 
@@ -156,7 +125,7 @@ When the email filter is enabled and an email is provided, the verification endp
 2. **Maximum dots** — if configured, checked first.
 3. **Default patterns** — if enabled, evaluated next.
 4. **Custom regex blocklist** — each pattern is tested in order; first match wins.
-5. **Spam-email-domain list** — if `spamEmailDomainCheckEnabled` is on, the direct lookup, redirect probe, CNAME lookup and MX lookup chain runs last because it is the most expensive stage.
+5. **Spam-email-domain list** — if enabled, the domain (and any redirect, CNAME or MX it points at) is checked against the maintained blocklist.
 
 Evaluation stops at the first match. The rejection reason is recorded for audit purposes.
 
