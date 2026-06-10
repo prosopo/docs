@@ -11,7 +11,7 @@ Invisible CAPTCHA is currently in **beta**. Features and behavior may change in 
 :::
 
 :::note[Tier Restriction]
-Invisible CAPTCHA is only available for **Pro and Enterprise** tier users. Free tier users cannot access this feature.
+Invisible CAPTCHA is only available for **Professional and Enterprise** tier users. Free tier users cannot access this feature.
 :::
 
 ## Overview
@@ -219,18 +219,18 @@ const response = await fetch('https://api.prosopo.io/siteverify', {
     },
     body: JSON.stringify({
         secret: 'your_secret_key',
-        response: token, // Token from Procaptcha callback
-        remoteip: userIP // Optional
+        token: token, // Token from Procaptcha callback
+        ip: userIP // Optional
     })
 });
 
 const result = await response.json();
-if (result.success) {
+if (result.verified) {
     // Procaptcha verified successfully
     console.log('Verification successful');
 } else {
     // Verification failed
-    console.log('Verification failed:', result['error-codes']);
+    console.log('Verification failed:', result.status);
 }
 ```
 

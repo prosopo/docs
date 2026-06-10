@@ -94,6 +94,16 @@ Match requests from specific countries using ISO 3166-1 alpha-2 country codes.
 
 **Use case:** Apply stricter or more lenient policies for specific geographic regions.
 
+#### ASN
+
+Match the Autonomous System Number (ASN) of the IP's network. Useful for blocking or restricting traffic from a specific hosting provider, ISP, or VPN/proxy network without enumerating every IP they own.
+
+**Format:** Numeric AS number (e.g., `14061`, `32934`)
+
+**Examples:** `14061` (DigitalOcean), `32934` (Meta), `13335` (Cloudflare)
+
+**Use case:** Restrict or block traffic from cloud hosting networks frequently used by bots, or apply policies to whole ISPs in response to abuse patterns.
+
 ### Operators
 
 Currently, only the **equals** operator is supported. The condition matches when the field value exactly equals the specified value.
@@ -294,6 +304,16 @@ Target specific browser fingerprints associated with automation:
 // Block known bot fingerprint
 JA4 Hash equals "t13d1516h2_8daaf6152771_a278895b5b6a"
 Policy: Block
+```
+
+### ASN-Based Blocking
+
+Restrict traffic from a whole hosting provider or ISP by AS number:
+
+```typescript
+// Restrict traffic from a cloud hosting ASN
+ASN equals "14061"
+Policy: Proof of Work, difficulty 5
 ```
 
 ## Considerations

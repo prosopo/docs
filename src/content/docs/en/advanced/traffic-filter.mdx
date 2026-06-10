@@ -36,7 +36,9 @@ Traffic filter checks run before other verification logic (captcha correctness, 
 
 ## Providing the IP Address
 
-Traffic filters require the user's IP address. Pass it in the `ip` field when calling the server-side verification endpoint:
+Traffic filters always run. By default they evaluate the IP recorded when the user initiated the captcha session (the browser's IP at session-start time, captured by the provider when the widget first contacted it).
+
+If the end user's IP may have changed between solving the captcha and your server calling `/verify` (e.g. they moved networks), pass the current IP in the optional `ip` field. The provider then re-resolves IP info against that "now" IP and runs the filters on the fresh result:
 
 ```json
 {
@@ -47,8 +49,6 @@ Traffic filters require the user's IP address. Pass it in the `ip` field when ca
 ```
 
 See the [Server-side Verification](/en/basics/server-side-verification/#optional-ip-address) docs for details.
-
-If no IP address is provided, traffic filters are still evaluated but only the abusive-network filter will fire (using the connecting IP from the request itself).
 
 ## Filter Details
 

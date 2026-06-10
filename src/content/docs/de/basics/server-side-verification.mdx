@@ -95,7 +95,8 @@ async function verifyToken(token) {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ secret: 'your_secret_key', token }),
     });
-    return response.json().verified || false; // Return verified field, default to false
+    const data = await response.json();
+    return data.verified || false; // Return verified field, default to false
 }
 ```
 </section>
@@ -193,7 +194,8 @@ Um eine Benutzerantwort mit JavaScript / TypeScript zu verifizieren, importieren
 die `procaptcha-response` POST-Daten. Typen können aus `@prosopo/types` importiert werden.
 
 ```typescript
-import {ProsopoServer} from '@prosopo/server'
+import {ProsopoServer, getServerConfig} from '@prosopo/server'
+import {getPair} from '@prosopo/keyring'
 import {ApiParams} from '@prosopo/types'
 
 ...
@@ -204,10 +206,13 @@ const payload = JSON.parse(event.body)
 const procaptchaResponse = payload[ApiParams.procaptchaResponse]
 
 // initialise the `ProsopoServer` class
-const prosopoServer = new ProsopoServer(config)
+const config = getServerConfig()
+const pair = getPair(process.env.PROSOPO_SITE_PRIVATE_KEY, config.account.address)
+const prosopoServer = new ProsopoServer(config, pair)
 
 // check if the captcha response is verified
-if (await prosopoServer.isVerified(procaptchaResponse)) {
+const result = await prosopoServer.isVerified(procaptchaResponse)
+if (result.verified) {
     // perform CAPTCHA protected action
 }
 ```
