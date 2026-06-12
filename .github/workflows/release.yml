@@ -103,15 +103,16 @@ jobs:
                     exit 1
                 fi
 
+            - uses: pnpm/action-setup@v4
             - uses: actions/setup-node@v4
               with:
                   node-version-file: 'package.json'
-            - run: npm i -g "npm@$(jq -r .engines.npm < package.json)"
+            - run: corepack enable
 
-            - run: npm ci
+            - run: pnpm install --frozen-lockfile
 
             # check everything builds
-            - run: npm run build
+            - run: pnpm run build
             
             - name: Purge gh prerelease
               if: ${{ steps.env.outputs.gh_prerelease }}

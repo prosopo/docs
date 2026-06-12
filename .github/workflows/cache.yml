@@ -42,14 +42,15 @@ jobs:
             - run: mkdir -p ~/.cache/Cypress
 
             # don't restore the cache, otherwise we get artifacts left over from the previous run sit in the cache for eternity. Do a clean build every time.
-            - run: npm cache clean --force
+            - run: pnpm store prune
 
+            - uses: pnpm/action-setup@v4
             - uses: actions/setup-node@v4
               with:
                   node-version-file: 'package.json'
-            - run: npm i -g "npm@$(jq -r .engines.npm < package.json)"
+            - run: corepack enable
 
-            - run: npm ci
+            - run: pnpm install --frozen-lockfile
 
             # install cypress so we don't have to do that every time
             - run: npx cypress install

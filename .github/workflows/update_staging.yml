@@ -33,11 +33,12 @@ jobs:
               with:
                   submodules: "recursive"
 
+            - uses: pnpm/action-setup@v4
             - uses: actions/setup-node@v4
               with:
                   node-version-file: 'package.json'
                   
-            - run: npm i -g "npm@$(jq -r .engines.npm < package.json)"
+            - run: corepack enable
 
             - name: PR main into staging
               run: |

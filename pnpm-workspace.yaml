@@ -1,0 +1,5 @@
+# pnpm settings (single-package repo; no workspace members)
+allowBuilds:
+  "@biomejs/biome": true
+  esbuild: true
+  sharp: true

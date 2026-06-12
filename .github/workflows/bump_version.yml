@@ -56,10 +56,11 @@ jobs:
                   submodules: "recursive"
                   fetch-depth: 0  # Fetch all history for all branches
 
+            - uses: pnpm/action-setup@v4
             - uses: actions/setup-node@v4
               with:
                   node-version-file: 'package.json'
-            - run: npm i -g "npm@$(jq -r .engines.npm < package.json)"
+            - run: corepack enable
 
             - run: mkdir -p ~/.npm
             - run: mkdir -p ~/.cache/Cypress
@@ -133,10 +134,10 @@ jobs:
                 done
 
                 # the json may be poorly formatted now, so we need to fix it
-                npm i
-                npm run -w @prosopo/scripts build
-                npm run -w @prosopo/lint build
-                npm run lint-fix
+                pnpm install
+                pnpm --filter @prosopo/scripts run build
+                pnpm --filter @prosopo/lint run build
+                pnpm run lint-fix
 
                 # commit the version changes
                 git add .
