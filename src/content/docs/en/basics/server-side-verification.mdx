@@ -207,8 +207,8 @@ The `@prosopo/server` package is available on NPM and can be installed using:
 npm install @prosopo/server
 ```
 
-To verify a user's response using JavaScript / TypeScript, simpy import the `verify` function from `@prosopo/server` and pass it
-the `procaptcha-response` POST data. Types can be imported from `@prosopo/types`.
+To verify a user's response using JavaScript / TypeScript, instantiate the `ProsopoServer` class from `@prosopo/server` and
+call its `isVerified` method, passing it the `procaptcha-response` POST data. Types can be imported from `@prosopo/types`.
 
 ```typescript
 import {ProsopoServer, getServerConfig} from '@prosopo/server'
