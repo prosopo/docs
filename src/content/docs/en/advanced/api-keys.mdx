@@ -15,7 +15,7 @@ API key management is available to accounts with the API feature enabled. Check 
 3. Click **Create API Key**
 4. Fill in the required fields:
    - **Name** (required): A descriptive label for the key, e.g. "Production Backend" or "CI/CD Pipeline"
-   - **Expiration Time** (optional): Time in seconds until the key expires. Leave empty for a key that does not expire.
+   - **Expiration Time** (`expiresIn`, optional): Time in seconds until the key expires. If left empty, the key defaults to a 30-day expiration.
    - **Permissions** (required): Select which operations this key can perform (see below)
 5. Click **Create API Key**
 
@@ -83,6 +83,18 @@ Each API key is scoped to a specific set of permissions. Only grant the permissi
 |-----------|-------------|
 | `searchCaptchaRecords` | Search and retrieve CAPTCHA audit records |
 
+### Protect
+
+| Permission | Description |
+|-----------|-------------|
+| `updateProtectSettings` | Update Protect settings |
+
+### Puzzle Captcha
+
+| Permission | Description |
+|-----------|-------------|
+| `updatePuzzleCaptchaSettings` | Update Puzzle CAPTCHA settings |
+
 ## Using an API Key
 
 Include the API key in the `Authorization` header of your HTTP requests:
@@ -112,7 +124,7 @@ The API Keys page shows all keys for your account:
 
 - **Name**: The label you gave the key
 - **Created**: When the key was created
-- **Expires**: When the key expires (or "Never" for non-expiring keys)
+- **Expires**: When the key expires
 - **Permissions**: Which operations the key can perform
 
 ### Deleting Keys

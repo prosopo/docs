@@ -55,6 +55,12 @@ Calculates the geographic distance between IP addresses. If the distance exceeds
 
 **Use case:** Reject requests where the IP location moves more than 1000km between requests, which is unlikely for a legitimate user in a short timeframe.
 
+### Abuse Score Threshold
+
+Compares the IP's abuse score against the configured `abuseScoreThreshold`. If the score exceeds the threshold, the configured `abuseScoreExceedAction` is triggered.
+
+**Use case:** Reject or flag requests originating from IP addresses with a high abuse reputation score.
+
 ## Actions
 
 For each validation type, you can configure one of three actions:
@@ -71,13 +77,16 @@ Global IP validation rules apply to all requests unless overridden by country-sp
 
 ```typescript
 {
+    enabled: true,                      // Master toggle for IP validation rules
     actions: {
         countryChangeAction: "reject",  // Block country changes
         cityChangeAction: "allow",      // Allow city changes
         ispChangeAction: "flag",        // Flag ISP changes
         distanceExceedAction: "reject", // Block distance violations
+        abuseScoreExceedAction: "reject", // Block high abuse-score IPs
     },
     distanceThresholdKm: 1000,          // 1000km maximum distance
+    abuseScoreThreshold: 0.005,         // Abuse score above which the action triggers
     requireAllConditions: false,        // OR logic (any condition triggers action)
     forceConsistentIp: false            // Don't require exact IP match
 }
@@ -143,11 +152,14 @@ IP Validation rules can be configured through the [Prosopo Portal](https://porta
 
 If IP validation rules are not configured, the following defaults apply:
 
+- **Enabled**: false
 - **Country Change**: Allow
 - **City Change**: Allow
 - **ISP Change**: Allow
 - **Distance Threshold**: 1000km
 - **Distance Exceed Action**: Reject
+- **Abuse Score Threshold**: 0.005
+- **Abuse Score Exceed Action**: Reject
 - **Logic Mode**: Any condition (OR)
 - **Force Consistent IP**: false
 

@@ -70,9 +70,13 @@ Blocks IP addresses belonging to Autonomous Systems (networks) flagged for abuse
 
 Free-tier accounts always have this filter enabled and cannot disable it.
 
+The sensitivity of this filter is controlled by `abuserScoreThreshold` (range 0-1, default `0.5`): an IP is blocked when its abuse score meets or exceeds this value.
+
 ### Datacenter
 
 Blocks IP addresses belonging to hosting providers and cloud datacenters. Most real users browse from residential or mobile connections, so datacenter traffic is often automated. However, some corporate networks route through datacenter IPs, so consider your audience before enabling this filter.
+
+You can exempt specific providers from this filter using `datacenterNameAllowlist` — a list of names matched case-insensitively against the IP's datacenter name, provider name, or ASN organization.
 
 ### Mobile
 
