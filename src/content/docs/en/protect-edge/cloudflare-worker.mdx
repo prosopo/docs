@@ -1,0 +1,189 @@
+---
+title: Cloudflare Worker
+description: Deploy Prosopo Protect as a Cloudflare Worker so proxy / VPN / datacenter / tor traffic is blocked at Cloudflare's edge before it reaches your origin.
+i18nReady: true
+---
+
+`@prosopo/cloudflare-worker` is a Cloudflare Workers port of the Prosopo Protect edge integration. It's the CF-native counterpart of `@prosopo/lambda-edge` and shares the decision tree, envelope shape, block/challenge HTML, and per-isolate caches via [`@prosopo/protect-edge-core`](/protect-edge/).
+
+The worker sits in front of an origin (or, in the demo, a static assets bundle) and runs Prosopo's Protect logic on **every** request. On `allow` it forwards; on `block` / `challenge` / `no-session` it returns immediately without touching the origin.
+
+## Prerequisites
+
+- A Cloudflare account with **Workers Scripts: Read + Edit** on the API token you'll use.
+- A Prosopo site key (SS58 address, e.g. `5HSuC1s…`) registered as a Protect instance on the Bumblebee you're targeting (see [Seed a Protect instance](#seed-a-protect-instance)).
+- Node 24+, `npx`, `wrangler` (installed as a dev dep of the package).
+
+## Configuration model
+
+Cloudflare Workers takes a different approach from Lambda@Edge:
+
+| Value | Lambda@Edge | Cloudflare Worker |
+|--|--|--|
+| `BUMBLEBEE_URL` | Inlined at build time via vite `define` (Lambda@Edge rejects env vars). | `wrangler.toml` `[vars]`, overridable per deploy with `--var`. |
+| `CLIENT_JWT` (secret) | Inlined at build time via vite `define`. | Runtime binding uploaded via `wrangler secret put`. |
+| Site key (client HTML) | Not applicable — Lambda@Edge doesn't serve the demo HTML. | `sed` into `demo-site/index.html` before bundling. |
+
+The CF Worker bundle itself is site-agnostic. Client-specific configuration lives in Cloudflare's config store, not in the JS.
+
+## Install & type-check
+
+```bash
+cd protect/packages/cloudflare-worker
+npm install
+npm run build:tsc   # cascades to @prosopo/protect-edge-core via tsc --build
+```
+
+## Seed a Protect instance
+
+Before the worker's `/api/access-check` and `/api/jti/{jti}` calls will succeed for your site key, Bumblebee needs a `ProtectClientSettings` row for it. The `scripts/seed-settings.sh` script handles both `POST /api/settings` (the client settings blob) and `POST /api/access-rules` (the tiered IP-category rules the edge consults on no-cookie requests).
+
+```bash
+BUMBLEBEE_URL=https://protect.prosopo.io \
+SITE_KEY=5HSuC1s1VvSXq17bNu1Fp2Z2P6Vs8CKZNZB2bAqHzS4uhaTT \
+SITE_SURI="unusual bulb melt vanish ice correct myth ribbon second tunnel ride sadness" \
+CNAME=your-worker-subdomain.workers.dev \
+  bash scripts/seed-settings.sh
+```
+
+The seed script signs an admin JWT with the SURI in `ADMIN_SURI` (defaults to the Prosopo prod admin mnemonic). To point at a non-prod Bumblebee, pass a matching `ADMIN_SURI`.
+
+To skip inserting the tiered IP-category rules (redundant on a Bumblebee that folds `settings.ipCategoryRules` into `access-check`), set `SKIP_ACCESS_RULES=1`.
+
+## Deploy
+
+```bash
+export CLOUDFLARE_API_TOKEN=<token-with-Workers-Scripts-Read+Edit>
+export CLOUDFLARE_ACCOUNT_ID=<account-id>
+
+# One-off: push the CLIENT_JWT secret (persists across deploys).
+npm run deploy:secrets
+
+# Deploy — build:tsc runs first, then wrangler.
+npm run deploy
+```
+
+To override `BUMBLEBEE_URL` for a specific deploy without editing `wrangler.toml`:
+
+```bash
+npm run build:tsc \
+  && npx wrangler deploy --var BUMBLEBEE_URL:https://protect.twickets.live
+```
+
+To produce a bundle for inspection without deploying:
+
+```bash
+npm run bundle   # → dist/bundle/index.js + source map
+```
+
+## npm scripts
+
+Same shape as `@prosopo/lambda-edge`:
+
+| Script | What it does |
+|--|--|
+| `clean` | Removes `dist/`, `.wrangler/`, `tsconfig.tsbuildinfo`. |
+| `build:tsc` | Type-check via `tsc --build` (walks to `protect-edge-core`). |
+| `typecheck` | `tsc --build --noEmit`. |
+| `bundle` | `wrangler deploy --dry-run --outdir dist/bundle` — bundle to disk, no upload. |
+| `deploy` | `build:tsc` then `wrangler deploy`. Loads `.env` if present. |
+| `deploy:secrets` | Runs `scripts/upload-secrets.sh` — mints a `CLIENT_JWT` and uploads it as a wrangler secret. |
+| `dev` | `wrangler dev` — local dev server against your workers.dev subdomain. |
+| `tail` | `wrangler tail` — live request logs from the deployed worker. |
+| `seed-settings` | Runs `scripts/seed-settings.sh` — seeds Bumblebee with settings + access rules. |
+| `issue-client-jwt` | Prints a fresh 1-year CLIENT_JWT signed with `SITE_SURI`. |
+| `issue-admin-jwt` | Prints a 1-hour admin JWT signed with `ADMIN_SURI`. |
+
+## Verify the deploy
+
+Curl the worker directly — no session cookie, HTML `Accept` should pass through so the Protect bundle can load; JSON `Accept` should be 401 with `X-Prosopo-Status: no-session`:
+
+```bash
+WORKER=https://your-worker.workers.dev
+
+# HTML — should serve the origin / demo (200)
+curl -sD - -H "Accept: text/html" -H "User-Agent: Mozilla/5.0" "$WORKER/" | head
+
+# JSON, no cookie — should 401 with no-session status
+curl -sD - -H "Accept: application/json" "$WORKER/api/anything" | head
+# HTTP/2 401
+# x-prosopo-status: no-session
+# x-prosopo-request-id: <cf-ray>
+
+# From a proxy / VPN / datacenter IP — should 403 with the branded interstitial
+curl -sD - -H "Accept: text/html" -x http://your-proxy:port "$WORKER/" | head
+# HTTP/2 403
+# x-prosopo-decision: block
+```
+
+`X-Prosopo-Request-Id` is echoed on every response and written to Bumblebee's `verdict_log` row — grep from a support ticket straight to the verdict.
+
+## What the worker is protecting
+
+Out of the box the worker serves a small demo page from `demo-site/` via wrangler's ASSETS binding. To point it at a real origin, replace the `env.ASSETS.fetch(...)` call at the end of `src/index.ts` with `fetch(rewrittenUrl, request)` and set the upstream in `wrangler.toml`. The Protect decision tree above the fetch is unchanged.
+
+The `[assets]` block in `wrangler.toml` sets `run_worker_first = true` so the worker runs before Cloudflare serves any static file — without that, `/` would be served from cache and Protect would never see the request.
+
+## Configuring proxy / VPN / datacenter blocking
+
+Two rule stores independently feed the no-cookie edge path:
+
+- **`settings.ipCategoryRules`** — set via `POST /api/settings` (the seed script writes this). Recognised categories: `tor`, `datacenter`, `proxy`, `vpn`, `abuser`, `mobile`, `crawler`.
+- **Tiered access rules** — set via `POST /api/access-rules`. Supports the full tier set (IP CIDR, ASN, IP category, country, UA substring, JA4, JA4+IP) at either `client` or `global` scope.
+
+On any Bumblebee build with the settings-fold, either store fires the edge block. The effective verdict is the most restrictive of the two (Block > Challenge > Allow). See the `combine_matches` unit tests in `crates/bumblebee/src/http/routes/access_check.rs` for the precedence rules.
+
+For a "just block proxies" deploy, seed:
+
+```bash
+# in scripts/seed-settings.sh, in the /api/settings payload:
+"ipCategoryRules": {
+  "proxy": "block",
+  "vpn": "block",
+  "tor": "block",
+  "datacenter": "block",
+  "abuser": "block"
+}
+```
+
+## TLS caveats
+
+Cloudflare Workers doesn't expose a `rejectUnauthorized: false` option — if the Bumblebee host's certificate is expired or self-signed, `fetch` returns HTTP 526 and Prosopo can't be reached. Options:
+
+- Use a Bumblebee hostname with a valid cert (`bumblebee1.prosopo.io` is a fallback for the prod BB).
+- Renew the cert on `protect.prosopo.io` (managed via `protect/ansible/renew_bb1_certs.sh`).
+
+Lambda@Edge doesn't have this constraint — it can skip TLS verification per `protect/packages/lambda-edge/src/tlsOptions.ts`.
+
+## Troubleshooting
+
+- **`wrangler deploy` returns `Authentication error [code: 10000]`** — the token lacks **Workers Scripts: Read + Edit**. "Edit" alone isn't enough; wrangler needs both.
+- **`Unknown site` from `/api/access-check`** — no `ProtectClientSettings` row for the site key. Run `seed-settings.sh` first.
+- **Bundle deploys but every request 401s** — `CLIENT_JWT` isn't set or has expired. Re-run `npm run deploy:secrets` and redeploy.
+- **HTTP 526 in `wrangler tail`** — Bumblebee cert expired or invalid; see [TLS caveats](#tls-caveats).
+- **`/api/probe` returns HTML `Access Denied` instead of JSON** — the endpoint's `path_type` is `html` (either the site default or an endpoint rule). Set the site's `defaultPathType` to `json` and/or add an endpoint rule for `/` that forces `html` on the root only.
+
+## Package structure
+
+```
+protect/packages/cloudflare-worker/
+  demo-site/
+    index.html                # served via wrangler ASSETS binding
+  scripts/
+    issue-admin-jwt.ts        # mints admin JWT for /api/settings + /api/access-rules
+    issue-client-jwt.ts       # mints CLIENT_JWT for the worker to authenticate to BB
+    seed-settings.sh          # seeds Bumblebee (settings + tiered access rules)
+    upload-secrets.sh         # mints + uploads CLIENT_JWT as a wrangler secret
+  src/
+    index.ts                  # fetch handler, runs Protect then delegates to ASSETS
+    accessCheck.ts            # /api/access-check client (no-cookie path)
+    verdict.ts                # /api/jti/{jti} client (cookied path)
+    bbRequest.ts              # buildEnvelope (Fetch API-specific)
+    session.ts, cookies.ts    # prosopo_session cookie parsing
+    headers.ts                # cf-connecting-ip, cf-ray, Accept: text/html detection
+    corsHeaders.ts            # credentialed CORS Headers mutation
+    responses.ts              # 401 / 403 / interstitial / challenge Response builders
+    verdictResponse.ts        # JTI verdict → Response mapping
+    types.ts                  # WorkerEnv bindings
+  wrangler.toml               # worker config, [vars], [assets], run_worker_first
+```
