@@ -107,6 +107,11 @@ export default [
         slug: 'protect-edge/cloudflare-worker',
         key: 'protect-edge/cloudflare-worker',
     },
+    {
+        text: 'AWS Lambda@Edge',
+        slug: 'protect-edge/lambda-edge',
+        key: 'protect-edge/lambda-edge',
+    },
     {text: 'Framework integrations', header: true, type: 'learn', key: 'framework-integrations'},
     {
         text: 'Angular Integration',

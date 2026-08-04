@@ -1,44 +1,34 @@
 ---
 title: Prosopo Protect at the Edge
-description: Deploy Prosopo Protect in front of your site with a Cloudflare Worker or AWS Lambda@Edge. Verdict lookups run at your CDN's edge so bots are blocked before they reach the origin.
+description: Deploy Prosopo Protect in front of your site with a Cloudflare Worker or AWS Lambda@Edge. Verdict lookups run at your CDN's edge so bots are blocked before they reach your origin.
 i18nReady: true
 ---
 
-Prosopo Protect can run at the edge of your CDN so blocked requests never reach the origin. Two integrations are supported today:
+Prosopo Protect can run at the edge of your CDN so blocked and challenged requests never reach your origin. Two integrations are supported today:
 
-- **Cloudflare Workers** — [`@prosopo/cloudflare-worker`](/protect-edge/cloudflare-worker).
-- **AWS Lambda@Edge** — `@prosopo/lambda-edge`, deployed via the Serverless Framework in front of a CloudFront distribution.
+- **[Cloudflare Workers](/protect-edge/cloudflare-worker)** — deploy alongside your Cloudflare zone.
+- **[AWS Lambda@Edge](/protect-edge/lambda-edge)** — deploy in front of a CloudFront distribution.
 
-Both integrations share the same decision tree and talk to the same Bumblebee (`/api/access-check`, `/api/jti/{jti}`) endpoints. The shared logic (envelope shape, block/challenge HTML, path-type and passive caches, branding sanitisation) lives in `@prosopo/protect-edge-core` so a change made in one integration lands in the other.
+Both integrations enforce the same policy: they consult the Prosopo Protect API on every incoming request and act on the returned verdict before it reaches your origin.
 
-## What the edge integration does
+## How it works
 
-On every request that reaches your CDN:
+On every request that hits your CDN:
 
-1. If the request carries a valid `prosopo_session` cookie, the edge looks up the JTI verdict at Bumblebee. A `block` or `challenge` verdict is returned to the user immediately (branded interstitial for HTML, JSON for XHR/fetch); an `allow` verdict passes the request through to your origin.
-2. If the request has no cookie, the edge calls `/api/access-check` with the caller's IP, User-Agent, headers, and path. Bumblebee evaluates access rules (IP CIDR, ASN, IP category, country, UA substring, JA4) against the request and returns the effective decision:
-   - `allow` with source `no_cookie_html_bootstrap` — HTML page loads so the Protect telemetry bundle can create a session.
-   - `block` with source `no_session_401` — 401 with `X-Prosopo-Status: no-session` (recoverable — the client can call `/session/init`).
-   - `block` with source `access_rule_nocookie` — 403 (an IP-category / ASN / etc. rule fired). Never reaches the origin.
-   - `challenge` — HTML client sees a captcha interstitial; JSON client sees the same block behaviour (no session, no captcha surface to render into).
+1. **If the request has a `prosopo_session` cookie** the edge fetches the verdict for the session's token from the Prosopo Protect API. `allow` passes through to your origin; `block` returns a branded interstitial (or JSON error for API calls) with no origin fetch; `challenge` serves a captcha interstitial.
+2. **If the request has no cookie** the edge asks Protect what to do. Protect evaluates your access-rule set (IP CIDR, ASN, IP category, country, User-Agent, JA4 TLS fingerprint) against the request. Rule matches return `block` or `challenge`; if no rule matches and the path is an HTML SPA shell, the edge lets it through so the Protect script can create a session.
+
+The blocked-response HTML and challenge interstitial are branded per site via your Prosopo dashboard: logo, colour palette, typography, and message strings all sanitised and rendered server-side by the edge.
 
 ## Correlation
 
-Every edge request is stamped with an `X-Prosopo-Request-Id` header (`cf-ray` on Cloudflare, `cf.config.requestId` on Lambda@Edge). The same ID is written to Bumblebee's `verdict_log` row and echoed back on the response, so you can grep from a support ticket straight to the verdict that fired.
+Every edge request is stamped with an `X-Prosopo-Request-Id` header that's echoed on the response and written to the verdict audit log. From a support ticket you can grep straight to the verdict that fired.
 
-## What lives where
+## What's next
 
-| Concern | Where |
-|--|--|
-| Decision tree | Each adapter (`lambda-edge`, `cloudflare-worker`) |
-| Envelope shape, `bodyWithEnvelope`, `envelopeAsHeaders` | `@prosopo/protect-edge-core` |
-| Block / challenge HTML + branding sanitisers | `@prosopo/protect-edge-core` |
-| `passiveCache`, `pathTypeCache` | `@prosopo/protect-edge-core` |
-| CloudFront-shaped headers / responses | `lambda-edge` |
-| Fetch API `Headers` / `Response` shape, `wrangler.toml` | `cloudflare-worker` |
-| Bumblebee routes (`/api/access-check`, `/api/jti/{jti}`, `/api/settings`, `/api/access-rules`) | `crates/bumblebee` |
+Pick your platform:
 
-## Next steps
+- **[Cloudflare Worker](/protect-edge/cloudflare-worker)** — install, configure, deploy, verify.
+- **[AWS Lambda@Edge](/protect-edge/lambda-edge)** — same policy, deployed in front of CloudFront.
 
-- **Cloudflare Workers** — [Deploy the CF Worker](/protect-edge/cloudflare-worker).
-- **AWS Lambda@Edge** — same shape, deployed via `serverless deploy` in front of a CloudFront distribution. Environment variables (`BUMBLEBEE_URL`, `CLIENT_JWT`) are inlined at build time via vite because Lambda@Edge rejects functions that carry runtime env vars.
+Before you deploy, your Prosopo site must be registered with the Protect service. Site registration is handled from your [Prosopo dashboard](https://portal.prosopo.io/) or by your Prosopo account manager — you will need the site's SS58 key (e.g. `5HSuC1s…`) and a `CLIENT_JWT` signed by the site's key to authenticate the edge to the Protect API.
