@@ -20,6 +20,43 @@ On every request that hits your CDN:
 
 The blocked-response HTML and challenge interstitial are branded per site via your Prosopo dashboard: logo, colour palette, typography, and message strings all sanitised and rendered server-side by the edge.
 
+## Protecting HTML pages vs JSON APIs
+
+Protect handles browser page loads and API calls differently. You tell it which paths on your site are which, and the edge enforces accordingly.
+
+### HTML paths — pages users load in a browser
+
+- **First visit (no cookie):** the edge passes the request through so the Protect script embedded in your HTML can load and create a session.
+- **Subsequent requests:** the edge fetches the verdict and either forwards (`allow`), serves a captcha interstitial (`challenge`), or serves a branded "Access Denied" page (`block`).
+
+Session creation is transparent — the Protect script calls `/api/protect/init`, receives a `prosopo_session` cookie, and every request from that browser carries it automatically.
+
+### JSON paths — API endpoints called by scripts / XHR / `fetch`
+
+- **No cookie:** the edge returns **401 Unauthorized** with `X-Prosopo-Status: no-session`. The Protect script (loaded on your app shell) intercepts the 401, creates a session, and replays the request.
+- **With cookie:** the edge fetches the verdict. `allow` forwards to your origin; `block` returns a JSON error the Protect script uses to render an in-place block interstitial; `challenge` returns a JSON `challenge_config` the script uses to render a captcha modal without a full-page reload.
+
+JSON paths never pass through on a cookie-less request — an API endpoint has no HTML shell to bootstrap a session from, so a first-hit is always either a rule-based decision or a hard 401.
+
+### Configuring path types
+
+Tell Protect which paths on your site are HTML vs JSON on your [Prosopo dashboard](https://portal.prosopo.io/):
+
+- **Site-level default (`defaultPathType`)** — applies to every path unless overridden.
+- **Per-endpoint rules** — override the default for specific paths (e.g. `/api/*` → json, `/` → html).
+
+This closes the "spoof `Accept: text/html` on an API endpoint" bypass. Bots can lie about their `Accept` header, but they can't change what content type your site actually serves at a given path — the declared type is what the edge enforces.
+
+### Which mode fits your site
+
+| Your site | Recommended default | Endpoint overrides |
+|--|--|--|
+| Server-rendered pages with occasional API endpoints | `html` | `/api/*` → `json` |
+| Single-page app with a heavy API surface | `json` | `/`, `/index.html` → `html` |
+| Pure JSON API service (no HTML at all) | `json` | (none) |
+
+For a pure-API deployment, consumers must obtain a session through a separate app that loads the Protect script, or through your own headless-friendly flow — the edge won't let a cookie-less browser reach a JSON endpoint.
+
 ## Correlation
 
 Every edge request is stamped with an `X-Prosopo-Request-Id` header that's echoed on the response and written to the verdict audit log. From a support ticket you can grep straight to the verdict that fired.
