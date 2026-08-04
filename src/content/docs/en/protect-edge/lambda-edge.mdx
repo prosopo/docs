@@ -52,7 +52,9 @@ The `publish-version` response includes a `FunctionArn` ending in `:<version-num
 - **Function type**: Lambda@Edge
 - **Function ARN**: the versioned ARN from `publish-version`.
 
-CloudFront propagates to every edge location in 2–5 minutes. Repeat this attach step for each behaviour that should be protected. When Prosopo issues a new bundle, run `update-function-code` + `publish-version` and point the behaviour at the new versioned ARN — CloudFront won't pick up `$LATEST`.
+CloudFront propagates to every edge location in 2–5 minutes. Repeat this attach step for each behaviour that should be protected.
+
+Your account manager will let you know when a new bundle is available. Run `update-function-code` + `publish-version` and point the behaviour at the new versioned ARN — CloudFront won't pick up `$LATEST`.
 
 ### Execution role
 
@@ -89,7 +91,9 @@ curl -sD - -H "Accept: application/json" "$DIST/api/anything" | head
 # x-prosopo-status: no-session
 # x-prosopo-request-id: <cloudfront-request-id>
 
-# From a proxy or VPN — should 403 with the branded interstitial
+# From a proxy or VPN (only if you've enabled proxy/VPN blocking on
+# your Prosopo dashboard — see the next section) — should 403 with
+# the branded interstitial
 curl -sD - -H "Accept: text/html" -x http://your-proxy:port "$DIST/" | head
 # HTTP/2 403
 # x-prosopo-decision: block

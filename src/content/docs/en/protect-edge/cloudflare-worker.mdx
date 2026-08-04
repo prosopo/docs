@@ -52,7 +52,7 @@ wrangler deploy
 
 The worker is now live at `https://<name>.<your-subdomain>.workers.dev`. To attach to a custom hostname, add a **Route** in `wrangler.toml` (e.g. `route = "example.com/*"`) and redeploy.
 
-When Prosopo issues a new bundle, replace `worker.js` and re-run `wrangler deploy`. The secret persists across deploys.
+Your account manager will let you know when a new bundle is available. Replace `worker.js` and re-run `wrangler deploy`. The secret persists across deploys.
 
 ## Verify
 
@@ -68,7 +68,9 @@ curl -sD - -H "Accept: application/json" "$WORKER/api/anything" | head
 # x-prosopo-status: no-session
 # x-prosopo-request-id: <cf-ray>
 
-# From a proxy or VPN — should 403 with the branded interstitial
+# From a proxy or VPN (only if you've enabled proxy/VPN blocking on
+# your Prosopo dashboard — see the next section) — should 403 with
+# the branded interstitial
 curl -sD - -H "Accept: text/html" -x http://your-proxy:port "$WORKER/" | head
 # HTTP/2 403
 # x-prosopo-decision: block
