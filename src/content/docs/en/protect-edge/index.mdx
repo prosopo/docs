@@ -16,9 +16,46 @@ Both integrations enforce the same policy: they consult the Prosopo Protect API 
 On every request that hits your CDN:
 
 1. **If the request has a `prosopo_session` cookie** the edge fetches the verdict for the session's token from the Prosopo Protect API. `allow` passes through to your origin; `block` returns a branded interstitial (or JSON error for API calls) with no origin fetch; `challenge` serves a captcha interstitial.
-2. **If the request has no cookie** the edge asks Protect what to do. Protect evaluates your access-rule set (IP CIDR, ASN, IP category, country, User-Agent, JA4 TLS fingerprint) against the request. Rule matches return `block` or `challenge`; if no rule matches and the path is an HTML SPA shell, the edge lets it through so the Protect script can create a session.
+2. **If the request has no cookie** the edge asks Protect what to do. Protect evaluates your access-rule set (IP CIDR, ASN, IP category, country, User-Agent, JA4 TLS fingerprint) against the request. Rule matches return `block` or `challenge`; if no rule matches and the path is an HTML page, the edge lets it through so the Protect script can create a session.
 
 The blocked-response HTML and challenge interstitial are branded per site via your Prosopo dashboard: logo, colour palette, typography, and message strings all sanitised and rendered server-side by the edge.
+
+## Protecting HTML pages vs JSON APIs
+
+Protect handles browser page loads and API calls differently. You tell it which paths on your site are which, and the edge enforces accordingly.
+
+### HTML paths — pages users load in a browser
+
+- **First visit (no cookie):** the edge passes the request through so the Protect script embedded in your HTML can load and create a session.
+- **Subsequent requests:** the edge fetches the verdict and either forwards (`allow`), serves a captcha interstitial (`challenge`), or serves a branded "Access Denied" page (`block`).
+
+Session creation is transparent — the Protect script calls `/api/protect/init`, receives a `prosopo_session` cookie, and every request from that browser carries it automatically.
+
+### JSON paths — API endpoints called by scripts / XHR / `fetch`
+
+- **No cookie:** the edge returns **401 Unauthorized** with `X-Prosopo-Status: no-session`. The Protect script (loaded on your site's HTML pages) intercepts the 401, creates a session, and replays the request.
+- **With cookie:** the edge fetches the verdict. `allow` forwards to your origin; `block` returns a JSON error the Protect script uses to render an in-place block interstitial; `challenge` returns a JSON `challenge_config` the script uses to render a captcha modal without a full-page reload.
+
+JSON paths never pass through on a cookie-less request — an API endpoint isn't an HTML page, so there's nowhere for the Protect script to load from and no session can be bootstrapped on the fly. A first-hit is always either a rule-based decision or a hard 401.
+
+### Configuring path types
+
+Tell Protect which paths on your site are HTML vs JSON on your [Prosopo dashboard](https://portal.prosopo.io/):
+
+- **Site-level default (`defaultPathType`)** — applies to every path unless overridden.
+- **Per-endpoint rules** — override the default for specific paths (e.g. `/api/*` → json, `/` → html).
+
+This closes the "spoof `Accept: text/html` on an API endpoint" bypass. Bots can lie about their `Accept` header, but they can't change what content type your site actually serves at a given path — the declared type is what the edge enforces.
+
+### Which mode fits your site
+
+| Your site | Recommended default | Endpoint overrides |
+|--|--|--|
+| Server-rendered pages with occasional API endpoints | `html` | `/api/*` → `json` |
+| Single-page app with a heavy API surface | `json` | `/`, `/index.html` → `html` |
+| Pure JSON API service (no HTML at all) | `json` | (none) |
+
+For a pure-API deployment, consumers must obtain a session through a separate app that loads the Protect script, or through your own headless-friendly flow — the edge won't let a cookie-less browser reach a JSON endpoint.
 
 ## Correlation
 
