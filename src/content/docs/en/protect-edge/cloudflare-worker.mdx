@@ -15,6 +15,28 @@ A single JavaScript file, `worker.js`, delivered per site and per environment. I
 - A Cloudflare account with **Workers Scripts: Read + Edit** on the API token you'll use.
 - [`wrangler`](https://developers.cloudflare.com/workers/wrangler/install-and-update/) installed locally (`npm i -g wrangler`).
 - A Cloudflare zone (for a custom domain) or a workers.dev subdomain (fine for testing).
+- A CNAME record for your Protect API hostname — see the next section.
+
+## DNS: point your Protect subdomain at Prosopo
+
+The worker talks to your Protect API over HTTPS at a hostname you own — typically `protect.<your-domain>`. Create a CNAME record on your DNS pointing that hostname at Prosopo:
+
+```
+protect.<your-domain>   CNAME   protect.prosopo.io
+```
+
+Then enter the same hostname (e.g. `protect.example.com`) in the **CNAME** field of your site's Protect settings on your [Prosopo dashboard](https://portal.prosopo.io/). Prosopo uses this to route TLS requests arriving at that SNI to your site's configuration.
+
+Set `BUMBLEBEE_URL` in `wrangler.toml` (below) to `https://protect.<your-domain>` — the CNAMEd hostname, not `protect.prosopo.io` directly. TLS certificate handling is managed by Prosopo automatically for the CNAMEd hostname.
+
+Verify the DNS is live before deploying the worker:
+
+```bash
+dig protect.<your-domain>
+# should show a CNAME to protect.prosopo.io and an A record.
+```
+
+**Do not use NS delegation.** Only a CNAME record is supported; NS would delegate the whole subdomain to Prosopo's nameservers, which isn't the model.
 
 ## Deploy
 
