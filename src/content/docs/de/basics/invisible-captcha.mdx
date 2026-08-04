@@ -11,7 +11,7 @@ Unsichtbares CAPTCHA befindet sich derzeit in der **Beta**-Phase. Funktionen und
 :::
 
 :::note[Stufen-Beschränkung]
-Unsichtbares CAPTCHA ist nur für Benutzer der **Pro- und Enterprise**-Stufen verfügbar. Benutzer der kostenlosen Stufe können nicht auf diese Funktion zugreifen.
+Unsichtbares CAPTCHA ist nur für Benutzer der **Professional- und Enterprise**-Stufen verfügbar. Benutzer der kostenlosen Stufe können nicht auf diese Funktion zugreifen.
 :::
 
 ## Übersicht
@@ -219,18 +219,18 @@ const response = await fetch('https://api.prosopo.io/siteverify', {
     },
     body: JSON.stringify({
         secret: 'your_secret_key',
-        response: token, // Token from Procaptcha callback
-        remoteip: userIP // Optional
+        token: token, // Token from Procaptcha callback
+        ip: userIP // Optional
     })
 });
 
 const result = await response.json();
-if (result.success) {
+if (result.verified) {
     // Procaptcha verified successfully
     console.log('Verification successful');
 } else {
     // Verification failed
-    console.log('Verification failed:', result['error-codes']);
+    console.log('Verification failed:', result.status);
 }
 ```
 

@@ -1,0 +1,152 @@
+---
+title: AWS Lambda@Edge
+description: Deploy the Prosopo Protect Lambda@Edge bundle in front of a CloudFront distribution so bots and abusive traffic are blocked before they reach your origin.
+i18nReady: true
+---
+
+The Prosopo Protect Lambda@Edge bundle runs on Amazon CloudFront's viewer-request trigger. It executes Protect's decision on every request and either forwards the request to your origin (`allow`), blocks it with a branded interstitial (`block`), or serves a captcha challenge (`challenge`).
+
+## What you get
+
+A single JavaScript file, `lambda-edge.js`, delivered per site and per environment. It's self-contained — no dependencies, no configuration, ~100 KB.
+
+## Prerequisites
+
+- An AWS account with permission to create Lambda functions in **`us-east-1`** (Lambda@Edge functions must live there), publish versions of that function, and attach viewer-request triggers to your CloudFront distributions.
+- A CloudFront distribution serving your origin.
+- The [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) or the AWS Console.
+- A CNAME record for your Protect API hostname — see the next section.
+
+## DNS: point your Protect subdomain at Prosopo
+
+The bundle talks to your Protect API over HTTPS at a hostname you own — typically `protect.<your-domain>`. Create a CNAME record on your DNS pointing that hostname at Prosopo:
+
+```
+protect.<your-domain>   CNAME   protect.prosopo.io
+```
+
+Then enter the same hostname (e.g. `protect.example.com`) in the **CNAME** field of your site's Protect settings on your [Prosopo dashboard](https://portal.prosopo.io/). Prosopo uses this to route TLS requests arriving at that SNI to your site's configuration.
+
+The bundle you receive from Prosopo is built against your CNAMEd hostname — you don't need to configure the URL yourself. If you rotate the CNAMEd hostname, request a fresh bundle. TLS certificate handling is managed by Prosopo automatically for the CNAMEd hostname.
+
+Verify the DNS is live before deploying the bundle:
+
+```bash
+dig protect.<your-domain>
+# should show a CNAME to protect.prosopo.io and an A record.
+```
+
+**Do not use NS delegation.** Only a CNAME record is supported; NS would delegate the whole subdomain to Prosopo's nameservers, which isn't the model.
+
+## Deploy
+
+Upload the bundle to Lambda, publish a version, and attach the versioned ARN to the CloudFront behaviour you want to protect.
+
+```bash
+zip lambda-edge.zip lambda-edge.js
+
+# First deploy: create the function
+aws lambda create-function \
+  --region us-east-1 \
+  --function-name prosopo-protect-viewer-request \
+  --runtime nodejs22.x \
+  --handler lambda-edge.handler \
+  --memory-size 256 \
+  --timeout 5 \
+  --role arn:aws:iam::<account-id>:role/<lambda-edge-execution-role> \
+  --zip-file fileb://lambda-edge.zip
+
+# Every deploy after that: update the code
+aws lambda update-function-code \
+  --region us-east-1 \
+  --function-name prosopo-protect-viewer-request \
+  --zip-file fileb://lambda-edge.zip
+
+# Publish a version — Lambda@Edge only accepts versioned ARNs
+aws lambda publish-version \
+  --region us-east-1 \
+  --function-name prosopo-protect-viewer-request
+```
+
+The `publish-version` response includes a `FunctionArn` ending in `:<version-number>`. In your CloudFront distribution's **Behaviors** tab, edit the behaviour you want to protect and add a **Function association**:
+
+- **Event type**: Viewer request
+- **Function type**: Lambda@Edge
+- **Function ARN**: the versioned ARN from `publish-version`.
+
+CloudFront propagates to every edge location in 2–5 minutes. Repeat this attach step for each behaviour that should be protected.
+
+Your account manager will let you know when a new bundle is available. Run `update-function-code` + `publish-version` and point the behaviour at the new versioned ARN — CloudFront won't pick up `$LATEST`.
+
+### Execution role
+
+The function's role needs both `lambda.amazonaws.com` and `edgelambda.amazonaws.com` as trusted principals, plus the `AWSLambdaBasicExecutionRole` managed policy for CloudWatch Logs:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": ["lambda.amazonaws.com", "edgelambda.amazonaws.com"]
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+```
+
+## Verify
+
+Once the trigger is attached and CloudFront has propagated, test through the distribution's domain.
+
+```bash
+DIST=https://your-distribution.cloudfront.net
+
+# HTML — should serve your origin (200)
+curl -sD - -H "Accept: text/html" -H "User-Agent: Mozilla/5.0" "$DIST/" | head
+
+# JSON, no cookie — should 401 with no-session status
+curl -sD - -H "Accept: application/json" "$DIST/api/anything" | head
+# HTTP/2 401
+# x-prosopo-status: no-session
+# x-prosopo-request-id: <cloudfront-request-id>
+
+# From a proxy or VPN (only if you've enabled proxy/VPN blocking on
+# your Prosopo dashboard — see the next section) — should 403 with
+# the branded interstitial
+curl -sD - -H "Accept: text/html" -x http://your-proxy:port "$DIST/" | head
+# HTTP/2 403
+# x-prosopo-decision: block
+```
+
+`X-Prosopo-Request-Id` is echoed on every response and written to Protect's verdict audit log — grep from a support ticket straight to the verdict. CloudFront's own `x-amz-cf-id` is the default request ID, so the same value shows up in CloudFront access logs and Protect's audit log.
+
+## Configuring proxy, VPN and datacenter blocking
+
+Blocking policy lives on your [Prosopo dashboard](https://portal.prosopo.io/), not in the bundle. Two independent rule sources feed the no-cookie edge path:
+
+- **Site settings** — recognised IP categories: `tor`, `datacenter`, `proxy`, `vpn`, `abuser`, `mobile`, `crawler`. Configure per-category verdicts (`allow` / `challenge` / `block`).
+- **Tiered access rules** — support the full rule set: IP CIDR, ASN, IP category, country, User-Agent substring, JA4 TLS fingerprint. Rules can be scoped to your site or applied globally by Prosopo.
+
+Either source firing blocks the request at the edge. When both match, the more restrictive verdict wins (`Block > Challenge > Allow`). Policy changes take effect on the next request — no redeploy needed.
+
+## Constraints
+
+- **Region**: functions must be created in `us-east-1`.
+- **Memory**: 256 MB recommended. Higher tiers cost more but give proportionally more CPU.
+- **Time**: the viewer-request handler is capped at 5 seconds. Protect's API calls typically return in under 40 ms (under 2 ms for cached lookups) and are budgeted to a 500 ms hard timeout, with fail-open on transient errors.
+- **CloudWatch logs**: written to the region *closest to the viewer that served the request*, not `us-east-1`. Check the matching region when debugging.
+
+## Rotating credentials
+
+Each bundle is scoped to a specific site's authentication token. Rotating the token means requesting a fresh bundle from Prosopo and redeploying it via the [Deploy](#deploy) flow. The old bundle keeps working until you swap the ARN on your CloudFront behaviour.
+
+## Troubleshooting
+
+- **CloudFront returns 502** — the function threw an unhandled exception. Check CloudWatch Logs in the region that served the request (Lambda@Edge writes logs region-locally).
+- **Requests return 401 with an internal-error body** — the bundle's authentication token is stale or invalid. Request a fresh bundle from Prosopo and redeploy.
+- **CloudFront won't accept the ARN** — Lambda@Edge requires a *published version* ARN (ending in `:1`, `:2`, …). `$LATEST` isn't accepted.
+- **Verdict lookups time out in logs** — Protect is unreachable or slow. The function fails open so requests still reach your origin, but investigate.
+- **`Unknown site` in logs** — your site isn't registered with Protect. Check your dashboard or contact your account manager.

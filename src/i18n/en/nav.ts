@@ -96,6 +96,22 @@ export default [
         slug: 'advanced/audit',
         key: 'advanced/audit',
     },
+    {text: 'Prosopo Protect (Edge)', header: true, type: 'learn', key: 'protect-edge'},
+    {
+        text: 'Overview',
+        slug: 'protect-edge/',
+        key: 'protect-edge/',
+    },
+    {
+        text: 'Cloudflare Worker',
+        slug: 'protect-edge/cloudflare-worker',
+        key: 'protect-edge/cloudflare-worker',
+    },
+    {
+        text: 'AWS Lambda@Edge',
+        slug: 'protect-edge/lambda-edge',
+        key: 'protect-edge/lambda-edge',
+    },
     {text: 'Framework integrations', header: true, type: 'learn', key: 'framework-integrations'},
     {
         text: 'Angular Integration',

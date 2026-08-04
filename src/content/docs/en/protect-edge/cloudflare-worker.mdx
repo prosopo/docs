@@ -1,0 +1,151 @@
+---
+title: Cloudflare Worker
+description: Deploy the Prosopo Protect Cloudflare Worker in front of your origin so proxy, VPN, datacenter and Tor traffic is blocked at Cloudflare's edge.
+i18nReady: true
+---
+
+The Prosopo Protect Cloudflare Worker sits in front of your origin and runs Protect's decision on every request. On `allow` it forwards to your origin; on `block` / `challenge` it returns immediately with a branded interstitial (or JSON error for API calls), no origin fetch.
+
+## What you get
+
+A single JavaScript file, `worker.js`, delivered per site and per environment. It's self-contained — no dependencies, ~50 KB.
+
+## Prerequisites
+
+- A Cloudflare account with **Workers Scripts: Read + Edit** on the API token you'll use.
+- [`wrangler`](https://developers.cloudflare.com/workers/wrangler/install-and-update/) installed locally (`npm i -g wrangler`).
+- A Cloudflare zone (for a custom domain) or a workers.dev subdomain (fine for testing).
+- A CNAME record for your Protect API hostname — see the next section.
+
+## DNS: point your Protect subdomain at Prosopo
+
+The worker talks to your Protect API over HTTPS at a hostname you own — typically `protect.<your-domain>`. Create a CNAME record on your DNS pointing that hostname at Prosopo:
+
+```
+protect.<your-domain>   CNAME   protect.prosopo.io
+```
+
+Then enter the same hostname (e.g. `protect.example.com`) in the **CNAME** field of your site's Protect settings on your [Prosopo dashboard](https://portal.prosopo.io/). Prosopo uses this to route TLS requests arriving at that SNI to your site's configuration.
+
+Set `BUMBLEBEE_URL` in `wrangler.toml` (below) to `https://protect.<your-domain>` — the CNAMEd hostname, not `protect.prosopo.io` directly. TLS certificate handling is managed by Prosopo automatically for the CNAMEd hostname.
+
+Verify the DNS is live before deploying the worker:
+
+```bash
+dig protect.<your-domain>
+# should show a CNAME to protect.prosopo.io and an A record.
+```
+
+**Do not use NS delegation.** Only a CNAME record is supported; NS would delegate the whole subdomain to Prosopo's nameservers, which isn't the model.
+
+## Deploy
+
+Cloudflare Workers is configured by a small `wrangler.toml` alongside the bundle. Create one next to `worker.js`:
+
+```toml
+name = "prosopo-protect"
+main = "worker.js"
+compatibility_date = "2025-01-15"
+compatibility_flags = ["nodejs_compat"]
+
+# Optional: bind static assets you want the worker to serve when a
+# request is allowed. Delete this block if your worker fronts an
+# upstream origin instead.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = true
+
+[vars]
+BUMBLEBEE_URL = "https://protect.prosopo.io"
+```
+
+Then deploy:
+
+```bash
+export CLOUDFLARE_API_TOKEN=<token-with-Workers-Scripts-Read+Edit>
+
+# 1. Push the authentication token as a wrangler secret (once per environment)
+echo "<your-CLIENT_JWT>" | wrangler secret put CLIENT_JWT
+
+# 2. Deploy
+wrangler deploy
+```
+
+The worker is now live at `https://<name>.<your-subdomain>.workers.dev`. To attach to a custom hostname, add a **Route** in `wrangler.toml` (e.g. `route = "example.com/*"`) and redeploy.
+
+Your account manager will let you know when a new bundle is available. Replace `worker.js` and re-run `wrangler deploy`. The secret persists across deploys.
+
+## Verify
+
+```bash
+WORKER=https://your-worker.workers.dev
+
+# HTML — should serve your origin (200)
+curl -sD - -H "Accept: text/html" -H "User-Agent: Mozilla/5.0" "$WORKER/" | head
+
+# JSON, no cookie — should 401 with no-session status
+curl -sD - -H "Accept: application/json" "$WORKER/api/anything" | head
+# HTTP/2 401
+# x-prosopo-status: no-session
+# x-prosopo-request-id: <cf-ray>
+
+# From a proxy or VPN (only if you've enabled proxy/VPN blocking on
+# your Prosopo dashboard — see the next section) — should 403 with
+# the branded interstitial
+curl -sD - -H "Accept: text/html" -x http://your-proxy:port "$WORKER/" | head
+# HTTP/2 403
+# x-prosopo-decision: block
+```
+
+`X-Prosopo-Request-Id` is echoed on every response and written to Protect's verdict audit log — grep from a support ticket straight to the verdict.
+
+## What the worker protects
+
+The worker runs Protect logic on every request before serving anything. You can point it at:
+
+- **Static assets** bound via `[assets]` in `wrangler.toml` (as in the example above). Set `run_worker_first = true` so the worker runs before Cloudflare's cache — without this, static files are served directly and Protect never sees the request.
+- **An upstream origin** — swap the assets binding for a `fetch(rewrittenUrl, request)` against your upstream, and set the origin host in `wrangler.toml`. The Protect decision above the fetch is unchanged.
+
+## Configuring proxy, VPN and datacenter blocking
+
+Blocking policy lives on your [Prosopo dashboard](https://portal.prosopo.io/), not in the bundle. Two independent rule sources feed the no-cookie edge path:
+
+- **Site settings** — recognised IP categories: `tor`, `datacenter`, `proxy`, `vpn`, `abuser`, `mobile`, `crawler`. Configure per-category verdicts (`allow` / `challenge` / `block`).
+- **Tiered access rules** — support the full rule set: IP CIDR, ASN, IP category, country, User-Agent substring, JA4 TLS fingerprint. Rules can be scoped to your site or applied globally by Prosopo.
+
+Either source firing blocks the request at the edge. When both match, the more restrictive verdict wins (`Block > Challenge > Allow`). Policy changes take effect on the next request — no redeploy needed.
+
+## Rotating credentials
+
+The authentication token is stored as a wrangler secret, so rotating it is a one-liner and doesn't require a redeploy:
+
+```bash
+echo "<new-CLIENT_JWT>" | wrangler secret put CLIENT_JWT
+```
+
+The next request picks up the new value.
+
+## Performance
+
+Protect's API calls from a Cloudflare Worker typically return in under 40 ms (under 2 ms for cached lookups) and are budgeted to a 500 ms hard timeout, with fail-open on transient errors. On an `allow` verdict the request continues to your origin as normal; on `block` or `challenge` the worker returns immediately without an origin fetch, so protected requests are strictly faster than unprotected ones for the blocked path.
+
+## TLS caveats
+
+Cloudflare Workers doesn't expose a way to skip TLS verification on outbound fetches. If the Protect API URL you're configured with has an invalid or expired certificate, `fetch` returns HTTP 526 and Protect can't be reached. Point `BUMBLEBEE_URL` at a hostname with a valid certificate.
+
+## Live logs
+
+While debugging a deploy, `wrangler tail` streams request-by-request logs from the deployed worker:
+
+```bash
+wrangler tail --format=pretty
+```
+
+## Troubleshooting
+
+- **`wrangler deploy` returns `Authentication error [code: 10000]`** — the token lacks **Workers Scripts: Read + Edit**. "Edit" alone isn't enough; wrangler needs both.
+- **Bundle deploys but every request 401s** — the `CLIENT_JWT` secret isn't set or has expired. Re-run `wrangler secret put CLIENT_JWT` and check `wrangler secret list`.
+- **HTTP 526 in `wrangler tail`** — the Protect API host's certificate is invalid or expired; see [TLS caveats](#tls-caveats).
+- **HTML `Access Denied` served instead of JSON on API paths** — the endpoint's declared content type is HTML. Update the site's `defaultPathType` (or add an endpoint rule) on your Prosopo dashboard.
+- **`Unknown site` in logs** — your site isn't registered with Protect. Check your dashboard or contact your account manager.

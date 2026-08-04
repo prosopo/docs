@@ -1,0 +1,34 @@
+---
+title: Prosopo Protect at the Edge
+description: Deploy Prosopo Protect in front of your site with a Cloudflare Worker or AWS Lambda@Edge. Verdict lookups run at your CDN's edge so bots are blocked before they reach your origin.
+i18nReady: true
+---
+
+Prosopo Protect can run at the edge of your CDN so blocked and challenged requests never reach your origin. Two integrations are supported today:
+
+- **[Cloudflare Workers](/protect-edge/cloudflare-worker)** — deploy alongside your Cloudflare zone.
+- **[AWS Lambda@Edge](/protect-edge/lambda-edge)** — deploy in front of a CloudFront distribution.
+
+Both integrations enforce the same policy: they consult the Prosopo Protect API on every incoming request and act on the returned verdict before it reaches your origin.
+
+## How it works
+
+On every request that hits your CDN:
+
+1. **If the request has a `prosopo_session` cookie** the edge fetches the verdict for the session's token from the Prosopo Protect API. `allow` passes through to your origin; `block` returns a branded interstitial (or JSON error for API calls) with no origin fetch; `challenge` serves a captcha interstitial.
+2. **If the request has no cookie** the edge asks Protect what to do. Protect evaluates your access-rule set (IP CIDR, ASN, IP category, country, User-Agent, JA4 TLS fingerprint) against the request. Rule matches return `block` or `challenge`; if no rule matches and the path is an HTML SPA shell, the edge lets it through so the Protect script can create a session.
+
+The blocked-response HTML and challenge interstitial are branded per site via your Prosopo dashboard: logo, colour palette, typography, and message strings all sanitised and rendered server-side by the edge.
+
+## Correlation
+
+Every edge request is stamped with an `X-Prosopo-Request-Id` header that's echoed on the response and written to the verdict audit log. From a support ticket you can grep straight to the verdict that fired.
+
+## What's next
+
+Pick your platform:
+
+- **[Cloudflare Worker](/protect-edge/cloudflare-worker)** — install, configure, deploy, verify.
+- **[AWS Lambda@Edge](/protect-edge/lambda-edge)** — same policy, deployed in front of CloudFront.
+
+Before you deploy, your Prosopo site must be registered with the Protect service. Site registration is handled from your [Prosopo dashboard](https://portal.prosopo.io/) or by your Prosopo account manager — you will need the site's SS58 key (e.g. `5HSuC1s…`) and a `CLIENT_JWT` signed by the site's key to authenticate the edge to the Protect API.

@@ -11,7 +11,7 @@ CAPTCHA invisible está actualmente en **beta**. Las características y el compo
 :::
 
 :::note[Restricción de nivel]
-CAPTCHA invisible solo está disponible para usuarios de nivel **Pro y Enterprise**. Los usuarios del nivel gratuito no pueden acceder a esta función.
+CAPTCHA invisible solo está disponible para usuarios de nivel **Professional y Enterprise**. Los usuarios del nivel gratuito no pueden acceder a esta función.
 :::
 
 ## Descripción general
@@ -222,18 +222,18 @@ const response = await fetch('https://api.prosopo.io/siteverify', {
     },
     body: JSON.stringify({
         secret: 'your_secret_key',
-        response: token, // Token from Procaptcha callback
-        remoteip: userIP // Optional
+        token: token, // Token from Procaptcha callback
+        ip: userIP // Optional
     })
 });
 
 const result = await response.json();
-if (result.success) {
+if (result.verified) {
     // Procaptcha verified successfully
     console.log('Verification successful');
 } else {
     // Verification failed
-    console.log('Verification failed:', result['error-codes']);
+    console.log('Verification failed:', result.status);
 }
 ```
 
