@@ -235,3 +235,83 @@ if (result.verified) {
 ```
 
 There is an example TypeScript server [NodeJS Server Side Example](/en/demos/client-example-server/) that you run locally.
+
+## Error Responses
+
+All `/siteverify` responses use a uniform JSON envelope. For programmatic handling, branch on `error.key` (stable, machine-readable) rather than `error.message` (human-readable and localised).
+
+### Response envelope
+
+A successful response:
+
+```json
+{
+    "status": "ok",
+    "verified": true,
+    "score": 0.1,
+    "reason": "optional"
+}
+```
+
+An error response:
+
+```json
+{
+    "error": {
+        "code": 400,
+        "key": "API.INVALID_SITE_KEY",
+        "message": "Invalid site key",
+        "data": {}
+    }
+}
+```
+
+### HTTP 200 — Success and soft failures
+
+A `200` response does **not** mean the user passed the challenge. Always inspect the `verified` field.
+
+| Scenario | Body | Notes |
+| --- | --- | --- |
+| Token verified | `{ "status": "ok", "verified": true, "score": ..., "reason"?: ... }` | Normal happy path. `score` is included for Premium-tier customers. |
+| Token cannot be decoded | `{ "status": "ok", "verified": false, "score": 0 }` | The token is malformed or forged. Treat as a failed challenge — do not retry. |
+| Provider verification timed out (5s) | `{ "status": "ok", "verified": true, "score": 0 }` | Fail-open: if our verification provider is temporarily unreachable, the request is allowed through so legitimate users are not blocked. A cluster of these responses indicates a provider incident. |
+
+### HTTP 4xx — Client / integration errors
+
+These indicate a problem with the request itself. Retrying without changes will not succeed.
+
+| HTTP | `error.key` | Trigger | What to fix |
+| --- | --- | --- | --- |
+| 400 | `API.MISSING_BODY` | Request body is empty or required fields are missing. | Send a POST with a JSON body containing at least `secret` and `token`. |
+| 400 | `API.PARSE_ERROR` | Body fails schema validation. | Check field names and types: `token` (string), `secret` (string), and optional `ip`, `email`, `timeouts`. |
+| 400 | `API.INVALID_SITE_KEY` | The `secret` does not correspond to the site key embedded in the `token`. | Confirm the secret key for the site matches the one rendering the widget. A common cause is using a secret from a different site. |
+| 400 | `API.UNKNOWN_ERROR` (or a more specific key) | The verification provider returned an error block for this token. | Inspect `error.key` and `error.message` for the specific provider-side reason. See [Forwarded provider errors](#forwarded-provider-errors) below. |
+
+### HTTP 5xx — Server / upstream errors
+
+These indicate a transient or upstream problem. Retrying with backoff is appropriate.
+
+| HTTP | `error.key` | Trigger |
+| --- | --- | --- |
+| 500 | `GENERAL.MISSING_SECRET_KEY` | The `secret` field is present but invalid as a keypair. |
+| forwarded | varies | The verification provider rejected the request with a `ProsopoApiError`. The HTTP code and `error.key` are propagated from the underlying error. |
+| forwarded | `API.UNKNOWN` (default) | Any uncaught exception inside the handler. Wrapped responses default to HTTP 400 with `key: "API.UNKNOWN"` when the underlying error is not a `ProsopoApiError`. |
+
+### Forwarded provider errors
+
+When the verification provider returns an error, the original `error.key` is forwarded. The keys you are most likely to see in production:
+
+| `error.key` | Meaning |
+| --- | --- |
+| `API.SITE_KEY_NOT_REGISTERED` | The site key is well-formed but not registered with the provider. Re-check the site key in the [customer portal](https://portal.prosopo.io). |
+| `API.PROVIDER_VERIFY_FAILED` | The provider reached a verification decision of "failed" for reasons other than a bad request (e.g. internal state mismatch). |
+| `API.UNKNOWN_ERROR` | The provider returned an error block without a recognised key. Inspect `error.message` and contact support if it persists. |
+
+Other `API.*` and `GENERAL.*` keys may appear depending on provider state.
+
+### Recommended client handling
+
+1. **Check `verified` first.** A `200` with `verified: false` is the normal "challenge failed" path, not an exception.
+2. **Retry only on 5xx.** 4xx responses indicate a configuration or integration error and will not succeed on retry.
+3. **Log `error.key`, not `error.message`.** Messages are localised and may change wording; keys are stable identifiers.
+4. **Treat timeout fail-open as a signal.** Repeated `200 { "verified": true, "score": 0 }` responses likely indicate a provider incident. Alert on this rather than counting them as successful verifications.
