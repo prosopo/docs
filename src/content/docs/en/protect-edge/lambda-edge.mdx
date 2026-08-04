@@ -114,7 +114,7 @@ Either source firing blocks the request at the edge. When both match, the more r
 
 - **Region**: functions must be created in `us-east-1`.
 - **Memory**: 256 MB recommended. Higher tiers cost more but give proportionally more CPU.
-- **Time**: the viewer-request handler is capped at 5 seconds. Protect's API calls are budgeted to 500 ms with fail-open on transient errors.
+- **Time**: the viewer-request handler is capped at 5 seconds. Protect's API calls typically return in under 40 ms (under 2 ms for cached lookups) and are budgeted to a 500 ms hard timeout, with fail-open on transient errors.
 - **CloudWatch logs**: written to the region *closest to the viewer that served the request*, not `us-east-1`. Check the matching region when debugging.
 
 ## Rotating credentials
