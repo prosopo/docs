@@ -61,11 +61,21 @@ For a pure-API deployment, consumers must obtain a session through a separate ap
 
 Every edge request is stamped with an `X-Prosopo-Request-Id` header that's echoed on the response and written to the verdict audit log. From a support ticket you can grep straight to the verdict that fired.
 
+## Two-part install
+
+Both edge integrations are **two independent pieces working together**, and deploying only one leaves your site unprotected:
+
+1. **The edge worker (server-side).** Sits in front of your origin. Runs the verdict on every request. Blocks bad traffic before it reaches your server.
+2. **The Protect JS bundle (client-side).** Loaded on every HTML page. Creates the session cookie, collects the bot-signal telemetry the risk engine scores, and shows the captcha overlay when the edge returns a challenge.
+
+Without the worker, no request is scored. Without the JS bundle, no user ever gets a session cookie — every `/api/*` and `/forms/*` request returns 401 `no-session` forever, because there is no session to look up. Both are covered by each platform's install guide.
+
 ## What's next
 
 Pick your platform:
 
 - **[Cloudflare Worker](/protect-edge/cloudflare-worker)** — install, configure, deploy, verify.
 - **[AWS Lambda@Edge](/protect-edge/lambda-edge)** — same policy, deployed in front of CloudFront.
+- **[Troubleshooting](/protect-edge/troubleshooting)** — distinguish Prosopo 4xx from your other bot-protection layers, recognise known-benign console warnings, diagnose the common misconfigurations.
 
 Before you deploy, your Prosopo site must be registered with the Protect service. Site registration is handled from your [Prosopo dashboard](https://portal.prosopo.io/) or by your Prosopo account manager — you will need the site's SS58 key (e.g. `5HSuC1s…`) and a `CLIENT_JWT` signed by the site's key to authenticate the edge to the Protect API.
