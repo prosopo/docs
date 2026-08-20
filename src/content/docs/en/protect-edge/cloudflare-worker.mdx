@@ -4,40 +4,39 @@ description: Deploy the Prosopo Protect Cloudflare Worker in front of your origi
 i18nReady: true
 ---
 
-The Prosopo Protect Cloudflare Worker sits in front of your origin and runs Protect's decision on every request. On `allow` it forwards to your origin; on `block` / `challenge` it returns immediately with a branded interstitial (or JSON error for API calls), no origin fetch.
+The Prosopo Protect Cloudflare Worker sits in front of your origin and runs Protect's decision on every request. On `allow` it forwards to your origin. On `block` or `challenge` it returns immediately with a branded interstitial (or JSON error for API calls) without touching your origin.
 
-## Two-part install — read this first
+## Two-part install: read this first
 
-A production Prosopo Protect integration is **two independent pieces working together**. Deploying only one leaves your site unprotected. Both are covered by this guide.
+A production Prosopo Protect integration is two independent pieces working together. Deploying only one leaves your site unprotected. Both are covered by this guide.
 
-1. **The Cloudflare Worker (server-side).** Sits in front of your origin. Runs the verdict on every request. Blocks bad traffic before it reaches your server. This is `worker.js` + `wrangler.toml`.
-
+1. **The Cloudflare Worker (server-side).** Sits in front of your origin, runs the verdict on every request, and blocks bad traffic before it reaches your server. This is `worker.js` plus `wrangler.toml`.
 2. **The Protect JS bundle (client-side).** Loaded on every HTML page users visit. Creates the session cookie, collects the bot-signal telemetry the risk engine scores, and shows the captcha overlay when the worker returns a challenge. This is a single `<script>` tag in your HTML.
 
-Without the worker, no request is scored. Without the bundle, no user ever gets a session cookie, so every `/api/*` and `/forms/*` request returns 401 `no-session` forever. The verify commands at the bottom of this page test the worker path only — a green worker with no bundle deployed **looks working** but every real user still fails on their first XHR.
+Without the worker, no request is scored. Without the bundle, no user ever gets a session cookie, so every `/api/*` and `/forms/*` request returns 401 `no-session` forever. The verify commands at the bottom of this page test the worker path only, so a green worker with no bundle deployed looks like it's working while every real user still fails on their first XHR.
 
 Deploy them in either order, but ship both before rollout.
 
 ## What you get
 
-- `worker.js` — the worker code, delivered per site and per environment. Self-contained, ~50 KB. Same file for every customer; per-site config lives in `wrangler.toml`.
-- `wrangler.toml` — deployment config, pre-set with your `PROTECT_URL`.
-- `README.md` — customer-specific quick reference mirroring this guide.
+- `worker.js`: the worker code, delivered per site and per environment. Self-contained, ~50 KB. Same file for every customer; per-site config lives in `wrangler.toml`.
+- `wrangler.toml`: deployment config, pre-set with your `PROTECT_URL`.
+- `README.md`: customer-specific quick reference mirroring this guide.
 
 ## Prerequisites
 
 - A Cloudflare account with an API token carrying:
-  - **Account → Workers Scripts → Edit** (upload the worker code).
-  - **Zone → Workers Routes → Edit** on the zone you'll bind the worker to (only needed when you move from `workers.dev` to a production route).
+  - **Account → Workers Scripts → Edit** to upload the worker code.
+  - **Zone → Workers Routes → Edit** on the zone you'll bind the worker to. Only needed when you move from `workers.dev` to a production route.
 - [`wrangler`](https://developers.cloudflare.com/workers/wrangler/install-and-update/) installed locally (`npm i -g wrangler`).
-- A Cloudflare zone for your production domain (a `workers.dev` subdomain is fine for the initial test).
+- A Cloudflare zone for your production domain. A `workers.dev` subdomain is fine for the initial test.
 - Your Prosopo account manager has:
-  - Registered your site key on the Protect dashboard with your intended `defaultPathType`, endpoint rules, IP-category rules, and interstitial branding — see [Portal settings checklist](#portal-settings-checklist) below.
-  - Issued you a `CLIENT_JWT` (long-lived token authenticating the worker to the Protect API).
+  - Registered your site key on the Protect dashboard with your intended `defaultPathType`, endpoint rules, IP-category rules, and interstitial branding. See [Portal settings checklist](#portal-settings-checklist) below.
+  - Issued you a `CLIENT_JWT`, a long-lived token authenticating the worker to the Protect API.
 
-## DNS: `protect.<your-domain>` as **DNS-only** (grey cloud)
+## DNS: `protect.<your-domain>` as DNS-only (grey cloud)
 
-The worker talks to Protect at a hostname you own — typically `protect.<your-domain>`. Create a CNAME record on that hostname pointing at Prosopo:
+The worker talks to Protect at a hostname you own, typically `protect.<your-domain>`. Create a CNAME record on that hostname pointing at Prosopo:
 
 ```
 protect.<your-domain>   CNAME   protect.prosopo.io
@@ -45,9 +44,9 @@ protect.<your-domain>   CNAME   protect.prosopo.io
 
 **Set the proxy status to DNS only (grey cloud), not proxied (orange cloud).** This is not optional.
 
-Why: Prosopo Protect's risk engine derives most of its bot-signal value from the raw TLS handshake — cipher-suite order, extensions, timing between packets (JA4, JA4H, JA4L, JA4T fingerprints). If Cloudflare's proxy terminates the browser's TLS at its edge, what reaches Prosopo is a fresh TLS connection from Cloudflare's own stack, identical for every user. The JA4 signals collapse to a single value and the risk-scoring pipeline degrades to noise.
+Why: Prosopo Protect's risk engine derives most of its bot-signal value from the raw TLS handshake (cipher-suite order, extensions, timing between packets, and the JA4, JA4H, JA4L, and JA4T fingerprints). If Cloudflare's proxy terminates the browser's TLS at its edge, what reaches Prosopo is a fresh TLS connection from Cloudflare's own stack, identical for every user. The JA4 signals collapse to a single value and the risk-scoring pipeline degrades to noise.
 
-Grey-cloud on `protect.<your-domain>` **only** — every other DNS record on your zone (including your main `www` record fronted by this worker) stays exactly as it is. This one subdomain needs to point directly at our origin so the browser's TLS handshake reaches us intact.
+Grey-cloud on `protect.<your-domain>` only. Every other DNS record on your zone (including your main `www` record fronted by this worker) stays exactly as it is. This one subdomain needs to point directly at our origin so the browser's TLS handshake reaches us intact.
 
 ### Coordinate cert issuance with your account manager
 
@@ -61,9 +60,9 @@ Prosopo issues the TLS certificate for your `protect.<your-domain>` subdomain vi
    # and an A record resolving directly to our edge (not Cloudflare's).
    ```
 
-   If the A record starts with `104.` or `172.` you're still orange-cloud — flip the record to grey-cloud before proceeding.
+   If the A record starts with `104.` or `172.` you're still orange-cloud. Flip the record to grey-cloud before proceeding.
 
-2. **Us**: email your account manager once DNS is grey-clouded and propagated. We issue the certificate on our end (~30 seconds), then confirm back. Attempting to deploy the worker before we've issued the cert results in HTTP 526 (SSL Handshake Failed) on every access-check call, and the worker fails open — no request is actually scored.
+2. **Us**: email your account manager once DNS is grey-clouded and propagated. We issue the certificate on our end (~30 seconds), then confirm back. Attempting to deploy the worker before we've issued the cert results in HTTP 526 (SSL Handshake Failed) on every access-check call, and the worker fails open. No request is actually scored.
 
 Once the cert is in place it auto-renews on our end every 60 days. You don't touch it again.
 
@@ -71,7 +70,7 @@ Once the cert is in place it auto-renews on our end every 60 days. You don't tou
 
 **This step is mandatory.** Without the bundle no session cookie is ever set, and the worker returns 401 `no-session` on every `/api/*` or `/forms/*` call in perpetuity.
 
-Add this snippet to every HTML page your site serves — a shared header or footer template is the usual spot:
+Add this snippet to every HTML page your site serves. A shared header or footer template is the usual spot:
 
 ```html
 <script>
@@ -83,7 +82,7 @@ Add this snippet to every HTML page your site serves — a shared header or foot
 <script src="https://js.protect.prosopo.io/protect.bundle.js" async></script>
 ```
 
-Both tags are required. The first sets `window.prosopo_config` before the second loads — the bundle reads that config to know which Protect API to talk to. Skipping the first tag causes the bundle to fall back to the CDN's own origin (`js.protect.prosopo.io`) as its API URL, which returns 405 on the CORS preflight for `/api/protect/init` and hangs the bundle's patched `fetch`.
+Both tags are required. The first sets `window.prosopo_config` before the second loads; the bundle reads that config to know which Protect API to talk to. Skipping the first tag causes the bundle to fall back to the CDN's own origin (`js.protect.prosopo.io`) as its API URL, which returns 405 on the CORS preflight for `/api/protect/init` and hangs the bundle's patched `fetch`.
 
 On first page load the bundle:
 
@@ -91,11 +90,11 @@ On first page load the bundle:
 2. Receives a `prosopo_session` cookie scoped to `.<your-domain>`.
 3. Loads a per-session telemetry runtime script that collects the bot-signal data used for risk scoring.
 
-Every subsequent request from that browser carries the cookie, and the worker looks up a real verdict on `/api/*` / `/forms/*` calls.
+Every subsequent request from that browser carries the cookie, and the worker looks up a real verdict on `/api/*` or `/forms/*` calls.
 
 ### Gate fast form submissions and link clicks (optional)
 
-Users can click **Submit** before the bundle finishes creating the session. The browser fires a full-page POST with no cookie and gets a 401. Security is correct — UX is bad.
+Users can click **Submit** before the bundle finishes creating the session. The browser fires a full-page POST with no cookie and gets a 401. The security is correct but the UX is bad.
 
 Opt any form or link into automatic held-until-session-ready behaviour by adding the `data-prosopo-gate` attribute:
 
@@ -110,9 +109,9 @@ Opt any form or link into automatic held-until-session-ready behaviour by adding
 </nav>
 ```
 
-The bundle intercepts marked forms / same-origin links in the capture phase, holds up to 8 seconds waiting for the session, then releases with the cookie in place. The submit button flips `disabled` + `aria-busy` while held so the user gets visual feedback. Ctrl/Cmd-click, middle-click, `target="_blank"`, `download` attributes, hash-only links, and cross-origin links are always passed through untouched.
+The bundle intercepts marked forms and same-origin links in the capture phase, holds up to 8 seconds waiting for the session, then releases with the cookie in place. The submit button flips `disabled` and `aria-busy` while held so the user gets visual feedback. Ctrl/Cmd-click, middle-click, `target="_blank"`, `download` attributes, hash-only links, and cross-origin links pass through untouched.
 
-Attributes on an ancestor cover every descendant form/link, so `<nav data-prosopo-gate>` gates every link inside.
+Attributes on an ancestor cover every descendant form or link, so `<nav data-prosopo-gate>` gates every link inside.
 
 ## Step 2: Deploy the worker
 
@@ -128,14 +127,14 @@ compatibility_flags = ["nodejs_compat"]
 PROTECT_URL = "https://protect.<your-domain>"
 # ORIGIN_URL is where the worker forwards allowed requests. Set this
 # for any deployment that fronts a real backend. Two hostnames are
-# required — the worker sits on <www>, forwards to a different name
+# required: the worker sits on <www>, forwards to a different name
 # (e.g. origin.<your-domain>, grey-clouded, pointing at your real
-# server) — pointing back at <www> would loop through this worker
+# server). Pointing back at <www> would loop through this worker
 # forever.
 ORIGIN_URL = "https://origin.<your-domain>"
 
 # Static assets are optional. Uncomment when the worker itself serves
-# files instead of forwarding to an origin (rare in production — the
+# files instead of forwarding to an origin (rare in production; the
 # origin usually serves them). `run_worker_first` uses positive
 # patterns for paths the worker runs on and `!`-prefixed patterns
 # for paths served directly (Protect entirely bypassed).
@@ -186,43 +185,43 @@ Your account manager notifies you when a new `worker.js` is available. Replace t
 ```bash
 WORKER=https://<name>.<your-subdomain>.workers.dev
 
-# 1. HTML — Protect should return "allow" (bootstrap-passthrough) and
+# 1. HTML: Protect should return "allow" (bootstrap-passthrough) and
 #    the worker forwards to your origin. Expected: 200, with
 #    x-prosopo-request-id in the response headers.
 curl -sD - -H "Accept: text/html" -H "User-Agent: Mozilla/5.0" "$WORKER/" | head
 
-# 2. JSON, no cookie — Protect returns 401. Expected: 401,
+# 2. JSON, no cookie: Protect returns 401. Expected: 401,
 #    x-prosopo-status: no-session, x-prosopo-request-id.
 curl -sD - -H "Accept: application/json" "$WORKER/api/anything" | head
 
-# 3. POST /forms/* with Accept: text/html and no cookie — same 401.
+# 3. POST /forms/* with Accept: text/html and no cookie: same 401.
 #    This closes the "spoof Accept: text/html on a POST to bypass
 #    session-required" bot pattern.
 curl -sD - -H "Accept: text/html" -X POST "$WORKER/forms/anything" | head
 ```
 
-**If command 1 returns anything but 200:** you may be hitting your own origin's bot protection, not Prosopo's. Cloudflare's Bot Management, AWS WAF, and similar tools reliably block curl regardless of what headers you set (they fingerprint TLS handshakes, not just User-Agents). Distinguish:
+**If command 1 returns anything other than 200**, you may be hitting your own origin's bot protection, not Prosopo's. Cloudflare Bot Management, AWS WAF, and similar tools reliably block curl regardless of what headers you set, because they fingerprint TLS handshakes rather than just User-Agents. Distinguish:
 
-- **Response has `x-prosopo-*` headers** → the 4xx is from Prosopo. Check `x-prosopo-status` and `x-prosopo-decision` — see [Troubleshooting](/protect-edge/troubleshooting).
-- **Response has `server: cloudflare` / `server: awselb` / etc and no `x-prosopo-*` headers** → the 4xx is from your origin's own bot protection blocking curl. Verify command 1 with a real browser instead, or temporarily point `ORIGIN_URL` at `https://httpbin.org` for the workers.dev smoke test.
+- If the response has `x-prosopo-*` headers, the 4xx is from Prosopo. Check `x-prosopo-status` and `x-prosopo-decision`. See [Troubleshooting](/protect-edge/troubleshooting).
+- If the response has `server: cloudflare` or `server: awselb` and no `x-prosopo-*` headers, the 4xx is from your origin's own bot protection blocking curl. Verify command 1 with a real browser instead, or temporarily point `ORIGIN_URL` at `https://httpbin.org` for the workers.dev smoke test.
 
-`X-Prosopo-Request-Id` is echoed on every response Prosopo returns and written to Protect's verdict audit log — quote it in support tickets and we can grep straight to the exact verdict that fired. The same ID also appears as `Reference: <id>` on the blocked interstitial page so users copying that line give you a direct lookup.
+`X-Prosopo-Request-Id` is echoed on every response Prosopo returns and written to Protect's verdict audit log. Quote it in support tickets and we can grep straight to the exact verdict that fired. The same ID also appears as `Reference: <id>` on the blocked interstitial page so users copying that line give you a direct lookup.
 
 ## Portal settings checklist
 
-Before deploying, confirm your Portal instance shows the settings you and your account manager agreed on. Open your [Prosopo dashboard](https://portal.prosopo.io/) → Sites → your site → Protect instance, and cross-check:
+Before deploying, confirm your Portal instance shows the settings you and your account manager agreed on. Open your [Prosopo dashboard](https://portal.prosopo.io/), navigate to Sites, your site, and Protect instance, and cross-check:
 
 | Setting | Typical value for a server-rendered site | Purpose |
 |--|--|--|
-| `cname` | `protect.<your-domain>` | Matches the DNS-only CNAME. If empty or pointing at `bumblebee1.prosopo.io`, the cert isn't wired up yet — talk to your account manager. |
+| `cname` | `protect.<your-domain>` | Matches the DNS-only CNAME. If empty or pointing at `bumblebee1.prosopo.io`, the cert isn't wired up yet; talk to your account manager. |
 | `defaultPathType` | `html` | Server-rendered pages get the no-cookie bootstrap passthrough so first-time visitors can load the bundle. Set to `json` only if your site is a pure API. |
 | Endpoint rule: `/api/*` | `pathType: json` | Any XHR endpoint requires an established session. |
 | Endpoint rule: `/forms/*` | `pathType: json` | Form-action endpoints require a session. |
 | Thresholds | Challenge `0.5`, Block `0.85` | Prosopo defaults. Tune from the dashboard once you've seen a few days of real traffic. |
-| Enforcement | `onPending: allow`, `onChallenge: captcha`, `onError: allow` | Fail-open on transient errors — a Protect outage never blocks legitimate users. |
+| Enforcement | `onPending: allow`, `onChallenge: captcha`, `onError: allow` | Fail-open on transient errors, so a Protect outage never blocks legitimate users. |
 | Captcha type | `frictionless` | Invisible on first attempt. Custom escalation (image challenge, PoW) can be layered on later. |
 | IP category rules | Typically `abuser: block`, `tor: block`; add `proxy: block` when you don't expect residential-proxy legitimate users | Conservative default. Every category rule can be tuned per site. |
-| Interstitial branding | Your logo, colours, copy strings | Rendered by the edge on block/challenge — sanitized server-side, no XSS risk. |
+| Interstitial branding | Your logo, colours, copy strings | Rendered by the edge on block/challenge, sanitized server-side, no XSS risk. |
 
 If any of these don't match, contact your account manager before deploying. Settings drift here silently produces `401 no-session` on paths that should return `200`, or blocks IP categories you didn't intend to.
 
@@ -238,25 +237,25 @@ routes = [
 
 For the worker's forward to reach your origin you need **two hostnames**:
 
-- `www.<your-domain>` → orange-cloud through Cloudflare → this worker runs.
-- `origin.<your-domain>` → **grey-cloud** DNS-only, pointing at your real origin server. Set `ORIGIN_URL = "https://origin.<your-domain>"` in `wrangler.toml`.
+- `www.<your-domain>`: orange-cloud through Cloudflare, so this worker runs.
+- `origin.<your-domain>`: **grey-cloud** DNS-only, pointing at your real origin server. Set `ORIGIN_URL = "https://origin.<your-domain>"` in `wrangler.toml`.
 
-Pointing `ORIGIN_URL` at `www.<your-domain>` would send the forwarded request back through Cloudflare's edge — which routes it through this worker again — a loop.
+Pointing `ORIGIN_URL` at `www.<your-domain>` would send the forwarded request back through Cloudflare's edge, which routes it through this worker again. That's a loop.
 
 ## Excluding static assets
 
-Every request through the worker costs a Protect API call. For hashed CSS/JS/image assets that never need a bot check, you can bypass Protect entirely using Cloudflare's `run_worker_first` list. Uncomment the `[assets]` block in the `wrangler.toml` example above, drop your files under `./public`, and any path matching a `!`-prefixed pattern is served by Cloudflare's asset worker without ever invoking Protect.
+Every request through the worker costs a Protect API call. For hashed CSS, JS, and image assets that never need a bot check, you can bypass Protect entirely using Cloudflare's `run_worker_first` list. Uncomment the `[assets]` block in the `wrangler.toml` example above, drop your files under `./public`, and any path matching a `!`-prefixed pattern is served by Cloudflare's asset worker without ever invoking Protect.
 
-Rule of thumb: exclude anything you'd normally cache aggressively on a CDN. Include everything a session should be established on (HTML pages, form endpoints, XHR/JSON endpoints).
+Rule of thumb: exclude anything you'd normally cache aggressively on a CDN. Include everything a session should be established on (HTML pages, form endpoints, XHR and JSON endpoints).
 
 ## Configuring proxy, VPN and datacenter blocking
 
 Blocking policy lives on your [Prosopo dashboard](https://portal.prosopo.io/), not in the bundle. Two independent rule sources feed the no-cookie edge path:
 
-- **Site settings** — recognised IP categories: `tor`, `datacenter`, `proxy`, `vpn`, `abuser`, `mobile`, `crawler`. Configure per-category verdicts (`allow` / `challenge` / `block`).
-- **Tiered access rules** — support the full rule set: IP CIDR, ASN, IP category, country, User-Agent substring, JA4 TLS fingerprint. Rules can be scoped to your site or applied globally by Prosopo.
+- **Site settings**: recognised IP categories are `tor`, `datacenter`, `proxy`, `vpn`, `abuser`, `mobile`, and `crawler`. Configure per-category verdicts (`allow`, `challenge`, or `block`).
+- **Tiered access rules**: support the full rule set of IP CIDR, ASN, IP category, country, User-Agent substring, and JA4 TLS fingerprint. Rules can be scoped to your site or applied globally by Prosopo.
 
-Either source firing blocks the request at the edge. When both match, the more restrictive verdict wins (`Block > Challenge > Allow`). Policy changes take effect on the next request — no redeploy needed.
+Either source firing blocks the request at the edge. When both match, the more restrictive verdict wins (`Block > Challenge > Allow`). Policy changes take effect on the next request, no redeploy needed.
 
 ## Rotating credentials
 
@@ -270,11 +269,11 @@ The next request picks up the new value.
 
 ## Performance
 
-Protect's API calls from a Cloudflare Worker typically return in under 40 ms (under 2 ms for cached lookups) and are budgeted to a 500 ms hard timeout, with fail-open on transient errors. On an `allow` verdict the request continues to your origin as normal; on `block` or `challenge` the worker returns immediately without an origin fetch, so protected requests are strictly faster than unprotected ones for the blocked path.
+Protect's API calls from a Cloudflare Worker typically return in under 40 ms (under 2 ms for cached lookups) and are budgeted to a 500 ms hard timeout, with fail-open on transient errors. On an `allow` verdict the request continues to your origin as normal. On `block` or `challenge` the worker returns immediately without an origin fetch, so protected requests are strictly faster than unprotected ones for the blocked path.
 
 ## TLS caveats
 
-Cloudflare Workers doesn't expose a way to skip TLS verification on outbound fetches. If the Protect API hostname doesn't have a valid certificate on our side yet, `fetch` returns HTTP 526 and Protect can't be reached. This is the failure mode when you deploy before your account manager has issued the cert for `protect.<your-domain>` — see [Coordinate cert issuance](#coordinate-cert-issuance-with-your-account-manager).
+Cloudflare Workers doesn't expose a way to skip TLS verification on outbound fetches. If the Protect API hostname doesn't have a valid certificate on our side yet, `fetch` returns HTTP 526 and Protect can't be reached. This is the failure mode when you deploy before your account manager has issued the cert for `protect.<your-domain>`. See [Coordinate cert issuance](#coordinate-cert-issuance-with-your-account-manager).
 
 ## Live logs
 
