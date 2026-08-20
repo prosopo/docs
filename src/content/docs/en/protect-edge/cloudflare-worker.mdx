@@ -19,9 +19,13 @@ Deploy the two parts in either order, but ship both before rollout. The sections
 
 ## What you get
 
-- `worker.js`: the worker code, delivered per site and per environment. Self-contained, ~50 KB. Same file for every customer; per-site config lives in `wrangler.toml`.
-- `wrangler.toml`: deployment config, pre-set with your `PROTECT_URL`.
+Part 1 (server-side) is delivered as a zip:
+
+- `worker.js`: the worker code. Self-contained, ~50 KB. Same file for every customer; per-site config lives in `wrangler.toml`.
+- `wrangler.toml`: Cloudflare deployment config, pre-set with your `PROTECT_URL`.
 - `README.md`: customer-specific quick reference mirroring this guide.
+
+Part 2 (client-side) is hosted by us. You add one `<script>` tag pointing at `https://js.protect.prosopo.io/protect.bundle.js`. Nothing to download or bundle yourself. We publish new versions to that URL; your pages pick them up on their next reload without a redeploy from you.
 
 ## Prerequisites
 

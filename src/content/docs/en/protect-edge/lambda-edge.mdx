@@ -19,7 +19,11 @@ Deploy the two parts in either order, but ship both before rollout. The sections
 
 ## What you get
 
-- `lambda-edge.js`: the bundle, delivered per site and per environment. Self-contained, ~100 KB. Same file for every customer; per-site config is baked in at build time.
+Part 1 (server-side) is delivered as a file:
+
+- `lambda-edge.js`: the Lambda code, delivered per site and per environment. Self-contained, ~100 KB. Same file for every customer; per-site config is baked in at build time.
+
+Part 2 (client-side) is hosted by us. You add one `<script>` tag pointing at `https://js.protect.prosopo.io/protect.bundle.js`. Nothing to download or bundle yourself. We publish new versions to that URL; your pages pick them up on their next reload without a redeploy from you.
 
 ## Prerequisites
 
