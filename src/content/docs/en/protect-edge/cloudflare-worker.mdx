@@ -8,14 +8,14 @@ The Prosopo Protect Cloudflare Worker sits in front of your origin and runs Prot
 
 ## Two-part install: read this first
 
-A production Prosopo Protect integration is two independent pieces working together. Deploying only one leaves your site unprotected. Both are covered by this guide.
+A production Prosopo Protect integration is two independent pieces working together. Deploying only one leaves your site unprotected:
 
-1. **The Cloudflare Worker (server-side).** Sits in front of your origin, runs the verdict on every request, and blocks bad traffic before it reaches your server. This is `worker.js` plus `wrangler.toml`.
-2. **The Protect JS bundle (client-side).** Loaded on every HTML page users visit. Creates the session cookie, collects the bot-signal telemetry the risk engine scores, and shows the captcha overlay when the worker returns a challenge. This is a single `<script>` tag in your HTML.
+- **Part 1: the Cloudflare Worker (server-side).** Sits in front of your origin, runs the verdict on every request, and blocks bad traffic before it reaches your server. This is `worker.js` plus `wrangler.toml`.
+- **Part 2: the Protect JS bundle (client-side).** Loaded on every HTML page users visit. Creates the session cookie, collects the bot-signal telemetry the risk engine scores, and shows the captcha overlay when the worker returns a challenge. This is a single `<script>` tag in your HTML.
 
-Without the worker, no request is scored. Without the bundle, no user ever gets a session cookie, so every `/api/*` and `/forms/*` request returns 401 `no-session` forever. The verify commands at the bottom of this page test the worker path only, so a green worker with no bundle deployed looks like it's working while every real user still fails on their first XHR.
+Without the worker, no request is scored. Without the bundle, no user ever gets a session cookie, so every `/api/*` and `/forms/*` request returns 401 `no-session` forever. The verify commands under Part 1 test the worker path only, so a green worker with no bundle deployed looks like it's working while every real user still fails on their first XHR.
 
-Deploy them in either order, but ship both before rollout.
+Deploy the two parts in either order, but ship both before rollout. The sections below are organised under the same two headings.
 
 ## What you get
 
@@ -34,7 +34,9 @@ Deploy them in either order, but ship both before rollout.
   - Registered your site key on the Protect dashboard with your intended `defaultPathType`, endpoint rules, IP-category rules, and interstitial branding. See [Portal settings checklist](#portal-settings-checklist) below.
   - Issued you a `CLIENT_JWT`, a long-lived token authenticating the worker to the Protect API.
 
-## DNS: `protect.<your-domain>` as DNS-only (grey cloud)
+## Part 1: the Cloudflare Worker (server-side)
+
+### 1a. DNS: `protect.<your-domain>` as DNS-only (grey cloud)
 
 The worker talks to Protect at a hostname you own, typically `protect.<your-domain>`. Create a CNAME record on that hostname pointing at Prosopo:
 
@@ -48,7 +50,7 @@ Why: Prosopo Protect's risk engine derives most of its bot-signal value from the
 
 Grey-cloud on `protect.<your-domain>` only. Every other DNS record on your zone (including your main `www` record fronted by this worker) stays exactly as it is. This one subdomain needs to point directly at our origin so the browser's TLS handshake reaches us intact.
 
-### Coordinate cert issuance with your account manager
+### 1b. Coordinate cert issuance with your account manager
 
 Prosopo issues the TLS certificate for your `protect.<your-domain>` subdomain via Let's Encrypt on our infrastructure. This is a two-step handoff:
 
@@ -66,54 +68,7 @@ Prosopo issues the TLS certificate for your `protect.<your-domain>` subdomain vi
 
 Once the cert is in place it auto-renews on our end every 60 days. You don't touch it again.
 
-## Step 1: Add the Protect JS bundle to every HTML page
-
-**This step is mandatory.** Without the bundle no session cookie is ever set, and the worker returns 401 `no-session` on every `/api/*` or `/forms/*` call in perpetuity.
-
-Add this snippet to every HTML page your site serves. A shared header or footer template is the usual spot:
-
-```html
-<script>
-  window.prosopo_config = {
-    site_key: "<your-site-key>",
-    protect_url: "https://protect.<your-domain>"
-  };
-</script>
-<script src="https://js.protect.prosopo.io/protect.bundle.js" async></script>
-```
-
-Both tags are required. The first sets `window.prosopo_config` before the second loads; the bundle reads that config to know which Protect API to talk to. Skipping the first tag causes the bundle to fall back to the CDN's own origin (`js.protect.prosopo.io`) as its API URL, which returns 405 on the CORS preflight for `/api/protect/init` and hangs the bundle's patched `fetch`.
-
-On first page load the bundle:
-
-1. Calls `POST https://protect.<your-domain>/api/protect/init`.
-2. Receives a `prosopo_session` cookie scoped to `.<your-domain>`.
-3. Loads a per-session telemetry runtime script that collects the bot-signal data used for risk scoring.
-
-Every subsequent request from that browser carries the cookie, and the worker looks up a real verdict on `/api/*` or `/forms/*` calls.
-
-### Gate fast form submissions and link clicks (optional)
-
-Users can click **Submit** before the bundle finishes creating the session. The browser fires a full-page POST with no cookie and gets a 401. The security is correct but the UX is bad.
-
-Opt any form or link into automatic held-until-session-ready behaviour by adding the `data-prosopo-gate` attribute:
-
-```html
-<form action="/forms/search.php" method="post" data-prosopo-gate>
-  <!-- ... -->
-</form>
-
-<nav data-prosopo-gate>
-  <a href="/section-a/">Section A</a>
-  <a href="/section-b/">Section B</a>
-</nav>
-```
-
-The bundle intercepts marked forms and same-origin links in the capture phase, holds up to 8 seconds waiting for the session, then releases with the cookie in place. The submit button flips `disabled` and `aria-busy` while held so the user gets visual feedback. Ctrl/Cmd-click, middle-click, `target="_blank"`, `download` attributes, hash-only links, and cross-origin links pass through untouched.
-
-Attributes on an ancestor cover every descendant form or link, so `<nav data-prosopo-gate>` gates every link inside.
-
-## Step 2: Deploy the worker
+### 1c. Deploy the worker
 
 Cloudflare Workers is configured by a `wrangler.toml` alongside the worker code:
 
@@ -168,7 +123,7 @@ echo "<your-CLIENT_JWT>" | wrangler secret put CLIENT_JWT
 wrangler deploy
 ```
 
-The worker is now live at `https://<name>.<your-subdomain>.workers.dev`. Once the verify commands below all pass, attach it to your production hostname by uncommenting the `routes` block in `wrangler.toml`:
+The worker is now live at `https://<name>.<your-subdomain>.workers.dev`. Once the verify commands below pass, attach it to your production hostname by uncommenting the `routes` block in `wrangler.toml`:
 
 ```toml
 routes = [
@@ -180,7 +135,7 @@ Then `wrangler deploy` once more. The worker now runs on every request to `www.<
 
 Your account manager notifies you when a new `worker.js` is available. Replace the file and re-run `wrangler deploy`. Secrets persist.
 
-## Verify
+### 1d. Verify the worker
 
 ```bash
 WORKER=https://<name>.<your-subdomain>.workers.dev
@@ -206,6 +161,67 @@ curl -sD - -H "Accept: text/html" -X POST "$WORKER/forms/anything" | head
 - If the response has `server: cloudflare` or `server: awselb` and no `x-prosopo-*` headers, the 4xx is from your origin's own bot protection blocking curl. Verify command 1 with a real browser instead, or temporarily point `ORIGIN_URL` at `https://httpbin.org` for the workers.dev smoke test.
 
 `X-Prosopo-Request-Id` is echoed on every response Prosopo returns and written to Protect's verdict audit log. Quote it in support tickets and we can grep straight to the exact verdict that fired. The same ID also appears as `Reference: <id>` on the blocked interstitial page so users copying that line give you a direct lookup.
+
+Worker verified? Move to Part 2.
+
+## Part 2: the Protect JS bundle (client-side)
+
+**This part is mandatory.** Without the bundle no session cookie is ever set, and the worker returns 401 `no-session` on every `/api/*` or `/forms/*` call in perpetuity. The worker verify commands under Part 1 still pass without the bundle; real user traffic doesn't.
+
+### 2a. Add the script tag to every HTML page
+
+Add this snippet to every HTML page your site serves. A shared header or footer template is the usual spot:
+
+```html
+<script>
+  window.prosopo_config = {
+    site_key: "<your-site-key>",
+    protect_url: "https://protect.<your-domain>"
+  };
+</script>
+<script src="https://js.protect.prosopo.io/protect.bundle.js" async></script>
+```
+
+Both tags are required. The first sets `window.prosopo_config` before the second loads; the bundle reads that config to know which Protect API to talk to. Skipping the first tag causes the bundle to fall back to the CDN's own origin (`js.protect.prosopo.io`) as its API URL, which returns 405 on the CORS preflight for `/api/protect/init` and hangs the bundle's patched `fetch`.
+
+On first page load the bundle:
+
+1. Calls `POST https://protect.<your-domain>/api/protect/init`.
+2. Receives a `prosopo_session` cookie scoped to `.<your-domain>`.
+3. Loads a per-session telemetry runtime script that collects the bot-signal data used for risk scoring.
+
+Every subsequent request from that browser carries the cookie, and the worker looks up a real verdict on `/api/*` or `/forms/*` calls.
+
+### 2b. Gate fast form submissions and link clicks (optional)
+
+Users can click **Submit** before the bundle finishes creating the session. The browser fires a full-page POST with no cookie and gets a 401. The security is correct but the UX is bad.
+
+Opt any form or link into automatic held-until-session-ready behaviour by adding the `data-prosopo-gate` attribute:
+
+```html
+<form action="/forms/search.php" method="post" data-prosopo-gate>
+  <!-- ... -->
+</form>
+
+<nav data-prosopo-gate>
+  <a href="/section-a/">Section A</a>
+  <a href="/section-b/">Section B</a>
+</nav>
+```
+
+The bundle intercepts marked forms and same-origin links in the capture phase, holds up to 8 seconds waiting for the session, then releases with the cookie in place. The submit button flips `disabled` and `aria-busy` while held so the user gets visual feedback. Ctrl/Cmd-click, middle-click, `target="_blank"`, `download` attributes, hash-only links, and cross-origin links pass through untouched.
+
+Attributes on an ancestor cover every descendant form or link, so `<nav data-prosopo-gate>` gates every link inside.
+
+### 2c. Verify the bundle
+
+Open your site in a real browser with DevTools on the Network tab. On first page load you should see:
+
+- A `POST` to `https://protect.<your-domain>/api/protect/init` returning `200` and a `Set-Cookie: prosopo_session=…` header.
+- A subsequent `GET https://protect.<your-domain>/api/protect/t/<jti>` fetching the per-session telemetry runtime.
+- The `prosopo_session` cookie set with `Domain=.<your-domain>` for later requests.
+
+If the init call goes to `https://js.protect.prosopo.io/api/protect/init` and returns 405, the `window.prosopo_config` block is missing from the snippet. See [Troubleshooting](/protect-edge/troubleshooting#http-401-no-session-on-every-user-request).
 
 ## Portal settings checklist
 
@@ -273,7 +289,7 @@ Protect's API calls from a Cloudflare Worker typically return in under 40 ms (un
 
 ## TLS caveats
 
-Cloudflare Workers doesn't expose a way to skip TLS verification on outbound fetches. If the Protect API hostname doesn't have a valid certificate on our side yet, `fetch` returns HTTP 526 and Protect can't be reached. This is the failure mode when you deploy before your account manager has issued the cert for `protect.<your-domain>`. See [Coordinate cert issuance](#coordinate-cert-issuance-with-your-account-manager).
+Cloudflare Workers doesn't expose a way to skip TLS verification on outbound fetches. If the Protect API hostname doesn't have a valid certificate on our side yet, `fetch` returns HTTP 526 and Protect can't be reached. This is the failure mode when you deploy before your account manager has issued the cert for `protect.<your-domain>`. See [Coordinate cert issuance](#1b-coordinate-cert-issuance-with-your-account-manager).
 
 ## Live logs
 

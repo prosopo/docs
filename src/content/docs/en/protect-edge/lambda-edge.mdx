@@ -8,14 +8,14 @@ The Prosopo Protect Lambda@Edge bundle runs on Amazon CloudFront's viewer-reques
 
 ## Two-part install: read this first
 
-A production Prosopo Protect integration is two independent pieces working together. Deploying only one leaves your site unprotected. Both are covered by this guide.
+A production Prosopo Protect integration is two independent pieces working together. Deploying only one leaves your site unprotected:
 
-1. **The Lambda@Edge bundle (server-side).** Runs on every CloudFront viewer request, executes the verdict, and blocks bad traffic before it reaches your origin. This is `lambda-edge.js`, deployed as a Lambda function and attached to a CloudFront behaviour.
-2. **The Protect JS bundle (client-side).** Loaded on every HTML page users visit. Creates the session cookie, collects the bot-signal telemetry the risk engine scores, and shows the captcha overlay when the edge returns a challenge. This is a single `<script>` tag in your HTML.
+- **Part 1: the Lambda@Edge bundle (server-side).** Runs on every CloudFront viewer request, executes the verdict, and blocks bad traffic before it reaches your origin. This is `lambda-edge.js`, deployed as a Lambda function and attached to a CloudFront behaviour.
+- **Part 2: the Protect JS bundle (client-side).** Loaded on every HTML page users visit. Creates the session cookie, collects the bot-signal telemetry the risk engine scores, and shows the captcha overlay when the edge returns a challenge. This is a single `<script>` tag in your HTML.
 
-Without the Lambda, no request is scored. Without the JS bundle, no user ever gets a session cookie, so every `/api/*` and `/forms/*` request returns 401 `no-session` forever. The verify commands at the bottom of this page test the Lambda path only, so a green Lambda with no JS bundle deployed looks like it's working while every real user still fails on their first XHR.
+Without the Lambda, no request is scored. Without the JS bundle, no user ever gets a session cookie, so every `/api/*` and `/forms/*` request returns 401 `no-session` forever. The verify commands under Part 1 test the Lambda path only, so a green Lambda with no JS bundle deployed looks like it's working while every real user still fails on their first XHR.
 
-Deploy them in either order, but ship both before rollout.
+Deploy the two parts in either order, but ship both before rollout. The sections below are organised under the same two headings.
 
 ## What you get
 
@@ -30,7 +30,9 @@ Deploy them in either order, but ship both before rollout.
   - Registered your site key on the Protect dashboard with your intended `defaultPathType`, endpoint rules, IP-category rules, and interstitial branding. See [Portal settings checklist](/protect-edge/cloudflare-worker#portal-settings-checklist), which applies here too.
   - Issued you a bundle scoped to your site.
 
-## DNS: `protect.<your-domain>` as DNS-only
+## Part 1: the Lambda@Edge bundle (server-side)
+
+### 1a. DNS: `protect.<your-domain>` as DNS-only
 
 The bundle talks to Protect at a hostname you own, typically `protect.<your-domain>`. Create a CNAME record on your DNS pointing that hostname at Prosopo:
 
@@ -40,7 +42,7 @@ protect.<your-domain>   CNAME   protect.prosopo.io
 
 **Do not put this record behind a proxy layer (CloudFront, Cloudflare, or similar).** Prosopo's risk engine derives most of its bot-signal value from the raw TLS handshake (the JA4, JA4H, JA4L, and JA4T fingerprints). If a proxy terminates the browser's TLS at its edge and re-opens a fresh connection to Prosopo, the JA4 signals collapse to a single value per proxy stack and risk scoring degrades to noise. This subdomain must be DNS-only.
 
-### Coordinate cert issuance with your account manager
+### 1b. Coordinate cert issuance with your account manager
 
 Prosopo issues the TLS certificate for your `protect.<your-domain>` subdomain via Let's Encrypt on our infrastructure. This is a two-step handoff:
 
@@ -58,25 +60,7 @@ Once the cert is in place it auto-renews on our end every 60 days.
 
 The bundle you receive from Prosopo is built against your CNAMEd hostname, so you don't need to configure the URL yourself. If you rotate the CNAMEd hostname, request a fresh bundle.
 
-## Step 1: Add the Protect JS bundle to every HTML page
-
-**This step is mandatory.** Without the bundle no session cookie is ever set, and the Lambda returns 401 `no-session` on every `/api/*` or `/forms/*` call in perpetuity.
-
-Add this snippet to every HTML page your site serves. A shared header or footer template is the usual spot:
-
-```html
-<script>
-  window.prosopo_config = {
-    site_key: "<your-site-key>",
-    protect_url: "https://protect.<your-domain>"
-  };
-</script>
-<script src="https://js.protect.prosopo.io/protect.bundle.js" async></script>
-```
-
-Both tags are required. See the [Cloudflare Worker guide](/protect-edge/cloudflare-worker#step-1-add-the-protect-js-bundle-to-every-html-page) for a full explanation of what each tag does and how to gate fast form submissions with `data-prosopo-gate`.
-
-## Step 2: Deploy the Lambda
+### 1c. Deploy the Lambda
 
 Upload the bundle to Lambda, publish a version, and attach the versioned ARN to the CloudFront behaviour you want to protect.
 
@@ -116,7 +100,7 @@ CloudFront propagates to every edge location in 2 to 5 minutes. Repeat this atta
 
 Your account manager will let you know when a new bundle is available. Run `update-function-code` plus `publish-version` and point the behaviour at the new versioned ARN. CloudFront won't pick up `$LATEST`.
 
-### Execution role
+#### Execution role
 
 The function's role needs both `lambda.amazonaws.com` and `edgelambda.amazonaws.com` as trusted principals, plus the `AWSLambdaBasicExecutionRole` managed policy for CloudWatch Logs:
 
@@ -135,7 +119,7 @@ The function's role needs both `lambda.amazonaws.com` and `edgelambda.amazonaws.
 }
 ```
 
-## Verify
+### 1d. Verify the Lambda
 
 Once the trigger is attached and CloudFront has propagated, test through the distribution's domain.
 
@@ -163,6 +147,67 @@ curl -sD - -H "Accept: text/html" -X POST "$DIST/forms/anything" | head
 
 `X-Prosopo-Request-Id` is echoed on every response Prosopo returns and written to Protect's verdict audit log. CloudFront's own `x-amz-cf-id` is the default request ID, so the same value shows up in CloudFront access logs and Protect's audit log.
 
+Lambda verified? Move to Part 2.
+
+## Part 2: the Protect JS bundle (client-side)
+
+**This part is mandatory.** Without the bundle no session cookie is ever set, and the Lambda returns 401 `no-session` on every `/api/*` or `/forms/*` call in perpetuity. The Lambda verify commands under Part 1 still pass without the bundle; real user traffic doesn't.
+
+### 2a. Add the script tag to every HTML page
+
+Add this snippet to every HTML page your site serves. A shared header or footer template is the usual spot:
+
+```html
+<script>
+  window.prosopo_config = {
+    site_key: "<your-site-key>",
+    protect_url: "https://protect.<your-domain>"
+  };
+</script>
+<script src="https://js.protect.prosopo.io/protect.bundle.js" async></script>
+```
+
+Both tags are required. The first sets `window.prosopo_config` before the second loads; the bundle reads that config to know which Protect API to talk to. Skipping the first tag causes the bundle to fall back to the CDN's own origin (`js.protect.prosopo.io`) as its API URL, which returns 405 on the CORS preflight for `/api/protect/init` and hangs the bundle's patched `fetch`.
+
+On first page load the bundle:
+
+1. Calls `POST https://protect.<your-domain>/api/protect/init`.
+2. Receives a `prosopo_session` cookie scoped to `.<your-domain>`.
+3. Loads a per-session telemetry runtime script that collects the bot-signal data used for risk scoring.
+
+Every subsequent request from that browser carries the cookie, and the Lambda looks up a real verdict on `/api/*` or `/forms/*` calls.
+
+### 2b. Gate fast form submissions and link clicks (optional)
+
+Users can click **Submit** before the bundle finishes creating the session. The browser fires a full-page POST with no cookie and gets a 401. The security is correct but the UX is bad.
+
+Opt any form or link into automatic held-until-session-ready behaviour by adding the `data-prosopo-gate` attribute:
+
+```html
+<form action="/forms/search.php" method="post" data-prosopo-gate>
+  <!-- ... -->
+</form>
+
+<nav data-prosopo-gate>
+  <a href="/section-a/">Section A</a>
+  <a href="/section-b/">Section B</a>
+</nav>
+```
+
+The bundle intercepts marked forms and same-origin links in the capture phase, holds up to 8 seconds waiting for the session, then releases with the cookie in place. The submit button flips `disabled` and `aria-busy` while held so the user gets visual feedback. Ctrl/Cmd-click, middle-click, `target="_blank"`, `download` attributes, hash-only links, and cross-origin links pass through untouched.
+
+Attributes on an ancestor cover every descendant form or link, so `<nav data-prosopo-gate>` gates every link inside.
+
+### 2c. Verify the bundle
+
+Open your site in a real browser with DevTools on the Network tab. On first page load you should see:
+
+- A `POST` to `https://protect.<your-domain>/api/protect/init` returning `200` and a `Set-Cookie: prosopo_session=…` header.
+- A subsequent `GET https://protect.<your-domain>/api/protect/t/<jti>` fetching the per-session telemetry runtime.
+- The `prosopo_session` cookie set with `Domain=.<your-domain>` for later requests.
+
+If the init call goes to `https://js.protect.prosopo.io/api/protect/init` and returns 405, the `window.prosopo_config` block is missing from the snippet. See [Troubleshooting](/protect-edge/troubleshooting#http-401-no-session-on-every-user-request).
+
 ## Configuring proxy, VPN and datacenter blocking
 
 Blocking policy lives on your [Prosopo dashboard](https://portal.prosopo.io/), not in the bundle. Two independent rule sources feed the no-cookie edge path:
@@ -181,7 +226,7 @@ Either source firing blocks the request at the edge. When both match, the more r
 
 ## Rotating credentials
 
-Each bundle is scoped to a specific site's authentication token. Rotating the token means requesting a fresh bundle from Prosopo and redeploying it via the [Deploy](#step-2-deploy-the-lambda) flow. The old bundle keeps working until you swap the ARN on your CloudFront behaviour.
+Each bundle is scoped to a specific site's authentication token. Rotating the token means requesting a fresh bundle from Prosopo and redeploying it via the [Deploy the Lambda](#1c-deploy-the-lambda) flow. The old bundle keeps working until you swap the ARN on your CloudFront behaviour.
 
 ## Troubleshooting
 
