@@ -1,0 +1,121 @@
+---
+title: Troubleshooting
+description: Distinguish Prosopo Protect 4xx responses from other bot-protection layers, recognise known-harmless browser console warnings, and diagnose the most common misconfigurations in an edge deployment.
+i18nReady: true
+---
+
+Common failure modes when deploying Prosopo Protect at the edge, with the actual causes rather than the surface symptoms.
+
+## Whose 4xx is this?
+
+A `curl` that returns a `4xx` from a URL running through both Prosopo and your own CDN's bot management isn't always Prosopo. Every response Prosopo emits carries `X-Prosopo-*` headers. Every response from Cloudflare Bot Management, AWS WAF, and similar layers doesn't. That's the tell.
+
+Check the response headers first:
+
+```bash
+curl -sI https://<your-domain>/some/path
+```
+
+| Response includes | Source | What to do |
+|---|---|---|
+| `x-prosopo-status: <status>` | Prosopo | Look up `<status>` below. |
+| `x-prosopo-decision: block` | Prosopo | The verdict was `block`. See [Blocked by Prosopo](#blocked-by-prosopo). |
+| `x-prosopo-decision: challenge` | Prosopo | The verdict was `challenge`. Real browsers see the captcha; `curl` cannot solve it. |
+| `server: cloudflare` and **no** `x-prosopo-*` | Cloudflare Bot Management | Your zone's own bot rules. Check your Cloudflare dashboard, Security, Bots. |
+| `server: awselb` / `Server: CloudFront` and no `x-prosopo-*` | AWS WAF / CloudFront managed rules | Your distribution's own bot rules. Check AWS WAF console. |
+| `server: nginx` / `Apache` / origin-specific | Your origin server itself | Application-level auth, IP allowlist, or origin bot protection. Not Prosopo. |
+
+When in doubt, hit Prosopo directly (bypass the edge worker) with `curl -H "Host: your-domain.com" https://protect.your-domain.com/api/protect/anything`. An `x-prosopo-*` header appears on that response, confirming Prosopo is reachable.
+
+## Prosopo status codes
+
+Every non-`allow` response from Prosopo sets `X-Prosopo-Status`:
+
+| Status | Meaning |
+|---|---|
+| `no-session` | Request has no `prosopo_session` cookie and hit a path declared as `pathType: json`. Not necessarily an error. This is the expected response for a first-time API call before the client bundle has established a session. |
+| `invalid-session` | The `prosopo_session` cookie value can't be parsed (truncated, tampered with, or a stale format). Client should clear the cookie and let the bundle re-initialise. |
+| `session-not-found` | The JTI in the cookie doesn't match any live session record. Usually a session that expired or was evicted from Redis. Client should re-initialise. |
+
+## Blocked by Prosopo
+
+When Prosopo returns `x-prosopo-decision: block`, the response body (HTML for browsers, JSON for API calls) explains why. The `X-Prosopo-Request-Id` header, echoed on every response and also rendered as `Reference: <id>` on the blocked interstitial, is the audit-log key. Quote it in support conversations and we can grep straight to the exact verdict that fired.
+
+Common block sources:
+
+- **IP category**: the client IP was flagged as `tor`, `abuser`, `proxy`, etc., and your Portal has that category set to `block`. Change on your [Prosopo dashboard](https://portal.prosopo.io/) under Site settings, IP category rules.
+- **Access rule**: an operator-added rule matched the request (IP CIDR, ASN, User-Agent, JA4, country). Change on your dashboard under Access rules.
+- **Risk score above threshold**: the verdict from the risk engine crossed the configured block threshold (default `0.85`). Investigate the individual rules that fired via the verdict audit log. Your account manager can pull the row from the `X-Prosopo-Request-Id`.
+
+## Known-benign browser console warnings
+
+Warnings that appear in the browser DevTools console during normal Protect operation. None of these break functionality; ignore them.
+
+| Warning | When you'll see it | Fixed in |
+|---|---|---|
+| `Refused to get unsafe header "x-prosopo-request-id"` | Bundle reading the request-id header on cross-origin responses that don't expose it via `Access-Control-Expose-Headers`. | Bundle fixed 2026-08-19. Redeploy from the CDN if you're on an older cached copy. |
+| `[Violation] Permissions policy violation: unload is not allowed in this document.` | Telemetry runtime registered an `unload` handler (deprecated in Chrome via Permissions-Policy). | Telemetry runtime fixed 2026-08-19. Users on the current bundle no longer see this. |
+
+If you're seeing either warning on a bundle that should be current, hard-refresh (Ctrl-Shift-R) to bypass the browser cache. The bundle sets a short cache lifetime so refreshes propagate quickly.
+
+## `HTTP 526` from the worker to Prosopo
+
+**Symptom:** `wrangler tail` shows `access-check returned 526` on every request. Worker fails open (requests reach your origin but Prosopo scored none of them).
+
+**Cause:** Cloudflare can't complete the TLS handshake to `protect.<your-domain>` because the certificate on our end hasn't been issued yet, or the CNAME record is orange-cloud (proxied) so Cloudflare's edge fingerprints your worker as talking to itself.
+
+**Fix:**
+
+1. Confirm the CNAME record is DNS-only (grey cloud):
+
+   ```bash
+   dig protect.<your-domain>
+   # A record MUST NOT be a Cloudflare edge IP (104.x, 172.x range).
+   # It should resolve directly to Prosopo's edge via the CNAME chain.
+   ```
+
+2. Email your Prosopo account manager. We issue the Let's Encrypt certificate on our end (~30 seconds), confirm back, and the 526s stop on the next request.
+
+## `HTTP 401 no-session` on every user request
+
+**Symptom:** Real users' API calls return `401 no-session`. Only affects paths declared as `pathType: json` (typically `/api/*`, `/forms/*`). The verify commands from the guides still show the expected 401. You already know that's the correct response for a cookie-less curl.
+
+**Cause:** No user is establishing a session. Usually because the Protect JS bundle isn't loaded on your HTML pages, or the `window.prosopo_config` block is missing from the snippet.
+
+**Fix:**
+
+1. Load a page from your site in a real browser with DevTools open on the Network tab.
+2. Filter for `protect.bundle.js`. If it's not there, the `<script>` tag isn't reaching your HTML. Check your header or footer template.
+3. Filter for `/api/protect/init`. It should be a `POST` to `https://protect.<your-domain>` returning 200 with `Set-Cookie: prosopo_session=…`.
+
+   - If it's going to `https://js.protect.prosopo.io/api/protect/init` instead and getting a 405, your snippet is missing the `window.prosopo_config` block. Add it above the `<script src=…>` line. See [the CF Worker install step](/protect-edge/cloudflare-worker#step-1-add-the-protect-js-bundle-to-every-html-page).
+   - If it's going to the right hostname but returning `4xx`, check the Portal settings and DNS.
+4. Filter for cookies. The `prosopo_session` cookie should be set with `Domain=.<your-domain>` after the init call.
+
+## Bundle rotation errors after a telemetry redeploy
+
+**Symptom:** Immediately after Prosopo publishes a new telemetry runtime bundle, some legitimate telemetry POSTs from your users fail with 400 `Failed to decrypt telemetry payload`. Volume declines over minutes to hours.
+
+**Cause:** Browsers that had cached an older telemetry bundle continue to encrypt telemetry with the old public key. Once the rotation happens on our side, only the new private key is retained, so old-key payloads fail decryption. The bundle catches the 400 silently. No user-visible impact.
+
+**Fix:** No action. The transient decays as browser caches expire and users reload pages. Session initialisation, verdict lookups, and captcha flows are unaffected. They use the client bundle's public request path, not the telemetry channel.
+
+## Verify commands return `200` from the worker but nothing appears in the verdict audit log
+
+**Symptom:** `curl` against the worker returns `200` with `x-prosopo-*` headers, but the dashboard shows no verdict rows for your site.
+
+**Cause:** The worker's forward to your origin succeeded, but the `X-Prosopo-Decision` on the response was `allow`. Those aren't logged in the same way as `block` or `challenge`. Successful passes are counted in the traffic summary, not the individual verdict log.
+
+Check the dashboard's traffic summary for your site to see request throughput broken down by verdict.
+
+## Configuration drift
+
+**Symptom:** Behaviour changed without anyone deploying. Verify commands that previously worked now fail (or vice versa).
+
+**Cause:** Someone edited your Protect instance's settings on the dashboard, or our sync process pushed a stale copy back over a manual Redis edit.
+
+**Fix:** Cross-check the current Portal settings against the [Portal settings checklist](/protect-edge/cloudflare-worker#portal-settings-checklist). If a field doesn't match, the dashboard is the source of truth; update there.
+
+## Getting help
+
+Grab the `X-Prosopo-Request-Id` from any failing request and share it with your account manager. It's the audit-log key. One string gets us straight to the exact verdict, all the input signals, the rules that fired, and the response we returned.

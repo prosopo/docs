@@ -112,6 +112,11 @@ export default [
         slug: 'protect-edge/lambda-edge',
         key: 'protect-edge/lambda-edge',
     },
+    {
+        text: 'Troubleshooting',
+        slug: 'protect-edge/troubleshooting',
+        key: 'protect-edge/troubleshooting',
+    },
     {text: 'Framework integrations', header: true, type: 'learn', key: 'framework-integrations'},
     {
         text: 'Angular Integration',
