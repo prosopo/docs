@@ -47,17 +47,6 @@ Common block sources:
 - **Access rule**: an operator-added rule matched the request (IP CIDR, ASN, User-Agent, JA4, country). Change on your dashboard under Access rules.
 - **Risk score above threshold**: the verdict from the risk engine crossed the configured block threshold (default `0.85`). Investigate the individual rules that fired via the verdict audit log. Your account manager can pull the row from the `X-Prosopo-Request-Id`.
 
-## Known-benign browser console warnings
-
-Warnings that appear in the browser DevTools console during normal Protect operation. None of these break functionality; ignore them.
-
-| Warning | When you'll see it | Fixed in |
-|---|---|---|
-| `Refused to get unsafe header "x-prosopo-request-id"` | Bundle reading the request-id header on cross-origin responses that don't expose it via `Access-Control-Expose-Headers`. | Bundle fixed 2026-08-19. Redeploy from the CDN if you're on an older cached copy. |
-| `[Violation] Permissions policy violation: unload is not allowed in this document.` | Telemetry runtime registered an `unload` handler (deprecated in Chrome via Permissions-Policy). | Telemetry runtime fixed 2026-08-19. Users on the current bundle no longer see this. |
-
-If you're seeing either warning on a bundle that should be current, hard-refresh (Ctrl-Shift-R) to bypass the browser cache. The bundle sets a short cache lifetime so refreshes propagate quickly.
-
 ## `HTTP 526` from the worker to Prosopo
 
 **Symptom:** `wrangler tail` shows `access-check returned 526` on every request. Worker fails open (requests reach your origin but Prosopo scored none of them).

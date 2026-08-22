@@ -69,7 +69,7 @@ protect.<your-domain>   CNAME   protect.prosopo.io
 
 **Set the proxy status to DNS only (grey cloud), not proxied (orange cloud).** This is not optional.
 
-Why: Prosopo Protect's risk engine derives most of its bot-signal value from the raw TLS handshake (cipher-suite order, extensions, timing between packets, and the JA4, JA4H, JA4L, and JA4T fingerprints). If Cloudflare's proxy terminates the browser's TLS at its edge, what reaches Prosopo is a fresh TLS connection from Cloudflare's own stack, identical for every user. The JA4 signals collapse to a single value and the risk-scoring pipeline degrades to noise.
+Why: Prosopo Protect's risk engine derives bot-signal value from the raw TLS handshake (cipher-suite order, extensions, timing between packets, and fingerprints). If Cloudflare's proxy terminates the browser's TLS at its edge, what reaches Prosopo is a fresh TLS connection from Cloudflare's own stack, identical for every user. The JA4 signals collapse to a single value and the risk-scoring pipeline degrades to noise.
 
 Grey-cloud on `protect.<your-domain>` only. Every other DNS record on your zone (including your main `www` record fronted by this worker) stays exactly as it is. This one subdomain needs to point directly at our origin so the browser's TLS handshake reaches us intact.
 
@@ -89,7 +89,7 @@ Prosopo issues the TLS certificate for your `protect.<your-domain>` subdomain vi
 
 2. **Us**: email your account manager once DNS is grey-clouded and propagated. We issue the certificate on our end (~30 seconds), then confirm back. Attempting to deploy the worker before we've issued the cert results in HTTP 526 (SSL Handshake Failed) on every access-check call, and the worker fails open. No request is actually scored.
 
-Once the cert is in place it auto-renews on our end every 60 days. You don't touch it again.
+Once the cert is in place it auto-renews every 60 days.
 
 ### 1c. Deploy the worker
 

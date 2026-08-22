@@ -44,7 +44,7 @@ The bundle talks to Protect at a hostname you own, typically `protect.<your-doma
 protect.<your-domain>   CNAME   protect.prosopo.io
 ```
 
-**Do not put this record behind a proxy layer (CloudFront, Cloudflare, or similar).** Prosopo's risk engine derives most of its bot-signal value from the raw TLS handshake (the JA4, JA4H, JA4L, and JA4T fingerprints). If a proxy terminates the browser's TLS at its edge and re-opens a fresh connection to Prosopo, the JA4 signals collapse to a single value per proxy stack and risk scoring degrades to noise. This subdomain must be DNS-only.
+**Do not put this record behind a proxy layer (CloudFront, Cloudflare, or similar).** Prosopo's risk engine derives bot-signal value from the raw TLS handshake. If a proxy terminates the browser's TLS at its edge and re-opens a fresh connection to Prosopo, the JA4 signals collapse to a single value per proxy stack and risk scoring degrades to noise. This subdomain must be DNS-only.
 
 ### 1b. Coordinate cert issuance with your account manager
 
