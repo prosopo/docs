@@ -36,7 +36,7 @@ const instanceId = Math.round(Math.random() * 10e9).toString(36);
 				<Icon name="close" size="2em" />
 			</button>
 			<div class="select-pane" tabindex="-1">
-				<h1><UIString key="feedback.formTitle" /></h1>
+				<h2 class="dialog-title"><UIString key="feedback.formTitle" /></h2>
 				<div class="select-buttons">
 					<a
 						class="github-button"
@@ -68,7 +68,7 @@ const instanceId = Math.round(Math.random() * 10e9).toString(36);
 					<span class="sr-only"><UIString key="feedback.close" /></span>
 					<Icon name="left-arrow" size="1em" />
 				</button>
-				<h1><UIString key="feedback.sendFeedback" /></h1>
+				<h2 class="dialog-title"><UIString key="feedback.sendFeedback" /></h2>
 				<fieldset class="category-options">
 					<legend class="sr-only"><UIString key={'feedback.categoryGroupLabel'} /></legend>
 					{
@@ -283,7 +283,7 @@ const instanceId = Math.round(Math.random() * 10e9).toString(36);
 		display: contents;
 	}
 
-	h1 {
+	.dialog-title {
 		padding: 0 calc(var(--feedback-form-close-icon-size) + var(--feedback-form-padding));
 		font-size: var(--sl-text-xl);
 		font-weight: bold;
