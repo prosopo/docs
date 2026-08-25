@@ -4,34 +4,39 @@ description: Common questions and answers about Procaptcha.
 i18nReady: true
 ---
 
-### What does `Site Key not Registered` mean?
-You may encounter this error when you set up the Procaptcha widget on your website. This error occurs when the site key
-you are using is not registered in the Prosopo system. To resolve this error, click the Activation link in the email
-or <a href="mailto:support@prosopo.io">contact the Prosopo support team</a>.
+Looking for a specific error message shown in place of the widget? The [Error Reference](/en/basics/error-reference)
+covers every one of them, with causes and fixes.
 
-### What does `Invalid Site Key` mean?
-This error occurs when the site key you are using is not valid. To resolve this error, ensure that you are using the
-correct site key, which you can find by logging in to the [Prosopo portal](https://portal.prosopo.io).
+### What does `Site key not registered` mean?
+The site key you are using is not registered in the Prosopo system. Most often the account was never activated — click
+the activation link in your email, or <a href="mailto:support@prosopo.io">contact the Prosopo support team</a>.
+See [Site key not registered](/en/basics/error-reference#site-key-not-registered).
+
+### What does `Invalid site key` mean?
+The value in your `data-sitekey` attribute is not a well-formed site key — usually truncated, or a placeholder that was
+never substituted. Copy the key from the [Prosopo portal](https://portal.prosopo.io).
+See [Invalid site key](/en/basics/error-reference#invalid-site-key).
 
 ### What does `Unauthorized origin URL` mean?
-This error occurs when the domain of the site key does not match the domain of the website where the Procaptcha widget
-is being used. To resolve this error, ensure that the domain of the site key matches the domain of the website by
-logging in to the [Prosopo portal](https://portal.prosopo.io) and updating the domain.
+The domain serving the widget is not on the site key's list of allowed domains. Add it in the
+[Prosopo portal](https://portal.prosopo.io), including any staging and preview domains.
+See [Unauthorized origin URL](/en/basics/error-reference#unauthorized-origin-url).
 
 ### What does `Incorrect CAPTCHA type` mean?
-This error occurs when the [captcha type](/en/basics/captcha-types) is not set correctly. The default `captchaType` is
-`frictionless`. If you wish to use `pow` or `image` you must set your `captchaType` in the widget configuration to `pow`
-or `image`. You must also update your [portal settings](https://portal.prosopo.io) to match.
+The [captcha type](/en/basics/captcha-types) your widget requests does not match the one configured for the site key.
+The default is `frictionless`; if you set `pow`, `image`, or `puzzle` in your markup you must set the same value in your
+[portal settings](https://portal.prosopo.io).
+See [Incorrect CAPTCHA type](/en/basics/error-reference#incorrect-captcha-type).
 
-### What does `Session not found` mean?
-This error occurs when the session is not found. This can happen if the session has expired or if the session ID is
-not valid. To resolve this error, either wait for the widget to reload (3s) or refresh the page. If the error persists,
-try clearing your browser cache and cookies. If the error still persists, please [contact the Prosopo support team](https://discord.com/invite/3nMYAHecZT).
+### What does `No session found` mean?
+The challenge session expired or had already been used. The widget resets itself after about 10 seconds, or you can
+refresh the page. See [No session found](/en/basics/error-reference#no-session-found).
 
 ### What does `Error parsing captcha` mean?
-This error will occur if incorrect data has been sent with the captcha response. To resolve this error, ensure that the
-data sent with the captcha response is correct.
+Prosopo received a request from the widget it could not read, usually from a stale or modified copy of the Procaptcha
+bundle. Hard-refresh and make sure you are loading the official bundle.
+See [Error parsing captcha](/en/basics/error-reference#error-parsing-captcha).
 
-
-
-
+### The widget doesn't appear at all, and there is no error message.
+Some failures are written only to the browser console rather than being displayed. Open developer tools and check the
+console — see [Errors that never reach the visitor](/en/basics/error-reference#errors-that-never-reach-the-visitor).

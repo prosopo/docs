@@ -55,6 +55,11 @@ export default [
         slug: 'basics/faq',
         key: 'basics/faq',
     },
+    {
+        text: 'Error Reference',
+        slug: 'basics/error-reference',
+        key: 'basics/error-reference',
+    },
     {text: 'Advanced Usage', header: true, type: 'learn', key: 'advanced'},
         {
         text: 'Context Awareness',
