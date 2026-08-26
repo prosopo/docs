@@ -98,6 +98,31 @@ on the request. This is optional, but recommended for better accuracy. To do thi
 
 > Note: You do not need to include the full email address, just the domain is sufficient for Prosopo to perform the necessary checks. For example, if the user's email is `a@example.com` then you can pass `example.com` as the value for the `email` field.
 
+#### Session ID
+
+If you rendered the widget with your own session identifier — see
+[Session correlation](/en/basics/client-side-rendering/#session-correlation) — pass the same value here as
+`clientSessionId`. The token will then only verify if it was earned in that session:
+
+```json
+{
+    "secret": "your_secret_key",
+    "token": "PROCAPTCHA-RESPONSE",
+    "clientSessionId": "YOUR_SESSION_ID"
+}
+```
+
+A token whose solution carries a different session id — or none at all, which is what a token solved outside your
+session looks like — comes back as a `200` with `verified: false` and `reason: "API.CLIENT_SESSION_MISMATCH"`. This is
+what stops a token being lifted from one browser and submitted from another.
+
+Both halves are required for the check to happen. If you send `clientSessionId` here but did not render the widget with
+one, every verification will fail; if you rendered with one but omit it here, no check is performed and the token
+verifies as normal.
+
+> Note: the field is `clientSessionId`, not `sessionId`. Verification *responses* may contain a `sessionId` field, which
+> is Prosopo's own frictionless session and is unrelated to yours.
+
 ## Verification Code Examples
 
 ### JavaScript
@@ -229,6 +254,9 @@ const prosopoServer = new ProsopoServer(config, pair)
 
 // check if the captcha response is verified
 const result = await prosopoServer.isVerified(procaptchaResponse)
+// or, to correlate the session the captcha was solved in:
+// isVerified(token, ip?, email?, clientSessionId?)
+// const result = await prosopoServer.isVerified(procaptchaResponse, undefined, undefined, sessionId)
 if (result.verified) {
     // perform CAPTCHA protected action
 }
@@ -274,6 +302,7 @@ A `200` response does **not** mean the user passed the challenge. Always inspect
 | --- | --- | --- |
 | Token verified | `{ "status": "ok", "verified": true, "score": ..., "reason"?: ... }` | Normal happy path. `score` is included for Premium-tier customers. |
 | Token cannot be decoded | `{ "status": "ok", "verified": false, "score": 0 }` | The token is malformed or forged. Treat as a failed challenge — do not retry. |
+| Session id mismatch | `{ "status": "ok", "verified": false, "reason": "API.CLIENT_SESSION_MISMATCH" }` | You sent `clientSessionId` and the token was not earned in that session. Treat as a failed challenge. See [Session ID](#session-id). |
 | Provider verification timed out (5s) | `{ "status": "ok", "verified": true, "score": 0 }` | Fail-open: if our verification provider is temporarily unreachable, the request is allowed through so legitimate users are not blocked. A cluster of these responses indicates a provider incident. |
 
 ### HTTP 4xx — Client / integration errors
@@ -283,7 +312,7 @@ These indicate a problem with the request itself. Retrying without changes will 
 | HTTP | `error.key` | Trigger | What to fix |
 | --- | --- | --- | --- |
 | 400 | `API.MISSING_BODY` | Request body is empty or required fields are missing. | Send a POST with a JSON body containing at least `secret` and `token`. |
-| 400 | `API.PARSE_ERROR` | Body fails schema validation. | Check field names and types: `token` (string), `secret` (string), and optional `ip`, `email`, `timeouts`. |
+| 400 | `API.PARSE_ERROR` | Body fails schema validation. | Check field names and types: `token` (string), `secret` (string), and optional `ip`, `email`, `clientSessionId`, `timeouts`. |
 | 400 | `API.INVALID_SITE_KEY` | The `secret` does not correspond to the site key embedded in the `token`. | Confirm the secret key for the site matches the one rendering the widget. A common cause is using a secret from a different site. |
 | 400 | `API.UNKNOWN_ERROR` (or a more specific key) | The verification provider returned an error block for this token. | Inspect `error.key` and `error.message` for the specific provider-side reason. See [Forwarded provider errors](#forwarded-provider-errors) below. |
 

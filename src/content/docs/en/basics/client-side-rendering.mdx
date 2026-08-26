@@ -122,6 +122,7 @@ following fields:
 | failed-callback      | string or function | The name of the window function, or a function, that will be called when the CAPTCHA challenge fails.                                                                | ✗        |
 | reset-callback       | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is reset.                                                                       | ✗        |
 | language             | string             | The language of the CAPTCHA widget. The default is `en`. All languages can be found [here](https://github.com/prosopo/captcha/tree/main/packages/locale/src/locales). | ✗        |
+| sessionId            | string             | Your own session identifier for this user. Pass the same value to your server-side verification call and the token will only verify if it was earned in that session. See [Session correlation](#session-correlation). | ✗        |
 
 ### Data Attributes
 
@@ -138,6 +139,49 @@ and define the callback function on the window object.
 ```html
 <div class="procaptcha" data-sitekey="your_site_key" data-callback="yourCallbackFunction"></div>
 ```
+
+### Session correlation
+
+By default a Procaptcha token proves that *somebody* solved a captcha for your site. It does not prove that the person
+submitting the token is the person who solved it. A token solved in one browser can be lifted and posted from another —
+which is how token-farming and captcha-solving services work.
+
+If your application already has a per-user session identifier, you can close that gap. Render the widget with it, pass
+the same value to your [server-side verification](/en/basics/server-side-verification/#session-id) call, and the token
+will only verify if the two agree.
+
+```html
+<div class="procaptcha" data-sitekey="your_site_key" data-sessionid="your_session_id"></div>
+```
+
+Or explicitly:
+
+```javascript
+window.procaptcha.render(captchaContainer, {
+    siteKey: 'YOUR_SITE_KEY',
+    sessionId: 'your_session_id',
+})
+```
+
+The widget attaches the value to the solution when it is submitted. At verification time, a token whose solution carries
+a different session id — or no session id at all, which is what a token minted outside your session looks like — is
+rejected with `API.CLIENT_SESSION_MISMATCH`.
+
+A few things worth knowing:
+
+- **It is opt-in.** Leave it out and nothing changes; no correlation is performed.
+- **It only works if you supply it in both places.** Rendering with a session id but omitting it at verification means
+  no check is made, and vice versa.
+- **The value must be one the user cannot choose.** The protection comes from your server knowing which session it
+  issued. An id read back from a request the client controls proves nothing.
+- **Use a value that survives the solve.** If your session identifier rotates between the widget rendering and the form
+  being submitted, verification will fail for legitimate users.
+- **It is not a secret.** It appears in the page HTML, so use a session identifier rather than a session token, and do
+  not put anything in it you would not show the user.
+- **Maximum length is 256 characters.** Longer values are dropped by the widget with an error logged to the console.
+
+Prosopo Protect uses this mechanism internally: it renders the challenge widget with its own session JTI, and asserts
+the same JTI when verifying, so a token solved against one session cannot be replayed against another.
 
 ### `captchaType`
 
