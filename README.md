@@ -24,7 +24,7 @@ You being a part of our community is welcome.
 
 ## Chat with Us
 
-You can learn more about Astro, get support, and meet other devs in [our Discord community](https://discord.gg/3nMYAHecZT).
+You can learn more about Astro, get support, and meet other devs in [our Discord community](https://discord.gg/dwQx2w9Tgm).
 
 ## Raise an Issue
 
@@ -66,5 +66,5 @@ Check out the dedicated [i18n guide](https://contribute.docs.astro.build/guides/
 - [Read the docs](https://docs.astro.build/)
 - [Raise an issue](https://github.com/prosopo/docs/issues/new)
 - [Participate in a discussion](https://github.com/prosopo/docs/discussions)
-- [Join the #docs channel on Discord](https://discord.gg/cZDZU3hJHc)
+- [Join the #docs channel on Discord](https://discord.gg/dwQx2w9Tgm)
 

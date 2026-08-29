@@ -44,7 +44,7 @@ Deze documentatie geeft altijd de laatste stabiele versie van Astro weer. Zodra 
 
 Het [@astrodotbuild](https://twitter.com/astrodotbuild) Twitter-account is de officiële bron voor de updates van het Astro-team.
 
-We plaatsen ook release-aankondigingen in onze [Discord-community](https://discord.gg/3nMYAHecZT) in het #announcements kanaal.
+We plaatsen ook release-aankondigingen in onze [Discord-community](https://discord.gg/dwQx2w9Tgm) in het #announcements kanaal.
 
 Niet elke Astro-release verdient een eigen blogpost, maar je kunt een gedetailleerde changelog voor elke release vinden in het [CHANGELOG.md-bestand in de Astro-repository](https://github.com/prosopo/captcha/blob/main/packages/astro/CHANGELOG.md).
 
