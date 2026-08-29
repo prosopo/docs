@@ -55,6 +55,11 @@ export default [
         slug: 'basics/faq',
         key: 'basics/faq',
     },
+    {
+        text: 'Demo Keys',
+        slug: 'basics/demo-keys',
+        key: 'basics/demo-keys',
+    },
     {text: 'Advanced Usage', header: true, type: 'learn', key: 'advanced'},
         {
         text: 'Context Awareness',
