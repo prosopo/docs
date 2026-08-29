@@ -8,6 +8,7 @@ Prima di tutto, deve includere la risorsa JavaScript Procaptcha da qualche parte
 
 ```html
 <script type="module" src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+<script nomodule src="https://js.prosopo.io/js/procaptcha.bundle.iife.js" async defer></script>
 ```
 
 Ora, può renderizzare il widget Procaptcha implicitamente o esplicitamente.
@@ -33,6 +34,7 @@ Ecco un esempio completo dove Procaptcha viene utilizzato per proteggere un form
     <head>
         <title>Procaptcha Demo</title>
         <script type="module" src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+        <script nomodule src="https://js.prosopo.io/js/procaptcha.bundle.iife.js" async defer></script>
     </head>
     <body>
         <form action="" method="POST">
@@ -64,6 +66,7 @@ Lo script viene caricato nell'head del documento e gli viene assegnato l'id `pro
             async
             defer
         ></script>
+        <script nomodule src="https://js.prosopo.io/js/procaptcha.bundle.iife.js" async defer></script>
     </head>
     <body>
         <div id="procaptcha-container"></div>
