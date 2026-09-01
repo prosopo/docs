@@ -359,14 +359,14 @@ provider-side failure rather than anything about your request.
 
 ## Errors that stay in the console
 
-Not every Procaptcha error is displayed. Some are written only to the browser console, so a visitor reporting "the
+Not every Procaptcha error is displayed. Some are written to the browser console instead, so a visitor reporting "the
 captcha just doesn't appear" may be hitting one of these. Check the console before assuming a network problem.
 
 | Console message | Key | Meaning |
 | --- | --- | --- |
 | `No site key found` | *(none)* | The widget element has no `data-sitekey` attribute at all. Add one. |
-| `SITE KEY missing` | `GENERAL.SITE_KEY_MISSING` | A widget mounted directly in React started with no site key. Same fix. |
 | `No Procaptcha containers found for execution` | *(none)* | `execute()` was called but no element with the `procaptcha` class exists on the page. |
+| `SITE KEY missing` | `GENERAL.SITE_KEY_MISSING` | A widget mounted directly in React started with no site key. Same fix. |
 | `No captchas returned from provider` | `DEVELOPER.PROVIDER_NO_CAPTCHA` | The provider returned an empty challenge. The widget retries automatically. |
 
 The first two stop the widget before it does anything at all: nothing is rendered and nothing is retried. The other two
