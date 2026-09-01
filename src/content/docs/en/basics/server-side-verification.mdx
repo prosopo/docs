@@ -313,7 +313,7 @@ These indicate a problem with the request itself. Retrying without changes will 
 | --- | --- | --- | --- |
 | 400 | `API.MISSING_BODY` | Request body is empty or required fields are missing. | Send a POST with a JSON body containing at least `secret` and `token`. |
 | 400 | `API.PARSE_ERROR` | Body fails schema validation. | Check field names and types: `token` (string), `secret` (string), and optional `ip`, `email`, `clientSessionId`, `timeouts`. |
-| 400 | `API.INVALID_SITE_KEY` | The `secret` does not correspond to the site key embedded in the `token`. | Confirm the secret key for the site matches the one rendering the widget. A common cause is using a secret from a different site. |
+| 400 | `API.INVALID_SITE_KEY` | The `secret` does not correspond to the site key embedded in the `token`. | Confirm the secret key for the site matches the one rendering the widget. A common cause is using a secret from a different site. The check is skipped for [reserved test site keys](/en/basics/test-keys/), which have no secret. |
 | 400 | `API.UNKNOWN_ERROR` (or a more specific key) | The verification provider returned an error block for this token. | Inspect `error.key` and `error.message` for the specific provider-side reason. See [Forwarded provider errors](#forwarded-provider-errors) below. |
 
 ### HTTP 5xx — Server / upstream errors
