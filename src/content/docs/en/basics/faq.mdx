@@ -33,6 +33,15 @@ See [Incorrect CAPTCHA type](/en/basics/error-reference#incorrect-captcha-type).
 The challenge session expired or had already been used. The widget resets itself after about 10 seconds, or you can
 refresh the page. See [No session found](/en/basics/error-reference#no-session-found).
 
+### How do I test my integration without solving a CAPTCHA?
+Use one of the [reserved test site keys](/en/basics/test-keys/). One always passes and one always fails, so your tests
+never have to solve a challenge. The widget displays a warning banner while a test key is in use.
+
+### Are requests made with a test site key billed?
+No. Requests made with the [reserved test site keys](/en/basics/test-keys/) are excluded from billable usage and from
+your plan's quota. A site key you create yourself for a staging or test environment is an ordinary site key, and its
+verifications **are** included in your billable usage.
+
 ### What does `Error parsing captcha` mean?
 Prosopo received a request from the widget it could not read, usually from a stale or modified copy of the Procaptcha
 bundle. Hard-refresh and make sure you are loading the official bundle.

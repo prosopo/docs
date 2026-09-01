@@ -51,6 +51,12 @@ export default [
     },
 
     {
+        text: 'Test Site Keys',
+        slug: 'basics/test-keys',
+        key: 'basics/test-keys',
+    },
+
+    {
         text: 'Frequently Asked Questions',
         slug: 'basics/faq',
         key: 'basics/faq',
