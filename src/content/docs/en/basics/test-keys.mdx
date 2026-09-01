@@ -1,0 +1,66 @@
+---
+title: Test Site Keys
+description: Reserved always-pass and always-fail site keys for automated tests and CI pipelines, and how they interact with your billable usage.
+i18nReady: true
+---
+
+Prosopo reserves two well-known site keys that always produce the same outcome. Use them in end-to-end tests, CI
+pipelines and local development when you need the widget to behave deterministically instead of running a real
+challenge.
+
+:::caution[Never use these in production]
+These keys weaken protection by design: anything guarded by the always-pass key is guarded by nothing at all. The widget
+renders a visible warning banner and logs a console warning whenever one of them is configured, so a test key cannot
+reach production unnoticed.
+:::
+
+## The keys
+
+| Purpose | Site key | Result |
+| --- | --- | --- |
+| Always pass | `5EARALUe4HXQwKo5KanZSGGKqJV4VTaytpezFwv8ZHbZewmh` | The widget always succeeds and emits a `procaptcha-response` token. |
+| Always fail | `5ETtechmZkn3CUVeJX7Z511oiuiu742aHLm91D5ZZw4fqoAG` | The widget always fails. No token is emitted and your `onError` / failure handler runs. |
+
+Both keys are constant across all Prosopo environments (production, staging and development), so the same value works
+everywhere without environment-specific configuration.
+
+## Using a test key
+
+Swap the site key in your widget configuration for one of the values above. No other change is needed — you do not need
+a secret key, and the key does not need to be registered against your account.
+
+```html
+<div class="procaptcha"
+     data-sitekey="5EARALUe4HXQwKo5KanZSGGKqJV4VTaytpezFwv8ZHbZewmh">
+</div>
+```
+
+The test keys work with every `captchaType`. The challenge is replaced by a deterministic, non-interactive one, so
+`frictionless` resolves without ever showing an image grid or a puzzle, and a test never has to solve a CAPTCHA to
+proceed.
+
+Because the always-fail key never emits a token, use it to exercise the failure branch of your front end — the error
+message, the disabled submit button, the retry prompt — rather than your server-side verification code.
+
+## Billing
+
+**Requests made with the reserved test keys are not billed and do not count towards your plan's quota.** They are
+short-circuited before any usage record is written, so they never appear in your usage figures or on your invoice.
+
+This is the only way to test without accruing usage. A site key you create yourself for a staging or test environment
+is an ordinary site key: its verifications are included in your billable usage exactly like those of a production key.
+
+## Server-side verification
+
+The reserved keys short-circuit the widget flow, which is where their value lies. Server-side verification behaves
+differently depending on how you verify:
+
+- **`api.prosopo.io/siteverify`** — a test-key token **cannot** be verified through the hosted endpoint. It requires
+  the `secret` to match the site key embedded in the token, and there is no secret key for a reserved test key, so the
+  call returns `400` with `error.key` of `API.INVALID_SITE_KEY`.
+- **[`@prosopo/server`](/en/basics/server-side-verification/)** — verification succeeds and returns
+  `verified: true` for the always-pass key.
+
+In practice, most test suites either stop at the widget (asserting that the form submits) or stub out the verification
+call in the test environment. If your tests need to run all the way through `siteverify`, keep a real site key for that
+environment and accept the usage it accrues.
