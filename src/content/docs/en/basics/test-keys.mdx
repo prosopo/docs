@@ -52,15 +52,23 @@ is an ordinary site key: its verifications are included in your billable usage e
 
 ## Server-side verification
 
-The reserved keys short-circuit the widget flow, which is where their value lies. Server-side verification behaves
-differently depending on how you verify:
+A test key works end to end: the token the widget emits under the always-pass key verifies through
+[`/siteverify`](/en/basics/server-side-verification/) and returns `verified: true`, so your tests can exercise the whole
+flow rather than stopping at the widget.
 
-- **`api.prosopo.io/siteverify`** — a test-key token **cannot** be verified through the hosted endpoint. It requires
-  the `secret` to match the site key embedded in the token, and there is no secret key for a reserved test key, so the
-  call returns `400` with `error.key` of `API.INVALID_SITE_KEY`.
-- **[`@prosopo/server`](/en/basics/server-side-verification/)** — verification succeeds and returns
-  `verified: true` for the always-pass key.
+```json
+{
+    "status": "ok",
+    "verified": true
+}
+```
 
-In practice, most test suites either stop at the widget (asserting that the form submits) or stub out the verification
-call in the test environment. If your tests need to run all the way through `siteverify`, keep a real site key for that
-environment and accept the usage it accrues.
+Two details to be aware of:
+
+- **The `secret` is ignored.** A reserved key has no secret of its own, so the usual check that your secret matches the
+  site key in the token is skipped. Send your existing secret, or none at all — the result is the same.
+- **No `score` is returned**, even on a Premium plan. Nothing scored the request, so there is no score to report. Do not
+  write test assertions that expect one.
+
+The always-fail key never produces a token, so there is nothing to verify with it. Use it to test your front end's
+failure path, not your verification code.
