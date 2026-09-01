@@ -8,13 +8,13 @@ Looking for a specific error message shown in place of the widget? The [Error Re
 covers every one of them, with causes and fixes.
 
 ### What does `Site key not registered` mean?
-The site key you are using is not registered in the Prosopo system. Most often the account was never activated — click
+The site key you are using is not registered in the Prosopo system. Most often the account was never activated: click
 the activation link in your email, or <a href="mailto:support@prosopo.io">contact the Prosopo support team</a>.
 See [Site key not registered](/en/basics/error-reference#site-key-not-registered).
 
 ### What does `Invalid site key` mean?
-The value in your `data-sitekey` attribute is not a well-formed site key — usually truncated, or a placeholder that was
-never substituted. Copy the key from the [Prosopo portal](https://portal.prosopo.io).
+The value in your `data-sitekey` attribute is not a well-formed site key. It is usually truncated, or a placeholder that
+was never substituted. Copy the key from the [Prosopo portal](https://portal.prosopo.io).
 See [Invalid site key](/en/basics/error-reference#invalid-site-key).
 
 ### What does `Unauthorized origin URL` mean?
@@ -23,9 +23,10 @@ The domain serving the widget is not on the site key's list of allowed domains. 
 See [Unauthorized origin URL](/en/basics/error-reference#unauthorized-origin-url).
 
 ### What does `Incorrect CAPTCHA type` mean?
-The [captcha type](/en/basics/captcha-types) your widget requests does not match the one configured for the site key.
-The default is `frictionless`; if you set `pow`, `image`, or `puzzle` in your markup you must set the same value in your
-[portal settings](https://portal.prosopo.io).
+Prosopo expected a different [captcha type](/en/basics/captcha-types) from the one that was requested. Current widget
+bundles are told which type to use by the server and ignore any type set in your markup, so this is usually either a
+stale session (which a refresh clears) or a direct API integration asking for a type the site key is not configured
+for in your [portal settings](https://portal.prosopo.io).
 See [Incorrect CAPTCHA type](/en/basics/error-reference#incorrect-captcha-type).
 
 ### What does `No session found` mean?
@@ -39,4 +40,4 @@ See [Error parsing captcha](/en/basics/error-reference#error-parsing-captcha).
 
 ### The widget doesn't appear at all, and there is no error message.
 Some failures are written only to the browser console rather than being displayed. Open developer tools and check the
-console — see [Errors that never reach the visitor](/en/basics/error-reference#errors-that-never-reach-the-visitor).
+console; see [Errors that never reach the visitor](/en/basics/error-reference#errors-that-never-reach-the-visitor).
