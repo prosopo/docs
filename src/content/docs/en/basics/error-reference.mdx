@@ -12,7 +12,7 @@ message a visitor can see, what causes it, and what to do about it.
 Each error has two identities:
 
 - **The message**, e.g. `Site key not registered`. This is what your visitor sees, and it is translated into their
-  language. A German visitor sees `Site Key nicht registriert` for the same error.
+  language. A German visitor sees `Site-Key nicht registriert` for the same error.
 - **The key**, e.g. `API.SITE_KEY_NOT_REGISTERED`. This never changes and is never translated, so it is what you should
   search for, log, and quote to support.
 
@@ -126,7 +126,8 @@ request carried no origin to check.
 - The site is being served from a domain you have not added yet, commonly a staging, preview, or branch-deploy URL.
 - A `www.` versus bare-domain mismatch, or a country domain you did not register alongside the main one.
 - Local development on `localhost` or `127.0.0.1` with a site key registered only for production.
-- The widget is embedded in an iframe hosted on a third-party domain, which makes the *embedding* domain the origin.
+- The widget is embedded in an iframe served from another domain. Requests from inside an iframe carry the *iframe
+  document's* origin, not your page's, so it is the iframe's domain that must be on the list.
 - **No domains are configured on the site key at all.** A key that has never had a domain added fails for every
   visitor, not just for those arriving on an unregistered domain. The error is worded identically in both cases, so
   check that the list is non-empty before you go hunting for a domain-matching problem.
@@ -351,7 +352,8 @@ provider-side failure rather than anything about your request.
 
 **How to fix it.**
 
-1. Retry. Where the cause is provider-side, the widget's own retry usually succeeds against a different provider.
+1. Refresh the page. The widget does not retry this error on its own, but provider-side failures are typically
+   short-lived and a fresh attempt usually goes through.
 2. Check that your page renders the widget exactly once. Two widget elements on one page, or a component that unmounts
    and remounts, will each ask for their own challenge, and the second request can be rejected.
 3. If it is consistent and reproducible, [contact support](https://discord.com/invite/3nMYAHecZT) with the URL and the
