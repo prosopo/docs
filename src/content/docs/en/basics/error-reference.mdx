@@ -75,7 +75,7 @@ If you can reproduce the error yourself, it is almost certainly one of these. Fi
 - You are pointing a production site key at a development environment, or vice versa.
 - The request carried no site key header at all. A direct API integration that omits `prosopo-site-key` gets this error
   rather than a more specific one. (A *widget* with no site key never gets this far; see
-  [Errors that never reach the visitor](#errors-that-never-reach-the-visitor).)
+  [Errors that stay in the console](#errors-that-stay-in-the-console).)
 
 **How to fix it.**
 
@@ -127,9 +127,9 @@ request carried no origin to check.
 - A `www.` versus bare-domain mismatch, or a country domain you did not register alongside the main one.
 - Local development on `localhost` or `127.0.0.1` with a site key registered only for production.
 - The widget is embedded in an iframe hosted on a third-party domain, which makes the *embedding* domain the origin.
-- **No domains are configured on the site key at all.** A key that has never had a domain added fails for every visitor,
-  not just for unregistered domains. The response says so explicitly: *No domains are allowed for this site key. Please
-  fix in the Procaptcha Portal*.
+- **No domains are configured on the site key at all.** A key that has never had a domain added fails for every
+  visitor, not just for those arriving on an unregistered domain. The error is worded identically in both cases, so
+  check that the list is non-empty before you go hunting for a domain-matching problem.
 - **The request arrived with no `Origin` header.** Browsers always send one for the widget's requests, so this normally
   means a proxy or CDN in front of your site is stripping it.
 
@@ -223,8 +223,9 @@ single-use and time-limited by design.
 
 **Key:** *(none, this is a fallback message)* · **HTTP:** *(varies)*
 
-**What it means.** The widget tried five times to reach a Prosopo provider and failed each time, or it received a
-failure with no message attached. This is the generic last-resort message shown when nothing more specific is known.
+**What it means.** The widget tried five times to reach a Prosopo provider and failed every time. It is the generic
+last-resort message, shown only once those five attempts are exhausted, so every other error on this page takes
+precedence over it.
 
 **What causes it.**
 
@@ -270,9 +271,10 @@ show. The visitor was turned away before any captcha was issued.
 
 **How to fix it.**
 
-- **If this is a real visitor being blocked wrongly**, review your
-  [access control rules](/en/advanced/access-control-rules) and the **auto-ban score threshold** on your site key in the
-  portal. An auto-ban threshold set too low is the most common cause of false positives.
+- **If this is a real visitor being blocked wrongly**, start with your
+  [access control rules](/en/advanced/access-control-rules), which are the part you control. If none of them explains
+  the block, the auto-ban score threshold on your site key may be set too low. That threshold is not customer-editable,
+  so [contact support](https://discord.com/invite/3nMYAHecZT) to have it reviewed.
 - **Do not reach for the [Safety Threshold](/en/basics/safety-threshold) here.** It is a separate setting that decides
   whether a visitor is given an image challenge instead of an invisible proof-of-work challenge. It never causes this
   error, so changing it will not unblock anyone.
@@ -339,9 +341,9 @@ provider-side failure rather than anything about your request.
 
 **What causes it.**
 
-- **The widget re-sent a token that had already been used.** Almost always a page that mounts the widget twice, so two
-  requests race for the same token and the second is rejected. Harmless as a one-off; a steady stream of it points at a
-  double mount on your page.
+- **A bot-detection token was submitted twice.** Each token is accepted once, so a second request carrying the same one
+  is rejected. Usually this means the widget is mounted twice on the same page, or that a request was replayed. Harmless
+  as a one-off; a steady stream of it points at a duplicate widget.
 - No dataset was available on the provider that served the request.
 - An internal provider error while building the challenge. This is the 500 case.
 - A required request header missing or stripped in transit. Note that a missing `Origin` usually surfaces as
@@ -350,12 +352,12 @@ provider-side failure rather than anything about your request.
 **How to fix it.**
 
 1. Retry. Where the cause is provider-side, the widget's own retry usually succeeds against a different provider.
-2. Check that your page renders the widget exactly once. A component that mounts twice (a React StrictMode
-   double-invoke, or a re-render that recreates the widget's config object) is the usual source of the 400.
+2. Check that your page renders the widget exactly once. Two widget elements on one page, or a component that unmounts
+   and remounts, will each ask for their own challenge, and the second request can be rejected.
 3. If it is consistent and reproducible, [contact support](https://discord.com/invite/3nMYAHecZT) with the URL and the
    time of the failure.
 
-## Errors that never reach the visitor
+## Errors that stay in the console
 
 Not every Procaptcha error is displayed. Some are written only to the browser console, so a visitor reporting "the
 captcha just doesn't appear" may be hitting one of these. Check the console before assuming a network problem.
@@ -363,9 +365,14 @@ captcha just doesn't appear" may be hitting one of these. Check the console befo
 | Console message | Key | Meaning |
 | --- | --- | --- |
 | `No site key found` | *(none)* | The widget element has no `data-sitekey` attribute at all. Add one. |
-| `SITE KEY missing` | `GENERAL.SITE_KEY_MISSING` | The widget started without a site key available to it. Same fix. |
+| `SITE KEY missing` | `GENERAL.SITE_KEY_MISSING` | A widget mounted directly in React started with no site key. Same fix. |
 | `No Procaptcha containers found for execution` | *(none)* | `execute()` was called but no element with the `procaptcha` class exists on the page. |
 | `No captchas returned from provider` | `DEVELOPER.PROVIDER_NO_CAPTCHA` | The provider returned an empty challenge. The widget retries automatically. |
+
+The first two stop the widget before it does anything at all: nothing is rendered and nothing is retried. The other two
+are thrown inside a retry loop, so they are logged once per attempt. `SITE KEY missing` is the one that does not stay in
+the console for good: once five attempts have failed, the widget gives up and shows
+[`Cannot load CAPTCHA`](#cannot-load-captcha).
 
 Separately, a visitor who fails a challenge is not shown an error at all. The widget simply resets so they can try
 again. Nothing is broken in that case.
