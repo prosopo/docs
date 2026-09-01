@@ -1,0 +1,385 @@
+---
+title: Error Reference
+description: Every error message Procaptcha can display in place of the widget, what causes it, and how to clear it.
+i18nReady: true
+---
+
+When Procaptcha cannot show a challenge, it replaces the widget with a short error message. This page lists every
+message a visitor can see, what causes it, and what to do about it.
+
+## Reading an error
+
+Each error has two identities:
+
+- **The message**, e.g. `Site key not registered`. This is what your visitor sees, and it is translated into their
+  language. A German visitor sees `Site-Key nicht registriert` for the same error.
+- **The key**, e.g. `API.SITE_KEY_NOT_REGISTERED`. This never changes and is never translated, so it is what you should
+  search for, log, and quote to support.
+
+Three of the messages below have no key: `Cannot load CAPTCHA`, `Frictionless response missing captchaType; halting
+captcha mount` and `Forbidden: <request id>`. These are produced by the widget or by middleware rather than by the
+translation layer, so they appear in English whatever the visitor's language.
+
+The message is on screen. To find the key, open your browser's developer tools, go to the **Network** tab, reload the
+page, and look at the response from the request to `/v1/prosopo/provider/client/captcha/…`:
+
+```json
+{
+  "error": {
+    "message": "Site key not registered",
+    "key": "API.SITE_KEY_NOT_REGISTERED",
+    "code": 400
+  }
+}
+```
+
+:::note[The error callback receives the message, not the key]
+The `error-callback` you configure on the widget is called with a standard `Error` whose `message` is the translated
+string. If you want to branch on a specific error in your own code, read the `key` from the network response rather
+than matching on message text, which changes with the visitor's language.
+:::
+
+## Quick reference
+
+| Message | Key | Whose problem is it? |
+| --- | --- | --- |
+| `Site key not registered` | `API.SITE_KEY_NOT_REGISTERED` | [Your configuration](#site-key-not-registered) |
+| `Invalid site key` | `API.INVALID_SITE_KEY` | [Your configuration](#invalid-site-key) |
+| `Unauthorized origin URL` | `API.UNAUTHORIZED_ORIGIN_URL` | [Your configuration](#unauthorized-origin-url) |
+| `Incorrect CAPTCHA type` | `API.INCORRECT_CAPTCHA_TYPE` | [Usually your configuration](#incorrect-captcha-type) |
+| `Procaptcha requires a secure (HTTPS) connection` | `WIDGET.INSECURE_CONTEXT` | [Your configuration](#procaptcha-requires-a-secure-https-connection) |
+| `No session found` | `CAPTCHA.NO_SESSION_FOUND` | [Transient, self-healing](#no-session-found) |
+| `Cannot load CAPTCHA` | *(none)* | [Transient, self-healing](#cannot-load-captcha) |
+| `Frictionless response missing captchaType; halting captcha mount` | *(none)* | [This visitor was blocked](#frictionless-response-missing-captchatype-halting-captcha-mount) |
+| `Forbidden: <request id>` | *(none)* | [This visitor was blocked](#forbidden-request-id) |
+| `Error parsing captcha` | `CAPTCHA.PARSE_ERROR` | [Unexpected](#error-parsing-captcha) |
+| `BadRequest` | `API.BAD_REQUEST` | [Unexpected](#badrequest) |
+
+## Configuration errors
+
+These come from how your site key or your markup is set up, so they usually affect **every** visitor, including you.
+If you can reproduce the error yourself, it is almost certainly one of these. Fix them in the
+[Prosopo portal](https://portal.prosopo.io) or in your widget markup.
+
+### Site key not registered
+
+**Key:** `API.SITE_KEY_NOT_REGISTERED` · **HTTP:** 400
+
+**What it means.** The site key in your widget is a valid, well-formed key, but Prosopo has no record of it.
+
+**What causes it.**
+
+- Your account was created but never activated, so the site key was issued and not yet enabled.
+- The site key was deleted from your account, or belongs to an account that has been closed.
+- You copied a site key from an example, a tutorial, or another organisation's site.
+- You are pointing a production site key at a development environment, or vice versa.
+- The request carried no site key header at all. A direct API integration that omits `prosopo-site-key` gets this error
+  rather than a more specific one. (A *widget* with no site key never gets this far; see
+  [Errors that stay in the console](#errors-that-stay-in-the-console).)
+
+**How to fix it.**
+
+1. Check your email for the Prosopo activation link and click it. This is the cause the majority of the time.
+2. Log in to the [Prosopo portal](https://portal.prosopo.io) and confirm the site key is listed and active.
+3. Copy the site key straight from the portal into your `data-sitekey` attribute. Do not retype it.
+4. If the key is listed as active and the error persists,
+   [contact support](mailto:support@prosopo.io) quoting the site key.
+
+### Invalid site key
+
+**Key:** `API.INVALID_SITE_KEY` · **HTTP:** 400
+
+**What it means.** The value you supplied is not a well-formed Prosopo site key at all, so it was rejected before any
+lookup happened. This is a different failure from [`Site key not registered`](#site-key-not-registered), where the key
+was well-formed but unknown.
+
+**What causes it.**
+
+- A truncated or partially copied key.
+- Stray whitespace, quotes, or a trailing comma inside the `data-sitekey` attribute.
+- A template placeholder that was never substituted, such as `data-sitekey="{{ SITE_KEY }}"`.
+- Your **secret** key pasted where the **site** key belongs. The secret key is for server-side verification only and
+  must never appear in your HTML.
+
+**How to fix it.**
+
+1. Log in to the [Prosopo portal](https://portal.prosopo.io) and copy the site key.
+2. Confirm your rendered HTML contains the full key with no surrounding whitespace:
+
+   ```html
+   <div class="procaptcha" data-sitekey="YOUR_SITE_KEY"></div>
+   ```
+
+3. If you inject the key from a server-side template or an environment variable, view the page source in the browser
+   and confirm the variable was actually interpolated.
+
+### Unauthorized origin URL
+
+**Key:** `API.UNAUTHORIZED_ORIGIN_URL` · **HTTP:** 400
+
+**What it means.** The site key is valid and registered, but Prosopo could not match the request's origin against that
+key's list of allowed domains. That covers three situations: the domain is not on the list, the list is empty, or the
+request carried no origin to check.
+
+**What causes it.**
+
+- The site is being served from a domain you have not added yet, commonly a staging, preview, or branch-deploy URL.
+- A `www.` versus bare-domain mismatch, or a country domain you did not register alongside the main one.
+- Local development on `localhost` or `127.0.0.1` with a site key registered only for production.
+- The widget is embedded in an iframe served from another domain. Requests from inside an iframe carry the *iframe
+  document's* origin, not your page's, so it is the iframe's domain that must be on the list.
+- **No domains are configured on the site key at all.** A key that has never had a domain added fails for every
+  visitor, not just for those arriving on an unregistered domain. The error is worded identically in both cases, so
+  check that the list is non-empty before you go hunting for a domain-matching problem.
+- **The request arrived with no `Origin` header.** Browsers always send one for the widget's requests, so this normally
+  means a proxy or CDN in front of your site is stripping it.
+
+**How to fix it.**
+
+1. Log in to the [Prosopo portal](https://portal.prosopo.io) and open the site key's settings.
+2. Add the exact domain shown in your browser's address bar to the allowed domains.
+3. Add every domain you deploy to, not just production. Staging and preview URLs each need an entry.
+4. If the error appears for every visitor including on production, check the domain list is not empty.
+5. If the list looks right, check the **Network** tab for an `Origin` header on the widget's requests. If it is absent,
+   a proxy or CDN in front of your site is removing it.
+6. Reload the page. Domain changes take effect immediately.
+
+### Incorrect CAPTCHA type
+
+**Key:** `API.INCORRECT_CAPTCHA_TYPE` · **HTTP:** 400
+
+**What it means.** A challenge was requested for one [captcha type](/en/basics/captcha-types) when Prosopo expected a
+different one. Current versions of the widget are told which type to use by the server, so this points either at a
+client that bypassed that step, or at a stale session.
+
+**What causes it.**
+
+- **A direct API integration** requesting `/captcha/pow`, `/captcha/image`, or `/captcha/puzzle` for a type that does
+  not match the one configured on the site key in the portal.
+- **A very old copy of the Procaptcha bundle** that still honours a `data-captcha-type` attribute on your markup and
+  requests that type directly. Current bundles ignore the attribute entirely.
+- **A stale session.** The widget carried on with a session whose type no longer matches, for example a page restored
+  from the browser's back/forward cache, or a challenge that was escalated to a second stage the host page did not
+  follow.
+- **An access control rule** pinning a specific captcha type for this visitor that differs from the one requested.
+
+**How to fix it.**
+
+1. If a visitor hits this once and a refresh clears it, it was a stale session. No configuration change is needed.
+2. Make sure you are loading the current Procaptcha bundle. If your markup still carries `data-captcha-type`, remove
+   it. The type is chosen by Prosopo and the attribute has no effect on current bundles.
+3. If you integrate against the API directly, request the captcha type that the site key is configured for in the
+   [Prosopo portal](https://portal.prosopo.io).
+4. If it is persistent for one visitor but not others, check your
+   [access control rules](/en/advanced/access-control-rules) for a rule pinning a captcha type.
+
+### Procaptcha requires a secure (HTTPS) connection
+
+**Key:** `WIDGET.INSECURE_CONTEXT` · **HTTP:** *(no request is made)*
+
+**What it means.** The page is not running in a [secure browser context](https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts).
+Procaptcha depends on browser cryptography APIs that browsers only expose over HTTPS, so it stops immediately rather
+than failing later with a confusing message.
+
+**What causes it.**
+
+- The page was loaded over plain `http://`.
+- A local development server bound to a LAN address such as `http://192.168.1.10:3000`. Browsers treat `localhost` as
+  secure, but not other IP addresses.
+- The page is embedded in an iframe served over plain HTTP, which makes the whole context insecure.
+
+**How to fix it.**
+
+1. Serve the page over HTTPS. In production this is required, not optional.
+2. In local development, use `http://localhost` (which browsers already treat as secure) rather than a LAN IP.
+3. If you must test from another device on your network, put a local HTTPS proxy or tunnel in front of your dev server.
+
+## Transient errors
+
+These clear on their own. Neither one means anything is misconfigured, and neither needs action from your visitor
+beyond waiting.
+
+### No session found
+
+**Key:** `CAPTCHA.NO_SESSION_FOUND` · **HTTP:** 400
+
+**What it means.** The widget tried to continue a challenge whose session the provider no longer holds. Sessions are
+single-use and time-limited by design.
+
+**What causes it.**
+
+- The visitor left the page open long enough for the session to expire before interacting with the widget.
+- The page was restored from the browser's back/forward cache with a session that had already been used.
+- The page mounted the widget more than once, so a duplicate request consumed the session first.
+
+**How to fix it.**
+
+1. Do nothing. The widget detects this specific error and automatically resets itself after about 10 seconds, at which
+   point the visitor can solve a fresh challenge.
+2. If the visitor is impatient, refreshing the page resolves it immediately.
+3. If it happens on *every* attempt and never recovers, clear the browser's cache and cookies and try again, then
+   [contact support](https://discord.com/invite/3nMYAHecZT).
+
+### Cannot load CAPTCHA
+
+**Key:** *(none, this is a fallback message)* · **HTTP:** *(varies)*
+
+**What it means.** The widget tried five times to reach a Prosopo provider and failed every time. It is the generic
+last-resort message, shown only once those five attempts are exhausted, so every other error on this page takes
+precedence over it.
+
+**What causes it.**
+
+- A transient network problem between the visitor and Prosopo.
+- The visitor's network, corporate proxy, DNS filter, or browser extension is blocking requests to Prosopo.
+- A Content Security Policy on your site that does not allow the widget to reach Prosopo.
+- A provider-side incident.
+
+**How to fix it.**
+
+1. Do nothing first. The widget reloads itself roughly 10 seconds after giving up, and transient failures usually clear
+   on the retry.
+2. If it is reproducible, open developer tools and check the **Network** tab and **Console** for blocked requests. A CSP
+   violation or an `ERR_BLOCKED_BY_CLIENT` entry points at a policy or extension on the visitor's side rather than at
+   Prosopo.
+3. Check that your Content Security Policy permits the widget's requests to Prosopo.
+4. If requests are reaching Prosopo and still failing for many visitors,
+   [contact support](https://discord.com/invite/3nMYAHecZT).
+
+## Blocked visitors
+
+These two messages mean Prosopo refused the request outright. Only the affected visitor sees them; the rest of your
+traffic is unaffected. If your own rules caused the block, this is Procaptcha working as configured.
+
+:::note[These messages are deliberately vague]
+Neither message names the rule that fired. That is intentional: telling an automated client exactly why it was blocked
+helps it evade the block. Use the audit log in the portal to see the real reason.
+:::
+
+### Frictionless response missing captchaType; halting captcha mount
+
+**Key:** *(none)* · **HTTP:** 401
+
+**What it means.** Prosopo returned `401 Unauthorized` rather than a challenge, and the widget refused to guess what to
+show. The visitor was turned away before any captcha was issued.
+
+**What causes it.**
+
+- An [access control rule](/en/advanced/access-control-rules) on your site matched this visitor and is set to block.
+- The visitor's bot score exceeded your site's auto-ban threshold.
+- The request failed a header integrity check, which usually means it did not come from a genuine browser.
+- Domain validation failed in a way that produced no specific error. This is rare, but it surfaces the same message.
+
+**How to fix it.**
+
+- **If this is a real visitor being blocked wrongly**, start with your
+  [access control rules](/en/advanced/access-control-rules), which are the part you control. If none of them explains
+  the block, the auto-ban score threshold on your site key may be set too low. That threshold is not customer-editable,
+  so [contact support](https://discord.com/invite/3nMYAHecZT) to have it reviewed.
+- **Do not reach for the [Safety Threshold](/en/basics/safety-threshold) here.** It is a separate setting that decides
+  whether a visitor is given an image challenge instead of an invisible proof-of-work challenge. It never causes this
+  error, so changing it will not unblock anyone.
+- **If you are testing with a script, `curl`, or a headless browser**, this is the expected outcome. Automated clients
+  are what the block exists to stop.
+- **If you cannot tell which it is**, check the audit log for your site in the
+  [Prosopo portal](https://portal.prosopo.io). It records which rule fired for each blocked request. See
+  [Audit](/en/advanced/audit).
+
+### Forbidden: `<request id>`
+
+**Key:** *(none)* · **HTTP:** 403
+
+**What it means.** Prosopo's request inspector refused the request before it reached any captcha logic. The trailing
+value is the request ID.
+
+**What causes it.**
+
+- The visitor's IP address, network, ASN, country, or client fingerprint matched a block rule.
+- The request came from infrastructure Prosopo has classified as abusive.
+- No IP address could be determined for the request.
+- The inspector itself failed, and denied the request rather than letting it through unchecked.
+
+**How to fix it.**
+
+1. Copy the request ID from the end of the message. It uniquely identifies this request in our logs.
+2. If a block rule matched, retrying will not help: the same request produces the same result every time. The last two
+   causes above are not rule matches and can clear on their own, so a retry that succeeds tells you it was one of those.
+3. If you believe a genuine visitor was blocked, [contact support](https://discord.com/invite/3nMYAHecZT) and quote the
+   request ID. We can look up the exact rule that fired.
+
+## Unexpected errors
+
+`Error parsing captcha` always means something went wrong that should not have. `BadRequest` is a catch-all that covers
+a few routine conditions as well as genuine faults. Either is worth reporting if you see it often.
+
+### Error parsing captcha
+
+**Key:** `CAPTCHA.PARSE_ERROR` · **HTTP:** 400
+
+**What it means.** Prosopo received a request from the widget that it could not read: a required field was missing,
+or a value was not of the expected shape.
+
+**What causes it.**
+
+- A modified, out-of-date, or partially loaded copy of the Procaptcha bundle.
+- Something on the page or in the network path altering the widget's requests, such as an aggressive optimisation
+  proxy or a browser extension.
+- A client that is imitating the widget rather than being the widget.
+
+**How to fix it.**
+
+1. Make sure you are loading the Procaptcha bundle from the official URL and are not pinning an old copy.
+2. Hard-refresh (`Ctrl`-`Shift`-`R`) to rule out a stale cached bundle.
+3. Reproduce with browser extensions disabled.
+4. If it persists on a clean, current bundle, [contact support](https://discord.com/invite/3nMYAHecZT).
+
+### BadRequest
+
+**Key:** `API.BAD_REQUEST` · **HTTP:** 400 or 500
+
+**What it means.** A catch-all for a request Prosopo could not fulfil. When it carries a 500 it indicates a
+provider-side failure rather than anything about your request.
+
+**What causes it.**
+
+- **A bot-detection token was submitted twice.** Each token is accepted once, so a second request carrying the same one
+  is rejected. Usually this means the widget is mounted twice on the same page, or that a request was replayed. Harmless
+  as a one-off; a steady stream of it points at a duplicate widget.
+- No dataset was available on the provider that served the request.
+- An internal provider error while building the challenge. This is the 500 case.
+- A required request header missing or stripped in transit. Note that a missing `Origin` usually surfaces as
+  [`Unauthorized origin URL`](#unauthorized-origin-url) instead, because domain validation runs first.
+
+**How to fix it.**
+
+1. Refresh the page. The widget does not retry this error on its own, but provider-side failures are typically
+   short-lived and a fresh attempt usually goes through.
+2. Check that your page renders the widget exactly once. Two widget elements on one page, or a component that unmounts
+   and remounts, will each ask for their own challenge, and the second request can be rejected.
+3. If it is consistent and reproducible, [contact support](https://discord.com/invite/3nMYAHecZT) with the URL and the
+   time of the failure.
+
+## Errors that stay in the console
+
+Not every Procaptcha error is displayed. Some are written to the browser console instead, so a visitor reporting "the
+captcha just doesn't appear" may be hitting one of these. Check the console before assuming a network problem.
+
+| Console message | Key | Meaning |
+| --- | --- | --- |
+| `No site key found` | *(none)* | The widget element has no `data-sitekey` attribute at all. Add one. |
+| `No Procaptcha containers found for execution` | *(none)* | `execute()` was called but no element with the `procaptcha` class exists on the page. |
+| `SITE KEY missing` | `GENERAL.SITE_KEY_MISSING` | A widget mounted directly in React started with no site key. Same fix. |
+| `No captchas returned from provider` | `DEVELOPER.PROVIDER_NO_CAPTCHA` | The provider returned an empty challenge. The widget retries automatically. |
+
+The first two stop the widget before it does anything at all: nothing is rendered and nothing is retried. The other two
+are thrown inside a retry loop, so they are logged once per attempt. `SITE KEY missing` is the one that does not stay in
+the console for good: once five attempts have failed, the widget gives up and shows
+[`Cannot load CAPTCHA`](#cannot-load-captcha).
+
+Separately, a visitor who fails a challenge is not shown an error at all. The widget simply resets so they can try
+again. Nothing is broken in that case.
+
+## Still stuck?
+
+Have your site key and, if you have one, the request ID to hand, then reach us on
+[Discord](https://discord.com/invite/3nMYAHecZT) or at [support@prosopo.io](mailto:support@prosopo.io).
