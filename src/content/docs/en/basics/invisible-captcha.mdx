@@ -171,6 +171,7 @@ For more control over the CAPTCHA lifecycle:
 | `data-callback` | Function name | Called when CAPTCHA is successfully verified |
 | `data-failed-callback` | Function name | Called when CAPTCHA verification fails |
 | `data-sitekey` | Your site key | **Required.** Your Procaptcha site key |
+| `data-start-mode` | `"auto"`, `"manual"` | When the background work starts. `auto` (default) starts on page load. `manual` waits until you call `window.procaptcha.start()` or `execute()`. See [Controlling when the widget starts](/en/basics/client-side-rendering/#controlling-when-the-widget-starts). |
 
 ## Best Practices
 

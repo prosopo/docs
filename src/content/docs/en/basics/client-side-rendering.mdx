@@ -123,6 +123,7 @@ following fields:
 | reset-callback       | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is reset.                                                                       | ✗        |
 | language             | string             | The language of the CAPTCHA widget. The default is `en`. All languages can be found [here](https://github.com/prosopo/captcha/tree/main/packages/locale/src/locales). | ✗        |
 | sessionId            | string             | Your own session identifier for this user. Pass the same value to your server-side verification call and the token will only verify if it was earned in that session. See [Session correlation](#session-correlation). | ✗        |
+| startMode            | string             | When the widget starts working. The default is `auto`, which starts on page load. Set `manual` to render the checkbox immediately but defer all detection and network activity until you call `window.procaptcha.start()` or the user clicks the checkbox. See [Controlling when the widget starts](#controlling-when-the-widget-starts). | ✗        |
 
 ### Data Attributes
 
@@ -182,6 +183,57 @@ A few things worth knowing:
 
 Prosopo Protect uses this mechanism internally: it renders the challenge widget with its own session JTI, and asserts
 the same JTI when verifying, so a token solved against one session cannot be replayed against another.
+
+### Controlling when the widget starts
+
+By default the widget starts working as soon as it is rendered: it runs bot detection, starts collecting behavioural
+signals and contacts a Procaptcha provider to decide which challenge, if any, the user should see. For most sites that
+is what you want, because the work is finished by the time the user reaches the checkbox.
+
+If you would rather nothing happens until your page decides — to keep the page load quiet, to wait for consent, or to
+start only once the user reaches the form — render the widget with `startMode` set to `manual`.
+
+```html
+<div class="procaptcha" data-sitekey="your_site_key" data-start-mode="manual"></div>
+```
+
+Or explicitly:
+
+```javascript
+const widgetId = await window.procaptcha.render(captchaContainer, {
+    siteKey: 'YOUR_SITE_KEY',
+    startMode: 'manual',
+})
+```
+
+The checkbox still appears straight away, at its final size, so your layout does not shift. The widget just does
+nothing else until one of two things happens:
+
+- **Your page starts it.** Call `window.procaptcha.start()` to start every widget on the page, or
+  `window.procaptcha.start(widgetId)` with the id returned by `render()` to start one. The widget then behaves exactly
+  as it would have on page load, and waits for the user to click the checkbox.
+
+  ```javascript
+  document.getElementById('email').addEventListener('focus', () => {
+      window.procaptcha.start(widgetId)
+  })
+  ```
+
+- **The user clicks the checkbox.** If your page never calls `start()`, the user's click starts the widget, and
+  whichever challenge the provider picks opens straight away. The user is never asked to click the checkbox twice.
+
+Whichever happens first wins; the other is ignored. Calling `start()` on a widget that has already started, or on one
+rendered in the default `auto` mode, does nothing.
+
+If you are not using the bundle's `window.procaptcha` object — for example in a framework integration that mounts the
+React component directly — dispatch a `procaptcha:start` event on `document` instead. It is what `start()` sends.
+
+```javascript
+document.dispatchEvent(new CustomEvent('procaptcha:start'))
+```
+
+In [invisible mode](/en/basics/invisible-captcha/), `execute()` also starts a manual widget, and opens its challenge
+immediately if the provider asks for one.
 
 ### `captchaType`
 
