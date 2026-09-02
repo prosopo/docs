@@ -8,7 +8,6 @@ const { isFallback, lang } = Astro.props;
 const ogImageUrl = getOgImageUrl(Astro.url.pathname, !!isFallback);
 const imageSrc = ogImageUrl ?? '/default-og-image.png';
 const canonicalImageSrc = new URL(imageSrc, Astro.site);
-const is404 = Astro.url.pathname.endsWith('/404/');
 ---
 
 <Default {...Astro.props}><slot /></Default>
