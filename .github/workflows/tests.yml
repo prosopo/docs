@@ -33,14 +33,6 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.draft == false
     steps:
-      - name: Print contexts
-        uses: prosopo/captcha/.github/actions/print_contexts@main
-        with:
-          INPUTS_CONTEXT: ${{ toJson(inputs) }}
-          NEEDS_CONTEXT: ${{ toJson(needs) }}
-          VARS_CONTEXT: ${{ toJson(vars) }}
-          SECRETS_CONTEXT: ${{ toJson(secrets) }}
-
       - uses: actions/checkout@v4
         with:
           submodules: "recursive"
