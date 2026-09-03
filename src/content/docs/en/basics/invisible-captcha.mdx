@@ -153,8 +153,9 @@ For more control over the CAPTCHA lifecycle:
             // Handle form submission
             document.getElementById('demo-form').addEventListener('submit', function(e) {
                 e.preventDefault();
-                // Trigger CAPTCHA verification
-                execute();
+                // Trigger CAPTCHA verification. Pass the widget id to trigger only
+                // this widget; with no argument every widget on the page runs.
+                execute(widgetId);
             });
         });
     </script>
@@ -171,6 +172,8 @@ For more control over the CAPTCHA lifecycle:
 | `data-callback` | Function name | Called when CAPTCHA is successfully verified |
 | `data-failed-callback` | Function name | Called when CAPTCHA verification fails |
 | `data-sitekey` | Your site key | **Required.** Your Procaptcha site key |
+| `data-bind` | CSS selector | A button on your page that triggers this widget, instead of your code calling `execute()`. The button's default action is prevented. See [Binding a button to the widget](/en/basics/client-side-rendering/#binding-a-button-to-the-widget). |
+| `data-placement` | `"popup"` | Accepted for consistency with visible widgets, but an invisible widget has no checkbox to anchor a `float` challenge to, so its challenge always opens as a centred popup. |
 
 ## Best Practices
 

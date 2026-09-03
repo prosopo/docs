@@ -123,6 +123,8 @@ following fields:
 | reset-callback       | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is reset.                                                                       | ✗        |
 | language             | string             | The language of the CAPTCHA widget. The default is `en`. All languages can be found [here](https://github.com/prosopo/captcha/tree/main/packages/locale/src/locales). | ✗        |
 | sessionId            | string             | Your own session identifier for this user. Pass the same value to your server-side verification call and the token will only verify if it was earned in that session. See [Session correlation](#session-correlation). | ✗        |
+| placement            | string             | Where a challenge opens. The default is `popup`, centred over the page. Set `float` to anchor the challenge to the widget and leave the page usable behind it. See [Choosing where the challenge opens](#choosing-where-the-challenge-opens). | ✗        |
+| bind                 | string             | A CSS selector for a button on your page that triggers this widget's challenge, so the widget can sit in one place and be driven by your form's own submit button. See [Binding a button to the widget](#binding-a-button-to-the-widget). | ✗        |
 
 ### Data Attributes
 
@@ -182,6 +184,69 @@ A few things worth knowing:
 
 Prosopo Protect uses this mechanism internally: it renders the challenge widget with its own session JTI, and asserts
 the same JTI when verifying, so a token solved against one session cannot be replayed against another.
+
+### Choosing where the challenge opens
+
+When the provider decides a user should see a challenge, the widget opens it in one of two places. The default, `popup`,
+centres the challenge over the page, which is what every widget did before this option existed. Set `placement` to
+`float` and the challenge opens next to the widget instead: it is anchored just below the checkbox, moves above it when
+there is no room below, follows the widget as the page scrolls, and leaves the rest of the page usable behind it.
+
+```html
+<div class="procaptcha" data-sitekey="your_site_key" data-placement="float"></div>
+```
+
+Or explicitly:
+
+```javascript
+window.procaptcha.render(captchaContainer, {
+    siteKey: 'YOUR_SITE_KEY',
+    placement: 'float',
+})
+```
+
+A few things worth knowing:
+
+- **Escape closes the challenge in either placement.** A floating challenge also closes when the user clicks anywhere
+  outside it. Closing returns the widget to its checkbox; it does not count as a failed attempt.
+- **Invisible widgets always use `popup`.** There is no checkbox on the page for a floating challenge to attach to, so a
+  `float` request from an [invisible widget](/en/basics/invisible-captcha/) is treated as `popup`.
+- **The challenge is rendered at the end of `<body>`,** not inside your container, so an ancestor with
+  `overflow: hidden` cannot clip it. If you style the challenge with your own CSS, target it from the document rather
+  than from inside the widget's container.
+
+### Binding a button to the widget
+
+By default the user starts a challenge by clicking the checkbox. If you would rather your form's own submit button did
+that, pass `bind` with a CSS selector for the button. Clicking it triggers that one widget's challenge, the checkbox is
+left alone, and the button's default action is prevented so the form is not posted before a token exists. Submit the
+form from your `callback` instead.
+
+```html
+<form id="signup">
+    <input type="email" name="email" placeholder="Email" />
+    <div class="procaptcha" data-sitekey="your_site_key" data-bind="#signup-submit"></div>
+    <button id="signup-submit" type="submit">Sign up</button>
+</form>
+```
+
+Or explicitly:
+
+```javascript
+window.procaptcha.render(captchaContainer, {
+    siteKey: 'YOUR_SITE_KEY',
+    bind: '#signup-submit',
+    callback: () => document.getElementById('signup').submit(),
+})
+```
+
+The selector is resolved once, when the widget renders, so the button has to be in the page by then. If nothing matches,
+the widget still renders and an error is logged to the console.
+
+Binding works for visible and [invisible](/en/basics/invisible-captcha/) widgets alike, and combines with `placement`.
+Underneath it calls `window.procaptcha.execute(widgetId)` with the id `render()` returned, which you can also call
+yourself. Called with no argument, `execute()` triggers every widget on the page, as it always has; called with an id it
+triggers only that widget, which is what lets two bound buttons on one page drive two widgets independently.
 
 ### `captchaType`
 
