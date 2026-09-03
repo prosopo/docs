@@ -1,0 +1,40 @@
+---
+title: 'LearnDash LMS'
+description: 'LearnDash LMS support.'
+---
+import {Image} from 'astro:assets';
+import CoreForms from '~/assets/wp-procaptcha-core-forms.png';
+
+The Procaptcha plugin extends the account forms of [LearnDash LMS](https://www.learndash.com/), the forms bots target when they sign up for free courses in bulk.
+
+## 1. Registration form
+
+The [LearnDash registration form](https://www.learndash.com/support/docs/settings/registration-settings/) is protected as soon as both plugins are active — there is no per-form switch.
+
+To confirm it is running, open **Settings** > **Procaptcha** > **Active Integrations** and check that `LearnDash LMS` is listed.
+
+A rejected submission is reported through LearnDash's own error list, so the visitor sees the failure in the same place as any other registration error.
+
+## 2. Login form
+
+The LearnDash login form submits through the native WordPress login flow, so it is controlled by the generic Procaptcha settings:
+
+1. Visit the Procaptcha plugin settings
+2. Switch to the "Core forms" tab
+3. Enable login form protection
+4. Save settings
+
+<Image src={CoreForms} alt={'The Core Forms tab of the Procaptcha plugin settings, with login and lost password protection enabled'} style="margin: 20px auto;"/>
+
+## 3. Password recovery form
+
+The password recovery form also submits through the native WordPress flow:
+
+1. Visit the Procaptcha plugin settings
+2. Switch to the "Core forms" tab
+3. Enable lost password form protection
+4. Save settings
+
+**Related blog articles**
+
+* [How to add CAPTCHA to LearnDash](https://prosopo.io/wordpress/how-to-add-captcha-to-learndash/)
