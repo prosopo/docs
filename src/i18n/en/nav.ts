@@ -199,6 +199,11 @@ export default [
         key: 'wordpress-plugin/gravity-forms',
     },
     {
+        text: 'JetFormBuilder',
+        slug: 'wordpress-plugin/jetformbuilder',
+        key: 'wordpress-plugin/jetformbuilder',
+    },
+    {
         text: 'Ninja Forms',
         slug: 'wordpress-plugin/ninja-forms',
         key: 'wordpress-plugin/ninja-forms',
@@ -224,6 +229,26 @@ export default [
         text: 'Beaver Builder',
         slug: 'wordpress-plugin/beaver-builder',
         key: 'wordpress-plugin/beaver-builder',
+    },
+    {
+        text: 'Blocksy',
+        slug: 'wordpress-plugin/blocksy',
+        key: 'wordpress-plugin/blocksy',
+    },
+    {
+        text: 'Bricks',
+        slug: 'wordpress-plugin/bricks',
+        key: 'wordpress-plugin/bricks',
+    },
+    {
+        text: 'Divi',
+        slug: 'wordpress-plugin/divi',
+        key: 'wordpress-plugin/divi',
+    },
+    {
+        text: 'LearnDash LMS',
+        slug: 'wordpress-plugin/learndash',
+        key: 'wordpress-plugin/learndash',
     },
     {
         text: 'Memberpress',

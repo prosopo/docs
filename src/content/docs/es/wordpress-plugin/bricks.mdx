@@ -1,0 +1,34 @@
+---
+title: 'Bricks'
+description: 'Soporte de Bricks.'
+---
+import {Image} from 'astro:assets';
+import ActiveIntegrations from '~/assets/wp-procaptcha-active-integrations.png';
+
+El plugin Procaptcha da soporte al elemento Form del constructor de temas [Bricks](https://bricksbuilder.io/).
+
+:::caution[Se requiere Bricks 2.0 o posterior]
+La integración se engancha al filtro `bricks/frontend/render_element`, la única vía para llegar al marcado del formulario, y ese filtro se introdujo en Bricks 2.0. En versiones anteriores el plugin deja los formularios de Bricks intactos.
+:::
+
+## 1. Activar Procaptcha en un formulario
+
+Un campo **Hidden** con la etiqueta `prosopo_procaptcha` marca el formulario como protegido. El widget sustituye entonces al input de ese campo, de modo que el token llega al servidor como un campo de formulario normal de Bricks.
+
+1. Edite la página de destino en Bricks y seleccione el elemento Form.
+2. En los ajustes del elemento, abra **Fields** y añada un nuevo campo.
+3. Ponga su **Type** en `Hidden`.
+4. Use `prosopo_procaptcha` como **Label** del campo (o, si su versión de Bricks no muestra etiqueta para los campos ocultos, como su **Value**).
+5. Guarde la página.
+
+Eso es todo. Abra la página como visitante sin sesión iniciada y el widget de Procaptcha aparecerá en el lugar del campo oculto. Un envío con un token ausente o inválido se rechaza con el mensaje de validación de Procaptcha, mostrado en el área de errores habitual del formulario.
+
+## 2. Comprobar que la integración está activa
+
+Bricks es un tema y no un plugin, así que el plugin Procaptcha lo detecta a partir de la plantilla activa. Para comprobarlo, abra **Ajustes** > **Procaptcha** > **Active Integrations** y verifique que `Bricks` aparece en la lista.
+
+<Image src={ActiveIntegrations} alt={'La pestaña "Active Integrations" de la configuración del plugin Procaptcha'} style="margin: 20px auto;"/>
+
+**Artículos de blog relacionados**
+
+* [How to add CAPTCHA to Bricks](https://prosopo.io/wordpress/how-to-add-captcha-to-bricks/)

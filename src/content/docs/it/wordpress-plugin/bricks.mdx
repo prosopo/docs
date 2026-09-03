@@ -1,0 +1,34 @@
+---
+title: 'Bricks'
+description: 'Supporto di Bricks.'
+---
+import {Image} from 'astro:assets';
+import ActiveIntegrations from '~/assets/wp-procaptcha-active-integrations.png';
+
+Il plugin Procaptcha supporta l'elemento Form del theme builder [Bricks](https://bricksbuilder.io/).
+
+:::caution[Richiede Bricks 2.0 o successivo]
+L'integrazione si aggancia al filtro `bricks/frontend/render_element`, l'unico modo per raggiungere il markup del modulo, e quel filtro è stato introdotto in Bricks 2.0. Sulle versioni precedenti il plugin lascia i moduli Bricks inalterati.
+:::
+
+## 1. Abilitare Procaptcha su un modulo
+
+Un campo **Hidden** con etichetta `prosopo_procaptcha` contrassegna il modulo come protetto. Il widget sostituisce quindi l'input di quel campo, così il token arriva al server come un normale campo del modulo Bricks.
+
+1. Modifica la pagina di destinazione in Bricks e seleziona l'elemento Form.
+2. Nelle impostazioni dell'elemento apri **Fields** e aggiungi un nuovo campo.
+3. Imposta il suo **Type** su `Hidden`.
+4. Usa `prosopo_procaptcha` come **Label** del campo (oppure, se la tua versione di Bricks non mostra l'etichetta per i campi nascosti, come suo **Value**).
+5. Salva la pagina.
+
+Fatto. Apri la pagina da visitatore non autenticato e il widget Procaptcha comparirà al posto del campo nascosto. Un invio con token mancante o non valido viene respinto con il messaggio di validazione di Procaptcha, mostrato nella consueta area errori del modulo.
+
+## 2. Verificare che l'integrazione sia attiva
+
+Bricks è un tema e non un plugin, quindi il plugin Procaptcha lo rileva dal template attivo. Per verificarlo, apri **Impostazioni** > **Procaptcha** > **Active Integrations** e controlla che `Bricks` sia elencato.
+
+<Image src={ActiveIntegrations} alt={'La scheda "Active Integrations" delle impostazioni del plugin Procaptcha'} style="margin: 20px auto;"/>
+
+**Articoli del blog correlati**
+
+* [How to add CAPTCHA to Bricks](https://prosopo.io/wordpress/how-to-add-captcha-to-bricks/)
