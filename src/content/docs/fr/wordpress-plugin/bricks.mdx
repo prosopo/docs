@@ -1,0 +1,34 @@
+---
+title: 'Bricks'
+description: 'Support de Bricks.'
+---
+import {Image} from 'astro:assets';
+import ActiveIntegrations from '~/assets/wp-procaptcha-active-integrations.png';
+
+Le plugin Procaptcha prend en charge l'élément Form du constructeur de thèmes [Bricks](https://bricksbuilder.io/).
+
+:::caution[Bricks 2.0 ou plus récent requis]
+L'intégration s'accroche au filtre `bricks/frontend/render_element`, seul moyen d'atteindre le balisage du formulaire, et ce filtre a été introduit dans Bricks 2.0. Sur les versions antérieures, le plugin laisse les formulaires Bricks inchangés.
+:::
+
+## 1. Activer Procaptcha sur un formulaire
+
+Un champ **Hidden** portant le libellé `prosopo_procaptcha` marque le formulaire comme protégé. Le widget remplace alors l'input de ce champ, de sorte que le jeton parvient au serveur comme un champ de formulaire Bricks ordinaire.
+
+1. Modifiez la page cible dans Bricks et sélectionnez l'élément Form.
+2. Dans les réglages de l'élément, ouvrez **Fields** et ajoutez un nouveau champ.
+3. Réglez son **Type** sur `Hidden`.
+4. Utilisez `prosopo_procaptcha` comme **Label** du champ (ou, si votre version de Bricks n'affiche pas de libellé pour les champs cachés, comme sa **Value**).
+5. Enregistrez la page.
+
+C'est tout. Ouvrez la page en tant que visiteur déconnecté : le widget Procaptcha apparaît à la place du champ caché. Une soumission dont le jeton est absent ou invalide est rejetée avec le message de validation Procaptcha, affiché dans la zone d'erreur habituelle du formulaire.
+
+## 2. Vérifier que l'intégration est active
+
+Bricks est un thème et non une extension : le plugin Procaptcha le détecte donc à partir du template actif. Pour le vérifier, ouvrez **Réglages** > **Procaptcha** > **Active Integrations** et contrôlez que `Bricks` figure dans la liste.
+
+<Image src={ActiveIntegrations} alt={'L\'onglet « Active Integrations » des réglages du plugin Procaptcha'} style="margin: 20px auto;"/>
+
+**Articles de blog associés**
+
+* [How to add CAPTCHA to Bricks](https://prosopo.io/wordpress/how-to-add-captcha-to-bricks/)

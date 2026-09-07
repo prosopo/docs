@@ -61,8 +61,18 @@ export default [
         slug: 'basics/faq',
         key: 'basics/faq',
     },
+    {
+        text: 'Error Reference',
+        slug: 'basics/error-reference',
+        key: 'basics/error-reference',
+    },
+    {
+        text: 'Demo Keys',
+        slug: 'basics/demo-keys',
+        key: 'basics/demo-keys',
+    },
     {text: 'Advanced Usage', header: true, type: 'learn', key: 'advanced'},
-        {
+    {
         text: 'Context Awareness',
         slug: 'advanced/context-awareness',
         key: 'advanced/context-awareness',
@@ -199,6 +209,11 @@ export default [
         key: 'wordpress-plugin/gravity-forms',
     },
     {
+        text: 'JetFormBuilder',
+        slug: 'wordpress-plugin/jetformbuilder',
+        key: 'wordpress-plugin/jetformbuilder',
+    },
+    {
         text: 'Ninja Forms',
         slug: 'wordpress-plugin/ninja-forms',
         key: 'wordpress-plugin/ninja-forms',
@@ -224,6 +239,26 @@ export default [
         text: 'Beaver Builder',
         slug: 'wordpress-plugin/beaver-builder',
         key: 'wordpress-plugin/beaver-builder',
+    },
+    {
+        text: 'Blocksy',
+        slug: 'wordpress-plugin/blocksy',
+        key: 'wordpress-plugin/blocksy',
+    },
+    {
+        text: 'Bricks',
+        slug: 'wordpress-plugin/bricks',
+        key: 'wordpress-plugin/bricks',
+    },
+    {
+        text: 'Divi',
+        slug: 'wordpress-plugin/divi',
+        key: 'wordpress-plugin/divi',
+    },
+    {
+        text: 'LearnDash LMS',
+        slug: 'wordpress-plugin/learndash',
+        key: 'wordpress-plugin/learndash',
     },
     {
         text: 'Memberpress',
