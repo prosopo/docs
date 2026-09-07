@@ -98,6 +98,21 @@ export default [
         key: 'advanced/spam-filter',
     },
     {
+        text: 'Geo Blocking',
+        slug: 'advanced/geo-blocking',
+        key: 'advanced/geo-blocking',
+    },
+    {
+        text: 'Honeypot',
+        slug: 'advanced/honeypot',
+        key: 'advanced/honeypot',
+    },
+    {
+        text: 'CAPTCHA Timeouts',
+        slug: 'advanced/captcha-timeouts',
+        key: 'advanced/captcha-timeouts',
+    },
+    {
         text: 'Image Accuracy Threshold',
         slug: 'advanced/image-threshold',
         key: 'advanced/image-threshold',

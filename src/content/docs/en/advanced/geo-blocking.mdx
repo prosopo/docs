@@ -1,0 +1,56 @@
+---
+title: Geo Blocking
+description: Block or allow traffic by country from a map, as access control rules you can lift again later.
+i18nReady: true
+---
+import { Image } from 'astro:assets';
+import GeoBlocking from '~/assets/geo-blocking.png';
+
+Geo Blocking turns a country selection into [access control rules](/en/advanced/access-control-rules/). It is the same
+rule engine as everything else on that page — the map is a way of writing a lot of country rules at once, and of seeing
+which ones you already have.
+
+Find it on the **Access Control** page, under **Geo Blocking**.
+
+<Image src={GeoBlocking} alt="prosopo portal geo blocking editor" style="margin: 20px auto;"/>
+
+## The two modes
+
+| Mode | What it writes |
+|------|----------------|
+| **Block selected** | One rule per country you have selected. |
+| **Allow only selected** | One rule for every *other* known country. Your selection is what stays open. |
+
+Allow-only is the mode to reach for when you serve one market and everything else is noise. It is worth reading the
+rule count before you save: the complement of a handful of countries is most of the world, and that is how many rules
+you are about to create.
+
+## What each rule does
+
+Selecting countries decides *who* the rules apply to. The policy beside the map decides what happens to them:
+
+- **Block** — the verification is rejected outright.
+- **A harder challenge** — the visitor is served an image or puzzle challenge instead of whatever they would otherwise
+  have got, with the number of rounds you choose. Use this where a region is a source of abuse but also of real
+  customers, and you would rather add friction than close the door.
+
+Geo rules default to **no expiry**, unlike the ad-hoc rule editor, which defaults to an hour. Country policy is usually
+standing policy rather than incident response — but if you are blocking a region for a specific reason, set an expiry
+and let it lapse rather than discovering it years later.
+
+## Groups, and why a country can only be in one
+
+Everything you save in one pass becomes a **rule group**: it is created together, listed together, and deleted
+together. That is what makes a geo policy reversible — you remove the group rather than hunting individual countries.
+
+A country can only carry one standing rule per account. If you select a country that already has one, saving moves that
+rule into the new group rather than creating a second one; the editor warns you which countries that affects before you
+save. So the last save wins, and there is no way to end up with two contradictory rules for the same country.
+
+## What it matches on
+
+The country comes from the IP address Prosopo resolves for the visitor, so the usual caveats apply: a VPN or proxy
+presents its exit country, not the user's. If your concern is anonymised traffic rather than geography, the
+[traffic filter](/en/advanced/traffic-filter/) blocks by connection type — VPN, proxy, Tor, datacenter — and is the
+better tool for it. The two combine: geo rules decide about a region, traffic filters decide about how the visitor is
+connecting.

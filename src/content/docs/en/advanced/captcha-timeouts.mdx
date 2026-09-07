@@ -1,0 +1,48 @@
+---
+title: CAPTCHA Timeouts
+description: How long a user has to solve a challenge, and how long your server then has to verify the token.
+i18nReady: true
+---
+import { Image } from 'astro:assets';
+import CaptchaTimeouts from '~/assets/captcha-timeouts.png';
+
+Two clocks run around a challenge, and both are configurable per site.
+
+| Setting | What it bounds | Default |
+|---------|----------------|---------|
+| **Solution timeout** | From the challenge being issued to the user submitting an answer | 60 seconds |
+| **Verified timeout** | From the user solving to your server calling verify | 120 seconds |
+
+Both accept 1 to 600 seconds.
+
+<Image src={CaptchaTimeouts} alt="prosopo portal CAPTCHA timeout settings" style="margin: 20px auto;"/>
+
+## Solution timeout
+
+How long the user has to solve the challenge in front of them. A solution submitted after this window is rejected as
+stale and the user gets a fresh challenge.
+
+Raise it if your challenge sits on a page where people are legitimately slow — a long form they fill in around the
+widget, or an accessibility need. Lower it and you shorten the window in which a challenge can be farmed out to a
+solving service, at the cost of failing genuine slow users.
+
+## Verified timeout
+
+How long your server has, after the user solves, to call
+[server-side verification](/en/basics/server-side-verification/) with the token. Past this window the token is no longer
+verifiable and your call returns unverified.
+
+This is the one to think about if your form does work between the user's click and your verify call — a slow upload, a
+payment step, a queue. The window has to cover your worst case, not your median. Shorter windows reduce the time a
+leaked or shared token is worth anything to someone who intercepts it.
+
+:::caution
+The verified timeout is the one that fails silently in production. It is measured against your server's clock reaching
+Prosopo, so it has to cover your slowest path — retries, cold starts, a queued job between submit and verify — not your
+average one. Set below that and the symptom is genuine users failing verification with a valid token.
+:::
+
+## Where to set them
+
+The **Captcha Timeouts** card is on the **General Settings** tab of Site Settings. Changes apply to new sessions on that
+site key; nothing needs redeploying.
