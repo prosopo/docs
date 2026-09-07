@@ -22,52 +22,24 @@ CAPTCHA invisible funciona mediante:
 3. Mostrar un desafío visible solo si el usuario parece sospechoso
 4. Proporcionar una experiencia fluida para usuarios legítimos
 
-## Tipos de CAPTCHA
+## Hacer invisible un widget
 
-### Frictionless invisible
-
-La opción más inteligente que se adapta dinámicamente según el comportamiento del usuario:
+`data-size="invisible"` es lo que hace invisible el widget. Colóquelo en el elemento que envía el formulario:
 
 ```html
-<button 
-    class="procaptcha" 
-    data-sitekey="your_site_key" 
-    data-captcha-type="frictionless"
+<button
+    class="procaptcha"
+    data-sitekey="your_site_key"
     data-size="invisible"
     data-callback="onCaptchaSuccess">
-    Enviar
+    Submit
 </button>
 ```
 
-### Proof of Work invisible
-
-Ejecuta un desafío computacional de forma invisible en segundo plano:
-
-```html
-<button 
-    class="procaptcha" 
-    data-sitekey="your_site_key" 
-    data-captcha-type="pow"
-    data-size="invisible" 
-    data-callback="onCaptchaSuccess">
-    Enviar
-</button>
-```
-
-### Imagen invisible
-
-Muestra desafíos visibles para verificar al usuario al enviar el formulario:
-
-```html
-<button 
-    class="procaptcha" 
-    data-sitekey="your_site_key" 
-    data-captcha-type="image"
-    data-size="invisible"
-    data-callback="onCaptchaSuccess">
-    Enviar
-</button>
-```
+Qué desafío se ejecuta detrás es una propiedad de la clave del sitio, elegida en el
+[portal de Prosopo](https://portal.prosopo.io) — consulte [Tipos de CAPTCHA](/es/basics/captcha-types/). Con una clave
+`frictionless`, la mayoría de los visitantes completan un Proof of Work invisible y nunca ven nada; a un visitante con
+puntuación de riesgo se le muestra un puzle o un desafío de imagen al enviar.
 
 ## Métodos de implementación
 
@@ -89,7 +61,6 @@ Agregue la clase `procaptcha` y los atributos de datos directamente a sus elemen
             type="button"
             class="procaptcha" 
             data-sitekey="your_site_key"
-            data-captcha-type="frictionless"
             data-size="invisible"
             data-callback="handleSubmit"
             data-failed-callback="handleFailure">
@@ -149,7 +120,6 @@ Para más control sobre el ciclo de vida del CAPTCHA:
             // Render invisible CAPTCHA
             widgetId = render(document.getElementById('captcha-container'), {
                 siteKey: 'your_site_key',
-                captchaType: 'frictionless',
                 size: 'invisible',
                 callback: handleCaptchaSuccess,
                 'failed-callback': handleCaptchaFailure
@@ -172,7 +142,6 @@ Para más control sobre el ciclo de vida del CAPTCHA:
 | Atributo | Valor | Descripción |
 |-----------|-------|-------------|
 | `data-size` | `"invisible"` | **Requerido.** Habilita el modo invisible |
-| `data-captcha-type` | `"frictionless"`, `"pow"`, `"image"` | Tipo de desafío de CAPTCHA |
 | `data-callback` | Nombre de función | Llamado cuando el CAPTCHA se verifica con éxito |
 | `data-failed-callback` | Nombre de función | Llamado cuando falla la verificación del CAPTCHA |
 | `data-sitekey` | Su sitekey | **Requerido.** Su sitekey de Procaptcha |

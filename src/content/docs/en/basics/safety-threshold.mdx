@@ -3,8 +3,15 @@ title: Safety Threshold
 description: Understanding and configuring the Safety Threshold in your Prosopo portal settings to balance security and user experience.
 i18nReady: true
 ---
+import { Image } from 'astro:assets';
+import CaptchaTypeSettings from '~/assets/captcha-type-settings.png';
 
 The **Safety Threshold** is a critical setting in your Prosopo portal that determines how strict your bot detection system is. It controls the balance between security (blocking bots) and user experience (minimizing CAPTCHA challenges for legitimate users).
+
+The threshold lives on the **CAPTCHA Type** card in Site Settings, and only applies when the type is
+`frictionless`:
+
+<Image src={CaptchaTypeSettings} alt="prosopo CAPTCHA type and safety threshold settings" style="margin: 20px auto;"/>
 
 ## What is Safety Threshold?
 

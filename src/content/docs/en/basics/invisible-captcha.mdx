@@ -22,49 +22,24 @@ Invisible CAPTCHA works by:
 3. Only showing a visible challenge if the user appears suspicious
 4. Providing a smooth experience for legitimate users
 
-## CAPTCHA Types
+## Making a widget invisible
 
-### Invisible Frictionless
-The most intelligent option that dynamically adapts based on user behavior:
+`data-size="invisible"` is what makes the widget invisible. Put it on the element that submits the form:
 
 ```html
 <button
     class="procaptcha"
     data-sitekey="your_site_key"
-    data-captcha-type="frictionless"
     data-size="invisible"
     data-callback="onCaptchaSuccess">
     Submit
 </button>
 ```
 
-### Invisible Proof of Work
-Runs a computational challenge invisibly in the background:
-
-```html
-<button
-    class="procaptcha"
-    data-sitekey="your_site_key"
-    data-captcha-type="pow"
-    data-size="invisible"
-    data-callback="onCaptchaSuccess">
-    Submit
-</button>
-```
-
-### Invisible Image
-Shows visible challenges to verify the user on form submission:
-
-```html
-<button
-    class="procaptcha"
-    data-sitekey="your_site_key"
-    data-captcha-type="image"
-    data-size="invisible"
-    data-callback="onCaptchaSuccess">
-    Submit
-</button>
-```
+Which challenge runs behind it is a property of the site key, chosen in the
+[Prosopo portal](https://portal.prosopo.io) — see [CAPTCHA Types](/en/basics/captcha-types/). On a `frictionless`
+site key most visitors complete an invisible Proof of Work and never see anything; a visitor who scores as risky is
+shown a puzzle or an image challenge at the point of submission.
 
 ## Implementation Methods
 
@@ -86,7 +61,6 @@ Add the `procaptcha` class and data attributes directly to your form elements:
             type="button"
             class="procaptcha"
             data-sitekey="your_site_key"
-            data-captcha-type="frictionless"
             data-size="invisible"
             data-callback="handleSubmit"
             data-failed-callback="handleFailure">
@@ -147,7 +121,6 @@ For more control over the CAPTCHA lifecycle:
             // using the id it resolves to.
             widgetId = await render(document.getElementById('procaptcha'), {
                 siteKey: 'your_site_key',
-                captchaType: 'frictionless',
                 size: 'invisible',
                 callback: handleCaptchaSuccess,
                 'failed-callback': handleCaptchaFailure
@@ -171,7 +144,6 @@ For more control over the CAPTCHA lifecycle:
 | Attribute | Value | Description |
 |-----------|-------|-------------|
 | `data-size` | `"invisible"` | **Required.** Enables invisible mode |
-| `data-captcha-type` | `"frictionless"`, `"pow"`, `"image"` | Type of CAPTCHA challenge |
 | `data-callback` | Function name | Called when CAPTCHA is successfully verified |
 | `data-failed-callback` | Function name | Called when CAPTCHA verification fails |
 | `data-sitekey` | Your site key | **Required.** Your Procaptcha site key |
@@ -182,9 +154,10 @@ For more control over the CAPTCHA lifecycle:
 ## Best Practices
 
 ### 1. Choose the Right Type
-- **Frictionless**: Best for most use cases, adapts automatically
-- **PoW**: Good for forms where you want consistent invisible challenges
-- **Image**: Use when you need image-based verification with invisible fallback
+Set this on the site key in the [portal](https://portal.prosopo.io), not in your markup:
+- **Frictionless**: best for most use cases — it adapts per visitor, and most of them see nothing at all
+- **PoW**: when you want every visitor to get the same invisible challenge and never a visible one
+- **Puzzle** or **Image**: when every visitor should get the same visible challenge on submission
 
 ### 2. Handle Failures Gracefully
 Always implement a failed callback to handle verification failures:

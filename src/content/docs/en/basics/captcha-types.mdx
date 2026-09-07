@@ -1,35 +1,67 @@
 ---
 title: CAPTCHA Types
-description: Serve different types of CAPTCHA by setting the `captchaType` to `frictionless`, `pow`, `image`.
+description: Choose which challenge a site serves — frictionless, Proof of Work, puzzle or image — in the Prosopo portal.
 i18nReady: true
 ---
 import {Image} from 'astro:assets';
 import ProcaptchaGIF from '~/assets/procaptcha-pow.gif';
 import ImageCaptcha from '~/assets/image-captcha.png';
 import PoWSettings from '~/assets/pow-settings.png';
-import ImageSettings from '~/assets/image-settings.png';
+import PuzzleSettings from '~/assets/puzzle-settings.png';
+import CaptchaTypeSettings from '~/assets/captcha-type-settings.png';
 
-Serve **different** types of CAPTCHA by setting the `captchaType` to `frictionless`, `pow`, `image`.
+Procaptcha can serve four types of challenge: `frictionless`, `pow`, `puzzle` and `image`.
+
+The type is a property of the site key, chosen in the [Prosopo portal](https://portal.prosopo.io). The widget is told
+which challenge to run by the server when the session starts, so there is nothing to set in your markup or your
+`render()` call — the same snippet serves whichever type the site is configured for.
 
 ## Frictionless CAPTCHA
 
-Procaptcha's default `frictionless` feature dynamically detects if the user is using a normal browser or automated,
-headless browsers such as [playwright](https://playwright.dev/) or [selenium](https://www.selenium.dev/). If the user is
-likely to be a bot, the user will be presented with an image CAPTCHA challenge. If the user is likely to be a *human*, the
-user *will not* be presented with an image CAPTCHA challenge and will instead solve a simple, invisible Proof of Work
-(PoW) challenge.
+`frictionless` is the default, and the one to use unless you have a reason not to. It examines the browser
+environment to work out whether it is looking at a real browser or an automated one such as
+[playwright](https://playwright.dev/) or [selenium](https://www.selenium.dev/), and picks a challenge to match the
+risk score it comes back with:
+
+- **Low risk** — an invisible Proof of Work challenge. The user sees nothing but the checkbox.
+- **Higher risk** — a puzzle: drag the piece into the gap.
+- **Highest risk** — an image CAPTCHA.
+
+So frictionless is not a fourth kind of challenge; it is the three below, chosen per visitor. Where the boundary
+between them sits is the [Safety Threshold](/en/basics/safety-threshold/), and you can opt a site out of the image
+band or the puzzle band (though not both).
+
+The remaining three types serve that one challenge to everybody, every time, and do not interrogate the browser
+environment at all. Pick one of them only if you specifically want a single challenge for all visitors.
 
 ## Proof of Work (PoW) CAPTCHA
 
-A Proof of Work (`pow`) CAPTCHA challenge requires the user to solve a computational puzzle before submitting the form. It is easy for humans to solve but computationally expensive for bots.
+A Proof of Work (`pow`) challenge requires the user's browser to solve a computational puzzle before submitting the
+form. It is quick for a real browser and expensive to do at scale, which is what makes it costly for bots.
 
 <Image src={ProcaptchaGIF} alt={'prosopo procaptcha pow captcha challenge'} style="margin: 20px auto;"/>
 
-The Proof of Work CAPTCHA type does not interrogate the user's browser environment, use `frictionless` for that (above).
+Set a site to `pow` when you want Proof of Work **only** — no image and no puzzle, whatever the risk score.
+
+How much work a solve costs is the difficulty, set per site in the portal. Each 0.25 step adds a bit of work and so
+doubles the cost to the solver, which makes a whole point a 16× jump:
+
+<Image src={PoWSettings} alt="prosopo proof of work difficulty setting" style="margin: 20px auto;"/>
+
+## Puzzle CAPTCHA
+
+A `puzzle` challenge asks the user to drag a piece into the gap it was cut from. It is faster to complete than an
+image CAPTCHA and works well on touchscreens.
+
+How far from the gap counts as a solve is the puzzle **tolerance**, set per site in the portal. Lower is stricter;
+too low and users on trackpads and small touchscreens start to struggle. The portal previews the challenge as you
+change it:
+
+<Image src={PuzzleSettings} alt="prosopo puzzle CAPTCHA settings and preview" style="margin: 20px auto;"/>
 
 ## Image CAPTCHA
 
-An image CAPTCHA challenge requires the user to select the correct image(s) that match the given prompt.
+An image CAPTCHA challenge requires the user to select the images that match the given prompt.
 
 <Image
     src={ImageCaptcha}
@@ -37,53 +69,15 @@ An image CAPTCHA challenge requires the user to select the correct image(s) that
     style="margin: 0 auto;"
 />
 
-The Image CAPTCHA type does not interrogate the user's browser environment, use `frictionless` for that (above).
+How many of those selections a user has to get right is the
+[Image Accuracy Threshold](/en/advanced/image-threshold/), set per site in the portal.
 
-## Set Type Implicitly
+## Choosing the type
 
-### 1. Set the type in the widget configuration
+Open the [Prosopo portal](https://portal.prosopo.io), go to **Site Settings**, and pick the type on the **CAPTCHA
+Type** card. With `frictionless` selected, the same card carries the safety threshold that decides which challenge
+each visitor gets.
 
-Here we are setting the `captchaType` to Proof-of-Work `pow`.
+<Image src={CaptchaTypeSettings} alt="prosopo portal CAPTCHA type and safety threshold settings" style="margin: 20px auto;"/>
 
-```html
-<div class="procaptcha" data-sitekey="your_site_key" data-captcha-type="pow"></div>
-```
-
-### 2. Set the type in the portal
-
-Navigate to the [Prosopo portal](https://portal.prosopo.io) and update the CAPTCHA type in the settings to `pow`.
-
-<Image
-    src={PoWSettings}
-    alt="prosopo pow setting"/>
-
-## Set Type Explicitly
-
-### 1. Set the type in the widget configuration
-
-Here we are setting the `captchaType` to Image `image`.
-
-```javascript
-document.getElementById('procaptcha-script').addEventListener('load', function () {
-    function onCaptchaVerified(output) {
-        console.log('Captcha verified, output: ' + JSON.stringify(output))
-    }
-    // Get the Element using elementId
-    const captchaContainer = document.getElementById('procaptcha-container')
-    window.procaptcha.render(captchaContainer, {
-        siteKey: 'YOUR_SITE_KEY',
-        theme: 'dark',
-        callback: onCaptchaVerified,
-        captchaType: 'image', // `pow` or leave blank for `frictionless`
-    })
-})
-```
-
-### 2. Set the type in the portal
-
-Navigate to the [Prosopo portal](https://portal.prosopo.io) and update the CAPTCHA type in the settings to `image`.
-
-<Image
-    src={ImageSettings}
-    alt="prosopo image setting"/>
-
+The change applies to new sessions on that site key; no redeploy is needed.

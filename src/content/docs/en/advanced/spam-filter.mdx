@@ -3,10 +3,16 @@ title: Email Filter
 description: Block CAPTCHA verification requests that use suspicious email addresses, including Gmail dot/plus-tag tricks and custom regex patterns.
 i18nReady: true
 ---
+import { Image } from 'astro:assets';
+import SpamFilter from '~/assets/spam-filter.png';
 
 The Email Filter (configured under the Spam Filter in site settings) lets you reject CAPTCHA verifications whose associated email address matches suspicious patterns. It is designed to catch common signup-spam evasion techniques — particularly the Gmail dot and plus-tag tricks — while keeping false positives low.
 
 Email filtering is available to Professional and Enterprise tier customers.
+
+The card is on the **Email Filter** tab of Site Settings:
+
+<Image src={SpamFilter} alt="prosopo email filter settings" style="margin: 20px auto;"/>
 
 ## Overview
 

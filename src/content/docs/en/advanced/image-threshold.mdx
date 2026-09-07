@@ -3,6 +3,8 @@ title: Image Accuracy Threshold
 description: Configure how strict image CAPTCHA verification is by setting the accuracy threshold for correct answers.
 i18nReady: true
 ---
+import { Image } from 'astro:assets';
+import ImageSettings from '~/assets/image-settings.png';
 
 The **Image Accuracy Threshold** controls how many image selections a user must get right for their CAPTCHA solution to be accepted. It applies whenever a user is presented with an image CAPTCHA challenge — either directly (image CAPTCHA mode) or as a fallback from frictionless mode when the bot score is above the safety threshold.
 
@@ -16,6 +18,8 @@ When a user submits an image CAPTCHA solution, the system compares their selecti
 ## Threshold Levels
 
 The threshold is configured via a three-position slider in the portal:
+
+<Image src={ImageSettings} alt="prosopo image accuracy threshold setting" style="margin: 20px auto;"/>
 
 | Level | Value | Description |
 |-------|-------|-------------|

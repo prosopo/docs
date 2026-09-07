@@ -3,6 +3,8 @@ title: Traffic Filter
 description: Block verification requests by connection type — VPN, proxy, Tor, datacenter, crawler, abusive networks, and more.
 i18nReady: true
 ---
+import { Image } from 'astro:assets';
+import TrafficFilter from '~/assets/traffic-filter.png';
 
 The Traffic Filter lets you block CAPTCHA verification requests based on the type of network connection the user is on. Each filter is an independent toggle, so you can tailor the policy per site without affecting other checks.
 
@@ -20,6 +22,10 @@ Traffic from abusive networks is blocked by default for every account, including
 | Mobile | `blockMobile` | `API.MOBILE_BLOCKED` | Off |
 | Satellite | `blockSatellite` | `API.SATELLITE_BLOCKED` | Off |
 | Crawler | `blockCrawler` | `API.CRAWLER_BLOCKED` | Off |
+
+Each filter is its own toggle on the **Traffic Filter** tab of Site Settings:
+
+<Image src={TrafficFilter} alt="prosopo traffic filter settings" style="margin: 20px auto;"/>
 
 Each filter returns a specific status code when it blocks a request. Your application can use these codes to show the user a tailored message (for example, asking a VPN user to disconnect and retry).
 
