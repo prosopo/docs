@@ -189,8 +189,8 @@ the same JTI when verifying, so a token solved against one session cannot be rep
 
 When the provider decides a user should see a challenge, the widget opens it in one of two places. The default, `popup`,
 centres the challenge over the page, which is what every widget did before this option existed. Set `placement` to
-`float` and the challenge opens next to the widget instead: it is anchored just below the checkbox, moves above it when
-there is no room below, follows the widget as the page scrolls, and leaves the rest of the page usable behind it.
+`float` and the challenge opens next to the widget instead: it is anchored directly above the checkbox, stays pinned
+there as the page scrolls, and leaves the rest of the page usable behind it.
 
 ```html
 <div class="procaptcha" data-sitekey="your_site_key" data-placement="float"></div>
