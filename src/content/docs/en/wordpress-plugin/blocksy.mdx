@@ -1,0 +1,41 @@
+---
+title: 'Blocksy'
+description: 'Blocksy support.'
+---
+import {Image} from 'astro:assets';
+import NewsletterExtension from '~/assets/wp-blocksy-newsletter-extension.png';
+import NewsletterBlock from '~/assets/wp-blocksy-newsletter-block.png';
+
+The Procaptcha plugin extends the newsletter subscribe form of the [Blocksy](https://creativethemes.com/blocksy/) theme, and covers its account modal forms through the WordPress Core Forms integration.
+
+## 1. Newsletter Subscribe form
+
+The subscribe form ships with [Blocksy Companion](https://wordpress.org/plugins/blocksy-companion/) as the **Newsletter Subscribe** extension. Both the block and the `[blocksy_newsletter_subscribe]` shortcode are protected, and no per-form switch is needed: the widget is added as soon as both plugins are active.
+
+1. Go to **Blocksy** > **Extensions** and enable **Newsletter Subscribe**.
+2. Connect a newsletter provider (Mailchimp and the other supported services) and save the settings.
+
+<Image src={NewsletterExtension} alt={'Enabling the Newsletter Subscribe extension on the Blocksy Extensions screen'} style="margin: 20px auto;"/>
+
+3. Add the **Newsletter** block to a page or a widget area, or place the `[blocksy_newsletter_subscribe]` shortcode in your content.
+
+<Image src={NewsletterBlock} alt={'The Blocksy Newsletter block in the WordPress block editor'} style="margin: 20px auto;"/>
+
+The Procaptcha widget is rendered just above the form's message area. A submission with a missing or invalid token is rejected before Blocksy's own handler runs, and the validation message is shown in the form's message area.
+
+:::note[The form only renders once a provider is connected]
+Blocksy outputs nothing for the block or the shortcode until a newsletter provider is configured under **Blocksy** > **Extensions** > **Newsletter Subscribe**. If the subscribe form is missing from the page, that is the setting to check first — it is not a Procaptcha issue.
+:::
+
+## 2. Account modal forms
+
+Blocksy renders its login, registration and password recovery modals with the native WordPress account hooks and processes them through the native flow, so they are covered by the WordPress Core Forms integration rather than by a Blocksy-specific one:
+
+1. Visit the Procaptcha plugin settings
+2. Switch to the "Core forms" tab
+3. Enable protection for the login, register and lost password forms as needed
+4. Save settings
+
+**Related blog articles**
+
+* [How to add CAPTCHA to Blocksy](https://prosopo.io/wordpress/how-to-add-captcha-to-blocksy/)

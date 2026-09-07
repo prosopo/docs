@@ -94,7 +94,6 @@ export class HtmlPage {
 				el.tagName.toLowerCase() === 'meta' && el.attribs['http-equiv']?.toLowerCase() === 'refresh'
 		);
 		const metaRefreshContent = metaRefreshElement?.attribs['content'];
-		// eslint-disable-next-line regexp/no-super-linear-backtracking
 		const metaRefreshMatches = metaRefreshContent?.match(/^(\d+)\s*;\s*url\s*=\s*(.+)$/i);
 		this.redirectTargetUrl = metaRefreshMatches ? new URL(metaRefreshMatches[2], this.href) : null;
 		this.isRedirect = Boolean(this.redirectTargetUrl);
