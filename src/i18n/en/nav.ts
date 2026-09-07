@@ -66,8 +66,13 @@ export default [
         slug: 'basics/error-reference',
         key: 'basics/error-reference',
     },
+    {
+        text: 'Demo Keys',
+        slug: 'basics/demo-keys',
+        key: 'basics/demo-keys',
+    },
     {text: 'Advanced Usage', header: true, type: 'learn', key: 'advanced'},
-        {
+    {
         text: 'Context Awareness',
         slug: 'advanced/context-awareness',
         key: 'advanced/context-awareness',

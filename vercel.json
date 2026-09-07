@@ -130,6 +130,14 @@
     {
       "source": "/:lang/recipes/",
       "destination": "/:lang/community-resources/content/"
+    },
+    {
+      "source": "/demo-keys/",
+      "destination": "/en/basics/demo-keys/"
+    },
+    {
+      "source": "/:lang/demo-keys/",
+      "destination": "/:lang/basics/demo-keys/"
     }
   ]
 }
