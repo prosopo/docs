@@ -111,7 +111,8 @@ jobs:
                   node-version-file: 'package.json'
             - run: npm i -g "npm@$(jq -r .engines.npm < package.json)"
 
-            - run: npm ci
+            - run: npm ci --no-audit --no-fund --prefer-offline
+
 
             # check everything builds
             - run: npm run build
