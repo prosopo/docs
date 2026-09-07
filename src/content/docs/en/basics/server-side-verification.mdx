@@ -41,7 +41,7 @@ Or, as a CURL command:
 ```bash
 curl --location 'https://api.prosopo.io/siteverify' \
 --header 'Content-Type: application/json' \
---data '{"secret":"your secret key copied from within the customer portal","token":"PROCAPTCHA-RESPONSE"}''
+--data '{"secret":"your secret key copied from within the customer portal","token":"PROCAPTCHA-RESPONSE"}'
 ```
 
 Note that the endpoint expects the application/json Content-Type. You can see exactly what is sent
@@ -55,15 +55,17 @@ in the example above. The response will be a JSON object with a `verified` key, 
 
 ```json
 {
-    "verified": true,
+    "status": "ok",
+    "verified": true
 }
 ```
 
-If you are a [Premium Tier customer](https://prosopo.io/pricing/) then you will also receive a risk score associated
-with the request. The closer the score is to 1, the more likely it is that the request is from a bot.
+[Professional and Enterprise Tier](https://prosopo.io/pricing/) accounts also receive a risk score associated with the
+request. The closer the score is to 1, the more likely it is that the request is from a bot.
 
 ```json
 {
+    "status": "ok",
     "verified": true,
     "score": 0.1
 }
@@ -97,6 +99,32 @@ on the request. This is optional, but recommended for better accuracy. To do thi
 ```
 
 > Note: You do not need to include the full email address, just the domain is sufficient for Prosopo to perform the necessary checks. For example, if the user's email is `a@example.com` then you can pass `example.com` as the value for the `email` field.
+
+#### Session ID
+
+If you rendered the widget with your own session identifier (see
+[Session correlation](/en/basics/client-side-rendering/#session-correlation)), pass the same value here as
+`clientSessionId`. The token will then only verify if it was earned in that session:
+
+```json
+{
+    "secret": "your_secret_key",
+    "token": "PROCAPTCHA-RESPONSE",
+    "clientSessionId": "YOUR_SESSION_ID"
+}
+```
+
+A token whose solution carries a different session id, or none at all (which is what a token solved outside your
+session looks like), comes back as a `200` with `verified: false`; Professional and Enterprise Tier responses name the
+cause with `reason: "API.CLIENT_SESSION_MISMATCH"`. This is what stops a token being lifted from one browser and
+submitted from another.
+
+Both halves are required for the check to happen. If you send `clientSessionId` here but did not render the widget with
+one, every verification will fail; if you rendered with one but omit it here, no check is performed and the token
+verifies as normal.
+
+> Note: the field is `clientSessionId`, not `sessionId`. Verification *responses* may contain a `sessionId` field, which
+> is Prosopo's own frictionless session and is unrelated to yours.
 
 ## Verification Code Examples
 
@@ -229,9 +257,172 @@ const prosopoServer = new ProsopoServer(config, pair)
 
 // check if the captcha response is verified
 const result = await prosopoServer.isVerified(procaptchaResponse)
+// or, to correlate the session the captcha was solved in:
+// isVerified(token, ip?, email?, clientSessionId?)
+// const result = await prosopoServer.isVerified(procaptchaResponse, undefined, undefined, sessionId)
 if (result.verified) {
     // perform CAPTCHA protected action
 }
 ```
 
 There is an example TypeScript server [NodeJS Server Side Example](/en/demos/client-example-server/) that you run locally.
+
+## Error Responses
+
+All `/siteverify` responses use a uniform JSON envelope. For programmatic handling, branch on `error.key` (a stable,
+machine-readable identifier) rather than `error.message` (human-readable, and not guaranteed to stay word-for-word
+stable between releases).
+
+### Response envelope
+
+A successful response:
+
+```json
+{
+    "status": "ok",
+    "verified": true,
+    "score": 0.1
+}
+```
+
+`status` is always the string `"ok"` on a `200`. `score` appears on Professional and Enterprise Tier accounts when a
+score was computed. On a `verified: false` response, Professional and Enterprise Tier accounts may additionally receive
+a `reason` field naming why the token was rejected; see [Failure reasons](#failure-reasons). Free Tier responses carry
+neither field.
+
+An error response:
+
+```json
+{
+    "error": {
+        "code": 400,
+        "key": "API.INVALID_SITE_KEY",
+        "message": "Invalid site key"
+    }
+}
+```
+
+`error.code` always matches the HTTP status. For `API.INVALID_BODY`, `message` is an array of field-level validation
+issues rather than a single string.
+
+### HTTP 200: success and soft failures
+
+A `200` response does **not** mean the user passed the challenge. Always inspect the `verified` field.
+
+| Scenario | Body | Notes |
+| --- | --- | --- |
+| Token verified | `{ "status": "ok", "verified": true }` | The happy path. Paid tiers also receive `score`. |
+| Token cannot be decoded | `{ "status": "ok", "verified": false }` | The token is malformed or forged. Treat as a failed challenge; it will never verify. |
+| Token failed verification | `{ "status": "ok", "verified": false }` | The provider rejected the solve. Paid tiers also receive `reason`; see [Failure reasons](#failure-reasons). |
+| Token expired | `{ "status": "ok", "verified": false }` | Tokens are valid for a limited window after the solve: by default 3 minutes for PoW and puzzle, 15 minutes for image. Verify promptly when the form arrives. |
+| Token already verified | `{ "status": "ok", "verified": false }` | Tokens are single use. A second `/siteverify` call with the same token always fails; the usual cause is a double form submission. Paid tiers see `reason: "API.USER_ALREADY_VERIFIED"`. |
+| Session id mismatch | `{ "status": "ok", "verified": false }` | You sent `clientSessionId` and the token was not earned in that session. Treat as a failed challenge; paid tiers see `reason: "API.CLIENT_SESSION_MISMATCH"`. See [Session ID](#session-id). |
+| Reserved test site key | `{ "status": "ok", "verified": true }` or `false` | A [reserved test site key](/en/basics/test-keys/) short-circuits verification and returns its forced verdict before the `secret` is even read. |
+| Provider verification timed out | `{ "status": "ok", "verified": true }` | Fail-open: if the verification provider does not answer within 5 seconds, the request is allowed through so legitimate users are not blocked during an incident. |
+
+The fail-open case is indistinguishable from a normal pass on the Free Tier. On paid tiers, a `verified: true` response
+with no `score` where you normally receive one is the hint.
+
+### Failure reasons
+
+On the Professional and Enterprise Tiers, a `verified: false` response may carry a `reason` identifying the rejection.
+The values are stable identifiers, grouped below by what they say about the request.
+
+The token itself:
+
+| `reason` | Meaning |
+| --- | --- |
+| `API.USER_NOT_VERIFIED` | Generic failure, including an incorrectly solved challenge. |
+| `API.USER_ALREADY_VERIFIED` | The token was already verified once. Tokens are single use. |
+| `API.USER_NOT_VERIFIED_NO_SOLUTION` | The token names no solution, or the provider holds no solution under that id. |
+| `API.USER_NOT_VERIFIED_TIME_EXPIRED` | The solve is older than the cached-verification window for its captcha type. |
+| `API.TIMESTAMP_TOO_OLD` | Too much time passed between the solve and your verify call. |
+| `API.CLIENT_SESSION_MISMATCH` | The `clientSessionId` you passed does not match the session the widget was rendered with. |
+| `CAPTCHA.DAPP_USER_SOLUTION_NOT_FOUND` | The provider has no record of the challenge in this token. |
+| `CAPTCHA.INVALID_SOLUTION` | The challenge was answered incorrectly. |
+| `CAPTCHA.INVALID_SALT` | The solve carried a salt the provider could not decode. |
+
+The visitor:
+
+| `reason` | Meaning |
+| --- | --- |
+| `API.ACCESS_POLICY_BLOCK` | An [access control rule](/en/advanced/access-control-rules/) on your site blocked this visitor. |
+| `API.FAILED_IP_VALIDATION` | The `ip` you passed failed validation against the IP that solved the captcha (applies when IP validation rules are enabled for the site). |
+| `API.DISALLOWED_WEBVIEW` | The solve came from an in-app WebView and your site settings disallow WebViews. |
+| `CAPTCHA.DECISION_MACHINE_DENIED` | A custom decision rule on your account denied the request. |
+
+Your traffic filter settings, each naming the IP category that was rejected:
+
+| `reason` | Meaning |
+| --- | --- |
+| `API.VPN_BLOCKED` | A VPN connection. |
+| `API.PROXY_BLOCKED` | A proxy server. |
+| `API.TOR_BLOCKED` | A Tor exit node. |
+| `API.DATACENTER_BLOCKED` | A datacenter IP address. |
+| `API.ABUSER_BLOCKED` | A network flagged for abuse. |
+| `API.CRAWLER_BLOCKED` | A known crawler. |
+| `API.MOBILE_BLOCKED` | A mobile network connection. |
+| `API.SATELLITE_BLOCKED` | A satellite connection. |
+
+The `email` you passed, when spam filtering is enabled:
+
+| `reason` | Meaning |
+| --- | --- |
+| `API.SPAM_EMAIL_DOMAIN` | A known disposable or blocked domain. |
+| `API.SPAM_EMAIL_RULE` | One of your custom email rules matched. |
+| `API.SPAM_EMAIL_COUNT_EXCEEDED` | Too many submissions from this address. |
+
+These are the values you are likely to meet. Treat `reason` as an open set: branch on the ones you handle explicitly and
+fall back to "challenge failed" for anything else, so a new value never breaks your integration.
+
+### HTTP 4xx: client and integration errors
+
+These indicate a problem with the request itself. Retrying an unchanged request will not succeed, with the single
+exception of `429`.
+
+| HTTP | `error.key` | Trigger | What to fix |
+| --- | --- | --- | --- |
+| 400 | `API.MISSING_BODY` | The request has no body and no query parameters. | Send a POST with a JSON body containing at least `secret` and `token`. |
+| 400 | `API.PARSE_ERROR` | The body could not be parsed at all (invalid JSON, or a malformed form body). | Send valid JSON with the `application/json` Content-Type. |
+| 400 | `API.INVALID_BODY` | The body parsed but failed validation: a required field is missing or has the wrong type. `error.message` lists the individual issues. | Check field names and types: `token` (string), `secret` (string), and the optional `ip`, `email`, `clientSessionId`. |
+| 400 | `GENERAL.MISSING_SECRET_KEY` | The `secret` is missing, or is not in a recognisable secret key format. | Copy the secret key exactly from the [customer portal](https://portal.prosopo.io). |
+| 400 | `API.INVALID_SITE_KEY` | The `secret` is a well-formed key but does not correspond to the site key inside the `token`. | Confirm the secret belongs to the same site as the widget that produced the token. The common cause is a secret copied from a different site. The check is skipped for [reserved test site keys](/en/basics/test-keys/), which have no secret. |
+| 400 | *(forwarded)* | The verification provider rejected the token with a 400 of its own; its `error.key` is passed through. | See [Forwarded provider errors](#forwarded-provider-errors). |
+| 429 | `API.BAD_REQUEST` | The provider rate-limited verify calls for your site key. The generic key is expected here; the HTTP status is the signal. | Back off and retry. |
+
+An uncaught exception inside `/siteverify` that is not one of the cases above defaults to a `400` with
+`key: "API.UNKNOWN"`.
+
+### HTTP 5xx: server and upstream errors
+
+These indicate a transient or upstream problem. Retrying with backoff is appropriate.
+
+| HTTP | `error.key` | Trigger |
+| --- | --- | --- |
+| 500 | `API.BAD_REQUEST` | The verification provider could not be reached, or failed internally while verifying. Despite the key's name, this is a server-side failure, not a problem with your request. |
+| *(forwarded)* | varies | Any other provider error is passed through with its original HTTP status and `error.key`. |
+
+### Forwarded provider errors
+
+When the verification provider itself rejects the request, `/siteverify` forwards the provider's HTTP status and
+`error.key`. The keys you may see:
+
+| `error.key` | HTTP | Meaning |
+| --- | --- | --- |
+| `API.SITE_KEY_NOT_REGISTERED` | 400 | The site key inside the token is well-formed but not registered with the provider. Re-check the site key in the [customer portal](https://portal.prosopo.io). |
+| `CAPTCHA.PARSE_ERROR` | 400 | The verify request the provider received was malformed. Not expected when calling `/siteverify`; it can occur when integrating against a provider's verify endpoints directly. |
+| `API.BAD_REQUEST` | 500 | The provider hit an unexpected error while verifying (an invalid token payload, a failed signature check, or a provider-side fault). |
+| `API.UNKNOWN_ERROR` | varies | The provider returned an error block without a recognised key. Inspect `error.message` and contact support if it persists. |
+
+### Recommended client handling
+
+1. **Check `verified` first.** A `200` with `verified: false` is the normal "challenge failed" path, not an exception.
+2. **Retry only on `429` and `5xx`.** Other `4xx` responses indicate a configuration or integration error and will not
+   succeed on retry.
+3. **Log `error.key`, not `error.message`.** Keys are stable identifiers; message wording can change (and is an array
+   for `API.INVALID_BODY`).
+4. **Verify each token once, promptly.** Tokens are single use and time-limited, so verify as soon as the form arrives
+   and never re-verify on retry logic of your own.
+5. **Watch for the fail-open pattern.** On paid tiers, a sustained run of `verified: true` responses that are missing
+   the usual `score` field suggests provider verification is timing out and failing open. Treat it as an incident
+   signal rather than a run of successful verifications.

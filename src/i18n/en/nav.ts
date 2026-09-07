@@ -51,12 +51,28 @@ export default [
     },
 
     {
+        text: 'Test Site Keys',
+        slug: 'basics/test-keys',
+        key: 'basics/test-keys',
+    },
+
+    {
         text: 'Frequently Asked Questions',
         slug: 'basics/faq',
         key: 'basics/faq',
     },
+    {
+        text: 'Error Reference',
+        slug: 'basics/error-reference',
+        key: 'basics/error-reference',
+    },
+    {
+        text: 'Demo Keys',
+        slug: 'basics/demo-keys',
+        key: 'basics/demo-keys',
+    },
     {text: 'Advanced Usage', header: true, type: 'learn', key: 'advanced'},
-        {
+    {
         text: 'Context Awareness',
         slug: 'advanced/context-awareness',
         key: 'advanced/context-awareness',
@@ -95,6 +111,27 @@ export default [
         text: 'Audit',
         slug: 'advanced/audit',
         key: 'advanced/audit',
+    },
+    {text: 'Prosopo Protect (Edge)', header: true, type: 'learn', key: 'protect-edge'},
+    {
+        text: 'Overview',
+        slug: 'protect-edge/',
+        key: 'protect-edge/',
+    },
+    {
+        text: 'Cloudflare Worker',
+        slug: 'protect-edge/cloudflare-worker',
+        key: 'protect-edge/cloudflare-worker',
+    },
+    {
+        text: 'AWS Lambda@Edge',
+        slug: 'protect-edge/lambda-edge',
+        key: 'protect-edge/lambda-edge',
+    },
+    {
+        text: 'Troubleshooting',
+        slug: 'protect-edge/troubleshooting',
+        key: 'protect-edge/troubleshooting',
     },
     {text: 'Framework integrations', header: true, type: 'learn', key: 'framework-integrations'},
     {
@@ -172,6 +209,11 @@ export default [
         key: 'wordpress-plugin/gravity-forms',
     },
     {
+        text: 'JetFormBuilder',
+        slug: 'wordpress-plugin/jetformbuilder',
+        key: 'wordpress-plugin/jetformbuilder',
+    },
+    {
         text: 'Ninja Forms',
         slug: 'wordpress-plugin/ninja-forms',
         key: 'wordpress-plugin/ninja-forms',
@@ -197,6 +239,26 @@ export default [
         text: 'Beaver Builder',
         slug: 'wordpress-plugin/beaver-builder',
         key: 'wordpress-plugin/beaver-builder',
+    },
+    {
+        text: 'Blocksy',
+        slug: 'wordpress-plugin/blocksy',
+        key: 'wordpress-plugin/blocksy',
+    },
+    {
+        text: 'Bricks',
+        slug: 'wordpress-plugin/bricks',
+        key: 'wordpress-plugin/bricks',
+    },
+    {
+        text: 'Divi',
+        slug: 'wordpress-plugin/divi',
+        key: 'wordpress-plugin/divi',
+    },
+    {
+        text: 'LearnDash LMS',
+        slug: 'wordpress-plugin/learndash',
+        key: 'wordpress-plugin/learndash',
     },
     {
         text: 'Memberpress',
