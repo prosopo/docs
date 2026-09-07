@@ -140,9 +140,10 @@ For more control over the CAPTCHA lifecycle:
             // Handle failure
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // Render invisible CAPTCHA
-            widgetId = render(document.getElementById('captcha-container'), {
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Render invisible CAPTCHA. render() is async, so await it before
+            // using the id it resolves to.
+            widgetId = await render(document.getElementById('procaptcha'), {
                 siteKey: 'your_site_key',
                 captchaType: 'frictionless',
                 size: 'invisible',
