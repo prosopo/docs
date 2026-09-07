@@ -11,7 +11,7 @@ O CAPTCHA Invisível está atualmente em **beta**. Recursos e comportamento pode
 :::
 
 :::note[Restrição de Nível]
-O CAPTCHA Invisível está disponível apenas para usuários dos níveis **Pro e Enterprise**. Usuários do nível gratuito não podem acessar este recurso.
+O CAPTCHA Invisível está disponível apenas para usuários dos níveis **Professional e Enterprise**. Usuários do nível gratuito não podem acessar este recurso.
 :::
 
 ## Visão Geral
@@ -76,7 +76,8 @@ Adicione a classe `procaptcha` e atributos de dados diretamente aos seus element
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+    <script type="module" src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+    <script nomodule src="https://js.prosopo.io/js/procaptcha.bundle.iife.js" async defer></script>
 </head>
 <body>
     <form>
@@ -116,7 +117,8 @@ Para mais controle sobre o ciclo de vida do CAPTCHA:
 <!DOCTYPE html>
 <html>
 <head>    
-    <script src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+    <script type="module" src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+    <script nomodule src="https://js.prosopo.io/js/procaptcha.bundle.iife.js" async defer></script>
 </head>
 <body>
     <form id="demo-form">
@@ -219,18 +221,18 @@ const response = await fetch('https://api.prosopo.io/siteverify', {
     },
     body: JSON.stringify({
         secret: 'your_secret_key',
-        response: token, // Token do callback Procaptcha
-        remoteip: userIP // Opcional
+        token: token, // Token do callback Procaptcha
+        ip: userIP // Opcional
     })
 });
 
 const result = await response.json();
-if (result.success) {
+if (result.verified) {
     // Procaptcha verificado com sucesso
     console.log('Verificação bem-sucedida');
 } else {
     // Falha na verificação
-    console.log('Falha na verificação:', result['error-codes']);
+    console.log('Falha na verificação:', result.status);
 }
 ```
 

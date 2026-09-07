@@ -8,6 +8,7 @@ Prima di tutto, deve includere la risorsa JavaScript Procaptcha da qualche parte
 
 ```html
 <script type="module" src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+<script nomodule src="https://js.prosopo.io/js/procaptcha.bundle.iife.js" async defer></script>
 ```
 
 Ora, può renderizzare il widget Procaptcha implicitamente o esplicitamente.
@@ -33,6 +34,7 @@ Ecco un esempio completo dove Procaptcha viene utilizzato per proteggere un form
     <head>
         <title>Procaptcha Demo</title>
         <script type="module" src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+        <script nomodule src="https://js.prosopo.io/js/procaptcha.bundle.iife.js" async defer></script>
     </head>
     <body>
         <form action="" method="POST">
@@ -64,6 +66,7 @@ Lo script viene caricato nell'head del documento e gli viene assegnato l'id `pro
             async
             defer
         ></script>
+        <script nomodule src="https://js.prosopo.io/js/procaptcha.bundle.iife.js" async defer></script>
     </head>
     <body>
         <div id="procaptcha-container"></div>
@@ -148,7 +151,7 @@ Può scegliere di implementare uno qualsiasi dei seguenti tipi di captcha quando
 
 Vari framework sono stati integrati con Procaptcha. Può trovare la documentazione per ciascun framework qui sotto:
 
-- [Integrazione React](/it/framework-integrations/angular-integration/)
+- [Integrazione React](/it/framework-integrations/react-integration/)
 - [Integrazione Vue](/it/framework-integrations/vue-integration/)
 - [Integrazione Angular](/it/framework-integrations/angular-integration/)
 - [Integrazione Svelte](/it/framework-integrations/svelte-integration/)

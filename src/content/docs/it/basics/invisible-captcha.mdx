@@ -11,7 +11,7 @@ Il CAPTCHA invisibile è attualmente in **beta**. Funzionalità e comportamento 
 :::
 
 :::note[Restrizione Tier]
-Il CAPTCHA invisibile è disponibile solo per gli utenti dei tier **Pro ed Enterprise**. Gli utenti del tier gratuito non possono accedere a questa funzionalità.
+Il CAPTCHA invisibile è disponibile solo per gli utenti dei tier **Professional ed Enterprise**. Gli utenti del tier gratuito non possono accedere a questa funzionalità.
 :::
 
 ## Panoramica
@@ -76,7 +76,8 @@ Aggiunga la classe `procaptcha` e gli attributi data direttamente agli elementi 
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+    <script type="module" src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+    <script nomodule src="https://js.prosopo.io/js/procaptcha.bundle.iife.js" async defer></script>
 </head>
 <body>
     <form>
@@ -116,7 +117,8 @@ Per un maggiore controllo sul ciclo di vita del CAPTCHA:
 <!DOCTYPE html>
 <html>
 <head>    
-    <script src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+    <script type="module" src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+    <script nomodule src="https://js.prosopo.io/js/procaptcha.bundle.iife.js" async defer></script>
 </head>
 <body>
     <form id="demo-form">
@@ -219,18 +221,18 @@ const response = await fetch('https://api.prosopo.io/siteverify', {
     },
     body: JSON.stringify({
         secret: 'your_secret_key',
-        response: token, // Token from Procaptcha callback
-        remoteip: userIP // Optional
+        token: token, // Token from Procaptcha callback
+        ip: userIP // Optional
     })
 });
 
 const result = await response.json();
-if (result.success) {
+if (result.verified) {
     // Procaptcha verified successfully
     console.log('Verification successful');
 } else {
     // Verification failed
-    console.log('Verification failed:', result['error-codes']);
+    console.log('Verification failed:', result.status);
 }
 ```
 
