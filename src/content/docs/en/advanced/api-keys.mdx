@@ -3,6 +3,8 @@ title: API Keys
 description: Create and manage API keys for programmatic access to Prosopo services.
 i18nReady: true
 ---
+import { Image } from 'astro:assets';
+import ApiKeyCreate from '~/assets/api-key-create.png';
 
 API keys allow you to interact with Prosopo services programmatically — for example, managing access control rules, querying traffic data, or verifying CAPTCHA solutions from your backend without using the portal UI.
 
@@ -18,6 +20,8 @@ API key management is available to accounts with the API feature enabled. Check 
    - **Expiration Time** (optional): Time in seconds until the key expires. Leave empty for a key that does not expire.
    - **Permissions** (required): Select which operations this key can perform (see below)
 5. Click **Create API Key**
+
+<Image src={ApiKeyCreate} alt="prosopo portal create API key dialog" style="margin: 20px auto;"/>
 
 After creation, the full API key is displayed once. Copy it immediately — it cannot be retrieved later.
 

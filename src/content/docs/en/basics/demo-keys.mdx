@@ -64,8 +64,7 @@ Demo keys should NEVER be used in:
 <div class="procaptcha"
      data-sitekey="5DAAnrj7VHTznn2AWBemMuyBwZWs6FNFjdyVXUeYum3PTXFy"
      data-callback="onSuccess"
-     data-failed-callback="onFailure"
-     data-captcha-type="frictionless">
+     data-failed-callback="onFailure">
 </div>
 ```
 
@@ -80,7 +79,6 @@ function MyComponent() {
       siteKey="5DAAnrj7VHTznn2AWBemMuyBwZWs6FNFjdyVXUeYum3PTXFy"
       onVerified={(output) => console.log('Verified:', output)}
       onFailed={() => console.log('Failed')}
-      captchaType="frictionless"
     />
   );
 }
@@ -94,7 +92,6 @@ function MyComponent() {
     site-key="5DAAnrj7VHTznn2AWBemMuyBwZWs6FNFjdyVXUeYum3PTXFy"
     @verified="onVerified"
     @failed="onFailed"
-    captcha-type="frictionless"
   />
 </template>
 

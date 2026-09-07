@@ -19,9 +19,10 @@ está sendo usado. Para resolver este erro, certifique-se de que o domínio da c
 fazendo login no [portal Prosopo](https://portal.prosopo.io) e atualizando o domínio.
 
 ### O que significa `Incorrect CAPTCHA type`?
-Este erro ocorre quando o [tipo de captcha](/pt-br/basics/captcha-types) não está definido corretamente. O `captchaType` padrão é
-`frictionless`. Se você deseja usar `pow` ou `image`, deve definir seu `captchaType` na configuração do widget para `pow`
-ou `image`. Você também deve atualizar suas [configurações do portal](https://portal.prosopo.io) para corresponder.
+A Prosopo esperava um [tipo de captcha](/pt-br/basics/captcha-types) diferente do solicitado. Os bundles atuais do widget
+recebem do servidor qual tipo usar e ignoram qualquer tipo definido no seu markup, então isso normalmente é uma sessão
+expirada (recarregar resolve) ou uma integração direta com a API pedindo um tipo para o qual a chave do site não está
+configurada nas suas [configurações do portal](https://portal.prosopo.io).
 
 ### O que significa `Session not found`?
 Este erro ocorre quando a sessão não é encontrada. Isso pode acontecer se a sessão expirou ou se o ID da sessão
