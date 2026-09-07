@@ -1,0 +1,64 @@
+---
+title: Consciência de Contexto
+description: Proteja a verificação de CAPTCHA aplicando verificações sensíveis ao ambiente e limites de contexto configuráveis para reduzir o uso de origem fraudulenta ou inesperada.
+i18nReady: true
+---
+
+A Consciência de Contexto ajuda a prevenir que seu CAPTCHA seja usado em origens falsificadas ou inesperadas, aplicando verificações sensíveis ao ambiente e um limite de sensibilidade configurável. Aumenta a dificuldade do desafio para contextos suspeitos, permitindo que o tráfego legítimo passe com fricção mínima.
+
+## O que é Consciência de Contexto?
+
+A Consciência de Contexto compara sinais de tempo de execução de solicitações recebidas (origem, contexto de frame/incorporação, ambiente) com o contexto esperado do seu site. Quando discrepâncias são detectadas, o sistema pode aumentar a dificuldade de verificação ou falhar na verificação para reduzir o abuso de origens incorporadas ou falsificadas.
+
+## Como a Consciência de Contexto Funciona
+
+### Fluxo de Detecção
+
+1. **Solicitação chega** - O sistema coleta sinais de ambiente, como origem, status de incorporação/frame e indicadores de cliente.
+2. **Comparação de contexto** - Os sinais são comparados com o contexto esperado do site configurado.
+3. **Pontuação e decisão** - Uma pontuação de risco contextual é derivada e avaliada em relação ao limite de sensibilidade selecionado.
+4. **Ação tomada**:
+- **Abaixo do limite**: Verificação normal (PoW invisível ou verificação leve).
+- **No limite ou acima**: Aumentar a dificuldade do CAPTCHA ou falhar na verificação (dependendo dos controles).
+
+## Controles
+
+- Não Permitir Webview
+Previne verificação bem-sucedida de webviews dentro de aplicativos. Os usuários ainda podem completar CAPTCHAs, mas a verificação falha se a solicitação se originar de um webview.
+
+- Consciência de Contexto (alternância)
+Habilita verificações contextuais que comparam sinais de ambiente de solicitação com o contexto esperado do seu site. Quando habilitado, o sistema pode aumentar a dificuldade do desafio para contextos suspeitos.
+
+- Controle Deslizante de Limite (Baixo / Médio / Alto)
+Controle deslizante de três posições controlando a sensibilidade. Médio é recomendado; Baixo é permissivo, Alto é rigoroso.
+
+### Faixas de Limite
+
+| Faixa | Rótulo | Descrição |
+|-------|-------|-------------|
+| Baixo |  Permissivo | Permite mais soluções; pode permitir origens fraudulentas ou incorporadas. |
+| Médio |  Balanceado | Padrão recomendado — bom equilíbrio entre UX e segurança. |
+| Alto |  Rigoroso | Bloqueia mais contextos suspeitos; pode aumentar falsos positivos. |
+
+## Permissões e Comportamento
+
+- Usuários do nível gratuito não podem habilitar `Não Permitir Webview` nem `Consciência de Contexto`. Tentar alternar mostrará o CTA de upgrade.
+- O modo de visualização torna os controles somente leitura e exibe uma dica informativa.
+
+## Exemplos do Mundo Real
+
+- E-commerce: Comece com Médio. Durante promoções, monitore o tráfego antes de diminuir a sensibilidade para reduzir a fricção. Se estiver sob ataque, aumente para Alto temporariamente.
+- Widget incorporado: Se seu site for destinado a ser incorporado, evite sensibilidade Alta ou liste explicitamente contextos de integração permitidos.
+
+## Configurando a Consciência de Contexto
+
+1. Faça login no portal Prosopo.
+2. Navegue até as configurações do seu site.
+3. Localize a seção "Consciência de Contexto".
+4. Alterne o recurso e defina o Controle Deslizante de Limite para Baixo / Médio / Alto.
+5. Salve as alterações e monitore as análises para validar o comportamento.
+
+## Obtendo Ajuda
+
+- Entre em contato com o suporte Prosopo via [Discord](https://discord.com/invite/dwQx2w9Tgm).
+- Revise os dados de análise com nossa equipe para ajustar as configurações.

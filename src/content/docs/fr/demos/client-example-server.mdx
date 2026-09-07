@@ -1,0 +1,27 @@
+---
+title: "Exemple de serveur NodeJS"
+description: "Cet exemple de serveur implémente des méthodes d'inscription, de connexion et d'autorisation pour une application backend node typique."
+i18nReady: true
+---
+Cet exemple de serveur implémente des méthodes d'inscription, de connexion et d'autorisation pour une application backend node typique. Ce serveur backend s'intègre avec l'application React client-example.
+
+## Démarrage rapide
+
+```bash
+git clone https://github.com/prosopo/captcha && \
+cd captcha && \
+cp demos/client-example-server/env.production demos/client-example-server/.env.production && \
+npm i && \
+npm run -w @prosopo/scripts build && \
+npm run start:server
+```
+
+Assurez-vous de remplacer les espaces réservés suivants dans le fichier `.env.production` par votre propre clé de site et clé secrète.
+Vous pouvez les obtenir en vous connectant au [portail Prosopo](https://portal.prosopo.io).
+
+```typescript
+PROSOPO_SITE_KEY=<YOUR SITE KEY HERE>
+PROSOPO_SITE_PRIVATE_KEY=<YOUR SECRET KEY HERE>
+```
+
+Exécutez cet exemple d'API en conjonction avec l'application de bout en bout [client-bundle-example](/fr/demos/client-example-bundle/).

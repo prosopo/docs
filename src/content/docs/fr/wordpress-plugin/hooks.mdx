@@ -1,0 +1,50 @@
+---
+title: 'Filtres et Hooks'
+description: 'Filtres et hooks.'
+---
+
+Le plugin Procaptcha introduit de nouveaux filtres et hooks WordPress, vous permettant de personnaliser son comportement.
+
+## 1. Visibilité du Captcha
+
+Par défaut, Procaptcha n'est affiché qu'aux utilisateurs non autorisés.
+
+Pour contrôler ce comportement, en plus des paramètres du plugin, vous pouvez utiliser le hook `is_captcha_present`.
+Par exemple, pour rendre Procaptcha obligatoire pour tout le monde, ajoutez le code suivant au fichier functions.php de votre thème :
+
+```php
+add_filter('prosopo/procaptcha/is_captcha_present', '__return_true');`
+```
+
+## 2. Message d'erreur personnalisé
+
+Vous pouvez personnaliser le message d'erreur par défaut en ajoutant ce code au fichier functions.php de votre thème :
+
+```php
+add_filter('prosopo/procaptcha/validation_error_message', function (string $message): string {
+    return __('Message d’erreur personnalisé', 'my-theme');
+});
+```
+
+## 3. Personnalisation des attributs Procaptcha
+
+Au-delà des préférences de style dans les paramètres du plugin, vous pouvez personnaliser tous les [attributs de données Procaptcha](https://docs.prosopo.io/fr/basics/client-side-rendering/#procaptcha-options) pris en charge en utilisant le filtre **prosopo/procaptcha/captcha_attributes**.
+
+```php
+add_filter('prosopo/procaptcha/captcha_attributes', function (array $attributes): array {
+    $attributes['lang'] = 'de';
+    return $attributes;
+});
+```
+
+## 4. Formulaires avec Procaptcha dans les tests
+
+Si vos tests impliquent des formulaires avec Procaptcha, vous pouvez contourner le Procaptcha en ajoutant la constante suivante à votre fichier wp-config.php :
+
+```php
+define('PROSOPO_PROCAPTCHA_ALLOW_BYPASS', true);
+```
+
+Dans vos tests, ajoutez un élément **input[name=procaptcha-response]** avec la valeur **bypass** à n'importe quel formulaire pour simuler l'achèvement de Procaptcha.
+
+**Important :** Cette constante de contournement ne doit être utilisée que dans les environnements de développement.

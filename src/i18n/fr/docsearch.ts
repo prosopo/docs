@@ -2,11 +2,11 @@ import { DocSearchDictionary } from '../translation-checkers';
 
 export default DocSearchDictionary({
 	button: 'Rechercher',
-	placeholder: 'Rechercher dans la documentation',
+	placeholder: 'Rechercher la documentation',
 	shortcutLabel: 'Appuyez sur / pour rechercher',
-	resultsFooterLede: "Vous cherchez un thème ou une intégration Astro ? Besoin d'aide ?",
-	resultsFooterIntegrations: 'Répertoire des intégrations Astro',
-	resultsFooterThemes: 'Présentation des thèmes Astro',
+	resultsFooterLede: 'Cherchez-vous une intégration Prosopo ou une documentation ? Besoin d’aide ?',
+	resultsFooterIntegrations: 'Répertoire des intégrations Prosopo',
+	resultsFooterThemes: 'Showcase des thèmes Prosopo',
 	resultsFooterDiscord: 'Rejoignez-nous sur Discord',
 	modal: {
 		searchBox: {
@@ -19,29 +19,29 @@ export default DocSearchDictionary({
 			recentSearchesTitle: 'Recherches récentes',
 			noRecentSearchesText: 'Aucune recherche récente',
 			saveRecentSearchButtonTitle: 'Sauvegarder cette recherche',
-			removeRecentSearchButtonTitle: "Enlever cette recherche de l'historique",
+			removeRecentSearchButtonTitle: 'Enlever cette recherche de l\'historique',
 			favoriteSearchesTitle: 'Favoris',
 			removeFavoriteSearchButtonTitle: 'Enlever cette recherche des favoris',
 		},
 		errorScreen: {
 			titleText: 'Erreur lors de la récupération des résultats',
-			helpText: "Vous devriez vérifier l'état de votre connection internet.",
+			helpText: 'Vous devriez vérifier l\'état de votre connexion Internet.',
 		},
 		footer: {
 			selectText: 'pour sélectionner',
 			selectKeyAriaLabel: 'Appuyez sur la touche',
 			navigateText: 'pour naviguer',
-			navigateUpKeyAriaLabel: 'Flèche du haut',
-			navigateDownKeyAriaLabel: 'Flèche du bas',
+			navigateUpKeyAriaLabel: 'Flèche vers le haut',
+			navigateDownKeyAriaLabel: 'Flèche vers le bas',
 			closeText: 'pour fermer',
-			closeKeyAriaLabel: "Touche d'échappement",
-			searchByText: 'Recherche via',
+			closeKeyAriaLabel: 'Touche Échappement',
+			searchByText: 'Recherche par',
 		},
 		noResultsScreen: {
 			noResultsText: 'Aucun résultat trouvé pour',
 			suggestedQueryText: 'Essayez de rechercher pour',
-			reportMissingResultsText: 'Vous pensez avoir trouvé une erreur ?',
-			reportMissingResultsLinkText: 'Faites-le nous savoir.',
+			reportMissingResultsText: 'Vous pensez que cette requête devrait renvoyer des résultats ?',
+			reportMissingResultsLinkText: 'Faites-le-nous savoir.',
 		},
 	},
 });

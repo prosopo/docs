@@ -1,0 +1,64 @@
+---
+title: Context Awareness
+description: Protegga la verifica CAPTCHA applicando controlli sensibili all'ambiente e soglie di contesto configurabili per ridurre l'uso fraudolento o di origine inaspettata.
+i18nReady: true
+---
+
+Context Awareness aiuta a prevenire che il suo CAPTCHA venga utilizzato su origini contraffatte o inaspettate applicando controlli sensibili all'ambiente e una soglia di sensibilità configurabile. Aumenta la difficoltà della sfida per contesti sospetti consentendo al traffico legittimo di passare con attrito minimo.
+
+## Cos'è il Context Awareness?
+
+Context Awareness confronta i segnali di runtime dalle richieste in arrivo (origine, contesto di frame/embedding, ambiente) con il contesto del sito previsto. Quando vengono rilevate discrepanze, il sistema può aumentare la difficoltà di verifica o far fallire la verifica per ridurre gli abusi da origini incorporate o contraffatte.
+
+## Come funziona il Context Awareness
+
+### Flusso di rilevamento
+
+1. **Arriva la richiesta** - Il sistema raccoglie segnali ambientali come origine, stato di embedding/frame e indicatori del client.
+2. **Confronto del contesto** - I segnali vengono confrontati con il contesto del sito previsto configurato.
+3. **Punteggio e decisione** - Un punteggio di rischio contestuale viene derivato e valutato rispetto alla soglia di sensibilità selezionata.
+4. **Azione intrapresa**:
+- **Sotto la soglia**: Verifica normale (PoW invisibile o verifica leggera).
+- **Alla soglia o sopra**: Aumento della difficoltà del CAPTCHA o fallimento della verifica (a seconda dei controlli).
+
+## Controlli
+
+- Disallow Webview
+Impedisce la verifica riuscita da webview in-app. Gli utenti possono comunque completare i CAPTCHA, ma la verifica fallisce se la richiesta proviene da una webview.
+
+- Context Awareness (toggle)
+Abilita controlli contestuali che confrontano i segnali dell'ambiente di richiesta con il contesto del sito previsto. Quando abilitato, il sistema può aumentare la difficoltà della sfida per contesti sospetti.
+
+- Threshold Slider (Low / Medium / High)
+Cursore a tre posizioni che controlla la sensibilità. Medium è consigliato; Low è permissivo, High è rigoroso.
+
+### Intervalli di soglia
+
+| Range | Label | Description |
+|-------|-------|-------------|
+| Low |  Permissivo | Consente più risoluzioni; può permettere origini fraudolente o incorporate. |
+| Medium |  Bilanciato | Valore predefinito consigliato — buon compromesso tra UX e sicurezza. |
+| High |  Rigoroso | Blocca più contesti sospetti; può aumentare i falsi positivi. |
+
+## Permessi e comportamento
+
+- Gli utenti del tier gratuito non possono abilitare `Disallow Webview` né `Context Awareness`. Il tentativo di attivare mostrerà il CTA di upgrade.
+- La modalità visualizzatore rende i controlli di sola lettura e visualizza un suggerimento informativo.
+
+## Esempi reali
+
+- E-commerce: Iniziare con Medium. Durante le promozioni, monitorare il traffico prima di abbassare la sensibilità per ridurre l'attrito. Se sotto attacco, aumentare a High temporaneamente.
+- Widget incorporato: Se il suo sito è destinato a essere incorporato, eviti la sensibilità High o aggiunga esplicitamente alla whitelist i contesti di integrazione.
+
+## Configurare il Context Awareness
+
+1. Acceda al portale Prosopo.
+2. Navighi alle impostazioni del suo sito.
+3. Localizzi la sezione "Context Awareness".
+4. Attivi la funzionalità e imposti il Threshold Slider su Low / Medium / High.
+5. Salvi le modifiche e monitori le analitiche per convalidare il comportamento.
+
+## Ottenere aiuto
+
+- Contatti il supporto Prosopo tramite [Discord](https://discord.com/invite/dwQx2w9Tgm).
+- Riveda i dati analitici con il nostro team per ottimizzare le impostazioni.

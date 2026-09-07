@@ -1,0 +1,88 @@
+---
+title: "Sicherheitsschwellenwert"
+description: "Verstehen und konfigurieren Sie den Sicherheitsschwellenwert in Ihren Prosopo-Portaleinstellungen, um Sicherheit und Benutzererfahrung auszubalancieren."
+i18nReady: true
+---
+
+Der **Sicherheitsschwellenwert** ist eine kritische Einstellung in Ihrem Prosopo-Portal, die bestimmt, wie streng Ihr Bot-Erkennungssystem ist. Er kontrolliert das Gleichgewicht zwischen Sicherheit (Blockieren von Bots) und Benutzererfahrung (Minimierung von CAPTCHA-Herausforderungen für legitime Benutzer).
+
+## Was ist der Sicherheitsschwellenwert?
+
+Der Sicherheitsschwellenwert ist ein numerischer Wert zwischen 0,2 und 0,8, der das erforderliche Vertrauensniveau darstellt, bevor ein Benutzer als legitim betrachtet wird. Wenn das Frictionless-System von Prosopo das Verhalten eines Benutzers analysiert, generiert es einen "Bot-Score" - eine Zahl, die angibt, wie wahrscheinlich es ist, dass der Benutzer ein Bot ist.
+
+- **Niedrigere Scores** = Wahrscheinlich ein Mensch
+- **Höhere Scores** = Wahrscheinlich ein Bot
+
+Der Sicherheitsschwellenwert bestimmt den Grenzwert: Benutzer mit Bot-Scores über Ihrem Schwellenwert erhalten eine CAPTCHA-Herausforderung, während diejenigen darunter ohne Unterbrechung durchkommen und einfach ein PoW CAPTCHA im Hintergrund durchführen.
+
+## Wie der Sicherheitsschwellenwert funktioniert
+
+### Der Bot-Erkennungsprozess
+
+1. **Benutzer besucht Ihre Website** - Das Frictionless-System von Prosopo beginnt mit der Analyse des Browser-Verhaltens
+2. **Verhaltensanalyse** - Das System untersucht Faktoren wie:
+   - Browser-Daten
+   - Eigenschaften der Website-Interaktion
+   - Geräte- und Umgebungssignale
+   
+   Dies wird verwendet, um sicher die Wahrscheinlichkeit eines Benutzers zu bestimmen, ein Bot zu sein, ohne diese Benutzerdaten an Prosopo zu senden, wodurch vollständiger Datenschutz und DSGVO-Konformität gewährleistet werden.
+3. **Score-Generierung** - Ein Bot-Score (0,0 bis 1,0) wird berechnet
+4. **Schwellenwertvergleich** - Der Score wird mit Ihrem Sicherheitsschwellenwert verglichen
+5. **Aktion ergriffen**:
+   - **Score < Schwellenwert**: Benutzer kommt durch (unsichtbare PoW-Herausforderung)
+   - **Score ≥ Schwellenwert**: Benutzer erhält CAPTCHA-Herausforderung
+
+### Schwellenwertbereiche
+
+| Bereich | Bezeichnung | Beschreibung | Anwendungsfall |
+|---------|-------------|--------------|----------------|
+| 0,2 - 0,4 | **Niedrig** | Freizügige Erkennung | Websites mit hohem Traffic, die Benutzererfahrung priorisieren |
+| 0,4 - 0,6 | **Mittel** ⭐ | Ausgewogener Ansatz | **Empfohlen** für die meisten Websites |
+| 0,6 - 0,8 | **Hoch** | Strenge Erkennung | Websites unter Angriff oder mit hohen Sicherheitsanforderungen |
+
+## Konfiguration Ihres Sicherheitsschwellenwerts
+
+### Zugriff auf die Einstellungen
+
+1. Melden Sie sich beim [Prosopo Portal](https://portal.prosopo.io/) an
+2. Navigieren Sie zu Ihren Website-Einstellungen
+3. Finden Sie den Abschnitt "Sicherheitsschwellenwert"
+4. Verwenden Sie den Schieberegler, um Ihren Schwellenwert anzupassen
+5. Klicken Sie auf "Speichern", um Änderungen anzuwenden
+
+### Auswahl des richtigen Schwellenwerts
+
+#### Beginnen Sie mit Mittel (0,4 - 0,6)
+Die mittlere Einstellung wird für die meisten Websites empfohlen, da sie ein gutes Gleichgewicht zwischen Sicherheit und Benutzererfahrung bietet.
+
+#### Wann ein niedriger Schwellenwert (0,2 - 0,4) verwendet werden sollte
+- **E-Commerce-Websites mit hohem Traffic**, bei denen Benutzerreibung minimiert werden muss
+- **Content-Websites**, bei denen gelegentlicher Bot-Traffic akzeptabel ist
+- **Während Werbeaktionen**, wenn Sie hohen legitimen Traffic erwarten
+
+#### Wann ein hoher Schwellenwert (0,6 - 0,8) verwendet werden sollte
+- **Unter aktivem Bot-Angriff** - vorübergehend erhöhen, um mehr verdächtigen Traffic zu blockieren
+- **Finanz- oder sensible Anwendungen**, die maximale Sicherheit erfordern
+- **Formularübermittlungen** mit hochwertigen Ergebnissen (Registrierungen, Käufe)
+
+## Praxisbeispiele
+
+### E-Commerce-Website-Beispiel
+**Szenario**: Online-Shop mit 10.000 täglichen Besuchern
+- **Normaler Betrieb**: Mittlerer Schwellenwert (0,5)
+- **Während Verkäufen**: Senken Sie den Sicherheitsschwellenwert, um Reibung zu reduzieren
+- **Unter Angriff**: Erhöhen Sie den Sicherheitsschwellenwert vorübergehend
+
+### Blog/Content-Website-Beispiel
+**Szenario**: Nachrichten-Website mit Kommentarsystem
+- **Artikel lesen**: Niedriger Schwellenwert (0,3) - minimale Reibung
+- **Kommentar posten**: Mittlerer Schwellenwert (0,5) - Spam verhindern
+
+## Hilfe erhalten
+
+Wenn Sie Unterstützung bei der Konfiguration des Sicherheitsschwellenwerts benötigen:
+- Kontaktieren Sie den Prosopo-Support über das Portal
+- Treten Sie unserem Discord bei
+- Überprüfen Sie Ihre Analysedaten mit unserem Team für Optimierungsempfehlungen
+
+Der Sicherheitsschwellenwert ist ein leistungsstarkes Werkzeug, um Sicherheit und Benutzererfahrung auszubalancieren. Mit ordnungsgemäßer Konfiguration und Überwachung kann er den Schutz Ihrer Website erheblich verbessern und gleichzeitig eine reibungslose Benutzererfahrung aufrechterhalten.

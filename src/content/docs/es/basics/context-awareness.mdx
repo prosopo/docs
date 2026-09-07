@@ -1,0 +1,64 @@
+---
+title: Conocimiento del contexto
+description: Proteja la verificación CAPTCHA aplicando verificaciones sensibles al entorno y umbrales de contexto configurables para reducir el uso fraudulento o de origen inesperado.
+i18nReady: true
+---
+
+El conocimiento del contexto ayuda a evitar que su CAPTCHA se use en orígenes falsificados o inesperados al aplicar verificaciones sensibles al entorno y un umbral de sensibilidad configurable. Aumenta la dificultad del desafío para contextos sospechosos mientras permite que el tráfico legítimo pase con fricción mínima.
+
+## ¿Qué es el conocimiento del contexto?
+
+El conocimiento del contexto compara las señales de tiempo de ejecución de las solicitudes entrantes (origen, contexto de marco/incrustación, entorno) con el contexto esperado de su sitio. Cuando se detectan discrepancias, el sistema puede aumentar la dificultad de verificación o fallar la verificación para reducir el abuso de orígenes incrustados o falsificados.
+
+## Cómo funciona el conocimiento del contexto
+
+### Flujo de detección
+
+1. **Llega la solicitud** - El sistema recopila señales del entorno como origen, estado de incrustación/marco e indicadores del cliente.
+2. **Comparación de contexto** - Las señales se comparan con el contexto esperado del sitio configurado.
+3. **Puntuación y decisión** - Se deriva una puntuación de riesgo contextual y se evalúa contra el umbral de sensibilidad seleccionado.
+4. **Acción tomada**:
+- **Por debajo del umbral**: Verificación normal (PoW invisible o verificación ligera).
+- **En o por encima del umbral**: Aumentar la dificultad del CAPTCHA o fallar la verificación (dependiendo de los controles).
+
+## Controles
+
+- No permitir Webview
+Previene la verificación exitosa desde webviews dentro de aplicaciones. Los usuarios aún pueden completar CAPTCHAs, pero la verificación falla si la solicitud se origina desde un webview.
+
+- Conocimiento del contexto (interruptor)
+Habilita verificaciones contextuales que comparan las señales del entorno de solicitud con el contexto esperado de su sitio. Cuando está habilitado, el sistema puede aumentar la dificultad del desafío para contextos sospechosos.
+
+- Control deslizante de umbral (Bajo / Medio / Alto)
+Control deslizante de tres posiciones que controla la sensibilidad. Se recomienda medio; bajo es permisivo, alto es estricto.
+
+### Rangos de umbral
+
+| Rango | Etiqueta | Descripción |
+|-------|-------|-------------|
+| Bajo |  Permisivo | Permite más soluciones; puede permitir orígenes fraudulentos o incrustados. |
+| Medio |  Equilibrado | Predeterminado recomendado — buen equilibrio entre UX y seguridad. |
+| Alto |  Estricto | Bloquea más contextos sospechosos; puede aumentar falsos positivos. |
+
+## Permisos y comportamiento
+
+- Los usuarios del nivel gratuito no pueden habilitar `No permitir Webview` ni `Conocimiento del contexto`. Intentar alternar mostrará el CTA de actualización.
+- El modo de visualización hace que los controles sean de solo lectura y muestra una sugerencia informativa.
+
+## Ejemplos del mundo real
+
+- Comercio electrónico: Comience con medio. Durante promociones, monitoree el tráfico antes de reducir la sensibilidad para reducir la fricción. Si está bajo ataque, aumente a alto temporalmente.
+- Widget incrustado: Si su sitio está diseñado para ser incrustado, evite la sensibilidad alta o incluya explícitamente en la lista blanca contextos de integración.
+
+## Configuración del conocimiento del contexto
+
+1. Inicie sesión en el portal Prosopo.
+2. Navegue a la configuración de su sitio.
+3. Localice la sección "Conocimiento del contexto".
+4. Alterne la función y configure el control deslizante de umbral en Bajo / Medio / Alto.
+5. Guarde los cambios y monitoree los análisis para validar el comportamiento.
+
+## Obtener ayuda
+
+- Contacte al soporte de Prosopo a través de [Discord](https://discord.com/invite/dwQx2w9Tgm).
+- Revise los datos de análisis con nuestro equipo para ajustar la configuración.

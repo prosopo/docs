@@ -1,0 +1,64 @@
+---
+title: Conscience contextuelle
+description: Protégez la vérification CAPTCHA en appliquant des vérifications sensibles à l'environnement et des seuils de contexte configurables pour réduire l'utilisation d'origine frauduleuse ou inattendue.
+i18nReady: true
+---
+
+La conscience contextuelle aide à empêcher votre CAPTCHA d'être utilisé sur des origines falsifiées ou inattendues en appliquant des vérifications sensibles à l'environnement et un seuil de sensibilité configurable. Elle augmente la difficulté du défi pour les contextes suspects tout en permettant au trafic légitime de passer avec une friction minimale.
+
+## Qu'est-ce que la conscience contextuelle ?
+
+La conscience contextuelle compare les signaux d'exécution des requêtes entrantes (origine, contexte de cadre/incorporation, environnement) à votre contexte de site attendu. Lorsque des divergences sont détectées, le système peut augmenter la difficulté de vérification ou faire échouer la vérification pour réduire les abus provenant d'origines incorporées ou falsifiées.
+
+## Comment fonctionne la conscience contextuelle
+
+### Flux de détection
+
+1. **La requête arrive** - Le système recueille les signaux d'environnement tels que l'origine, le statut d'incorporation/cadre et les indicateurs du client.
+2. **Comparaison de contexte** - Les signaux sont comparés au contexte de site attendu configuré.
+3. **Score et décision** - Un score de risque contextuel est dérivé et évalué par rapport au seuil de sensibilité sélectionné.
+4. **Action prise** :
+- **En dessous du seuil** : Vérification normale (PoW invisible ou vérification légère).
+- **Au seuil ou au-dessus** : Augmenter la difficulté CAPTCHA ou faire échouer la vérification (selon les contrôles).
+
+## Contrôles
+
+- Interdire Webview
+Empêche la vérification réussie depuis les webviews d'applications. Les utilisateurs peuvent toujours compléter les CAPTCHAs, mais la vérification échoue si la requête provient d'une webview.
+
+- Conscience contextuelle (bascule)
+Active les vérifications contextuelles qui comparent les signaux d'environnement de requête à votre contexte de site attendu. Lorsqu'elle est activée, le système peut augmenter la difficulté du défi pour les contextes suspects.
+
+- Curseur de seuil (Faible / Moyen / Élevé)
+Curseur à trois positions contrôlant la sensibilité. Moyen est recommandé ; Faible est permissif, Élevé est strict.
+
+### Plages de seuil
+
+| Plage | Étiquette | Description |
+|-------|-------|-------------|
+| Faible |  Permissif | Autorise plus de solutions ; peut permettre des origines frauduleuses ou incorporées. |
+| Moyen |  Équilibré | Recommandé par défaut — bon compromis entre UX et sécurité. |
+| Élevé |  Strict | Bloque plus de contextes suspects ; peut augmenter les faux positifs. |
+
+## Permissions et comportement
+
+- Les utilisateurs du niveau gratuit ne peuvent pas activer `Interdire Webview` ni `Conscience contextuelle`. Tenter de basculer affichera l'appel à l'action de mise à niveau.
+- Le mode visualisation rend les contrôles en lecture seule et affiche un indice informatif.
+
+## Exemples concrets
+
+- E-commerce : Commencez avec Moyen. Pendant les promotions, surveillez le trafic avant de réduire la sensibilité pour réduire la friction. Si vous êtes sous attaque, augmentez temporairement à Élevé.
+- Widget incorporé : Si votre site est destiné à être incorporé, évitez une sensibilité Élevée ou ajoutez explicitement à la liste blanche les contextes d'intégration.
+
+## Configuration de la conscience contextuelle
+
+1. Connectez-vous au portail Prosopo.
+2. Accédez aux paramètres de votre site.
+3. Localisez la section "Conscience contextuelle".
+4. Basculez la fonctionnalité et définissez le curseur de seuil à Faible / Moyen / Élevé.
+5. Enregistrez les modifications et surveillez les analyses pour valider le comportement.
+
+## Obtenir de l'aide
+
+- Contactez le support Prosopo via [Discord](https://discord.com/invite/dwQx2w9Tgm).
+- Examinez les données d'analyse avec notre équipe pour affiner les paramètres.

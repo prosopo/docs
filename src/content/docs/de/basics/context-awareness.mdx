@@ -1,0 +1,64 @@
+---
+title: "Kontextbewusstsein"
+description: "Schützen Sie die CAPTCHA-Verifizierung durch Anwendung umgebungssensibler Prüfungen und konfigurierbarer Kontextschwellenwerte, um betrügerische oder unerwartete Origin-Nutzung zu reduzieren."
+i18nReady: true
+---
+
+Kontextbewusstsein hilft zu verhindern, dass Ihr CAPTCHA auf gefälschten oder unerwarteten Origins verwendet wird, indem umgebungssensible Prüfungen und ein konfigurierbarer Sensitivitätsschwellenwert angewendet werden. Es erhöht die Schwierigkeit von Herausforderungen für verdächtige Kontexte, während legitimer Traffic mit minimaler Reibung passieren kann.
+
+## Was ist Kontextbewusstsein?
+
+Kontextbewusstsein vergleicht Laufzeitsignale aus eingehenden Anfragen (Origin, Frame/Embedding-Kontext, Umgebung) mit Ihrem erwarteten Website-Kontext. Wenn Diskrepanzen erkannt werden, kann das System die Verifizierungsschwierigkeit erhöhen oder die Verifizierung fehlschlagen lassen, um Missbrauch von eingebetteten oder gefälschten Origins zu reduzieren.
+
+## Wie Kontextbewusstsein funktioniert
+
+### Erkennungsablauf
+
+1. **Anfrage trifft ein** - Das System sammelt Umgebungssignale wie Origin, Embedding/Frame-Status und Client-Indikatoren.
+2. **Kontextvergleich** - Signale werden mit dem konfigurierten erwarteten Website-Kontext verglichen.
+3. **Bewertung & Entscheidung** - Ein kontextbezogener Risiko-Score wird abgeleitet und anhand des ausgewählten Sensitivitätsschwellenwerts bewertet.
+4. **Aktion ergriffen**:
+- **Unter Schwellenwert**: Normale Verifizierung (unsichtbarer PoW oder leichte Verifizierung).
+- **Am oder über Schwellenwert**: CAPTCHA-Schwierigkeit erhöhen oder Verifizierung fehlschlagen lassen (abhängig von Steuerungen).
+
+## Steuerungen
+
+- Webview verbieten
+Verhindert erfolgreiche Verifizierung aus In-App-Webviews. Benutzer können CAPTCHAs weiterhin durchführen, aber die Verifizierung schlägt fehl, wenn die Anfrage von einer Webview stammt.
+
+- Kontextbewusstsein (Umschalter)
+Aktiviert kontextbezogene Prüfungen, die Anforderungsumgebungssignale mit Ihrem erwarteten Website-Kontext vergleichen. Wenn aktiviert, kann das System die Herausforderungsschwierigkeit für verdächtige Kontexte erhöhen.
+
+- Schwellenwert-Schieberegler (Niedrig / Mittel / Hoch)
+Drei-Positionen-Schieberegler zur Steuerung der Sensitivität. Mittel wird empfohlen; Niedrig ist freizügig, Hoch ist streng.
+
+### Schwellenwertbereiche
+
+| Bereich | Bezeichnung | Beschreibung |
+|---------|-------------|--------------|
+| Niedrig | Freizügig | Erlaubt mehr Lösungen; kann betrügerische oder eingebettete Origins zulassen. |
+| Mittel | Ausgewogen | Empfohlener Standard — guter Kompromiss zwischen UX und Sicherheit. |
+| Hoch | Streng | Blockiert mehr verdächtige Kontexte; kann falsch-positive Ergebnisse erhöhen. |
+
+## Berechtigungen & Verhalten
+
+- Benutzer der kostenlosen Stufe können weder `Webview verbieten` noch `Kontextbewusstsein` aktivieren. Ein Umschaltversuch zeigt den Upgrade-CTA an.
+- Der Betrachter-Modus macht Steuerungen schreibgeschützt und zeigt einen informativen Hinweis an.
+
+## Praxisbeispiele
+
+- E-Commerce: Beginnen Sie mit Mittel. Überwachen Sie während Werbeaktionen den Traffic, bevor Sie die Sensitivität senken, um Reibung zu reduzieren. Bei Angriffen vorübergehend auf Hoch erhöhen.
+- Eingebettetes Widget: Wenn Ihre Website eingebettet werden soll, vermeiden Sie hohe Sensitivität oder setzen Sie Integrationskontexte explizit auf die Whitelist.
+
+## Konfiguration des Kontextbewusstseins
+
+1. Melden Sie sich beim Prosopo Portal an.
+2. Navigieren Sie zu Ihren Website-Einstellungen.
+3. Suchen Sie den Abschnitt "Kontextbewusstsein".
+4. Aktivieren Sie die Funktion und setzen Sie den Schwellenwert-Schieberegler auf Niedrig / Mittel / Hoch.
+5. Speichern Sie die Änderungen und überwachen Sie die Analysen, um das Verhalten zu validieren.
+
+## Hilfe erhalten
+
+- Kontaktieren Sie den Prosopo-Support über [Discord](https://discord.com/invite/dwQx2w9Tgm).
+- Überprüfen Sie Analysedaten mit unserem Team, um die Einstellungen feinabzustimmen.

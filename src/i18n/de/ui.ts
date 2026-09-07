@@ -1,39 +1,37 @@
-import { UIDictionary } from '../translation-checkers';
-
-export default UIDictionary({
+export default {
 	'a11y.skipLink': 'Zum Inhalt springen',
-	'a11y.sectionLink': 'Abschnitt betitelt',
-	'navbar.a11yTitle': 'Haupt',
+	'a11y.sectionLink': 'Abschnitt mit dem Titel',
+	'navbar.a11yTitle': 'Anfang',
 	// Site settings
-	'site.title': 'Astro-Dokumentation',
-	'site.description': 'Erstelle schnellere Websites mit weniger ausgeliefertem JavaScript.',
+	'site.title': 'Prosopo Dokumentation',
+	'site.description': 'Sichere Websites mit CAPTCHA-Verifizierung.',
 	'site.og.imageSrc': '/default-og-image.png?v=1',
 	'site.og.imageAlt':
-		'Astro-Logo im Weltraum mit Sternen und einem violetten, Saturn-ähnlichen Planeten rechts im Vordergrund',
+		'Prosopo Logo im Weltall mit leuchtenden Elementen',
 	// Left Sidebar
 	'leftSidebar.a11yTitle': 'Primär',
 	'leftSidebar.learnTab': 'Lernen',
 	'leftSidebar.referenceTab': 'Referenz',
-	'leftSidebar.viewInEnglish': 'Auf Englisch ansehen',
+	'leftSidebar.viewInEnglish': 'Auf Englisch anzeigen',
 	'leftSidebar.sponsoredBy': 'Gesponsert von',
 	// Right Sidebar
 	'rightSidebar.a11yTitle': 'Sekundär',
 	'rightSidebar.onThisPage': 'Auf dieser Seite',
-	'rightSidebar.overview': 'Überblick',
+	'rightSidebar.overview': 'Übersicht',
 	'rightSidebar.community': 'Community',
-	'rightSidebar.joinDiscord': 'Tritt unserem Discord bei',
-	'rightSidebar.readBlog': 'Lies unsere Blog-Beiträge',
-	'rightSidebar.openCollective': 'Unsere Open Collective-Seite',
-	'rightSidebar.contribute': 'Wirke mit',
+	'rightSidebar.joinDiscord': 'Treten Sie uns auf Discord bei',
+	'rightSidebar.readBlog': 'Lesen Sie unsere Blog-Beiträge',
+	'rightSidebar.openCollective': 'Unser Open Collective',
+	'rightSidebar.contribute': 'Beitragen',
 	'rightSidebar.contributorGuides': 'Leitfäden für Mitwirkende',
-	'rightSidebar.editPage': 'Bearbeite diese Seite',
-	'rightSidebar.translatePage': 'Übersetze diese Seite',
-	'rightSidebar.github': 'Astro Docs auf GitHub',
+	'rightSidebar.editPage': 'Diese Seite bearbeiten',
+	'rightSidebar.translatePage': 'Diese Seite übersetzen',
+	'rightSidebar.github': 'Prosopo Dokumentation auf GitHub',
 	// Footer
-	'footer.privacyPolicy': 'Datenschutzerklärung',
+	'footer.privacyPolicy': 'Datenschutzrichtlinie',
 	// `<ThemeToggleButton>` acessibility labels
-	'themeToggle.useLight': 'Nutze das helle Theme',
-	'themeToggle.useDark': 'Nutze das dunkle Theme',
+	'themeToggle.useLight': 'Helles Design verwenden',
+	'themeToggle.useDark': 'Dunkles Design verwenden',
 	// Used in previous/next page links at the bottom of pages
 	'articleNav.nextPage': 'Nächste Seite',
 	'articleNav.prevPage': 'Zurück',
@@ -42,96 +40,96 @@ export default UIDictionary({
 	'since.new': 'Neu',
 	'since.beta': 'Beta',
 	// Installation Guide
-	'install.autoTab': 'Automatische Installation',
-	'install.manualTab': 'Manuelle Installation',
+	'install.autoTab': 'Automatische CLI',
+	'install.manualTab': 'Manuelle Einrichtung',
 	// `<DeployGuidesNav>` vocabulary
-	'deploy.sectionTitle': 'Veröffentlichungs-Anleitungen',
-	'deploy.altSectionTitle': 'Weitere Veröffentlichungs-Anleitungen',
-	'deploy.filterLabel': 'Nach Art filtern',
+	'deploy.sectionTitle': 'Bereitstellungsleitfäden',
+	'deploy.altSectionTitle': 'Weitere Bereitstellungsleitfäden',
+	'deploy.filterLabel': 'Nach Bereitstellungstyp filtern',
 	'deploy.ssrTag': 'SSR',
 	'deploy.staticTag': 'Statisch',
 	// CMS Guides vocabulary
-	'cms.navTitle': 'Weitere CMS-Anleitungen',
+	'cms.navTitle': 'Weitere CMS-Leitfäden',
 	// Migration Guides vocabulary
-	'migration.navTitle': 'Weitere Migrations-Anleitungen',
+	'migration.navTitle': 'Weitere Migrationsleitfäden',
 	// Recipes vocabulary
-	'recipes.navTitle': 'Weitere Anleitungen',
+	'recipes.navTitle': 'Weitere Rezepte',
 	// `<RecipeLinks>` vocabulary
-	'recipesLink.singular': 'Verwandte Anleitung:',
-	'recipesLink.plural': 'Verwandte Anleitungen',
+	'recipesLink.singular': 'Verwandtes Rezept:',
+	'recipesLink.plural': 'Verwandte Rezepte',
 	// `<ContributorList>` fallback text
 	'contributors.seeAll': 'Alle Mitwirkenden ansehen',
 	// Fallback content notice shown when a page is not yet translated
 	'fallbackContent.notice':
-		'Da diese Seite noch nicht auf Deutsch verfügbar ist, siehst du sie auf Englisch. Möchtest du uns helfen?',
-	'fallbackContent.linkText': 'Übersetze diese Seite',
+		'Diese Seite ist in Ihrer Sprache noch nicht verfügbar. Daher zeigen wir Ihnen die englische Version an. Sie können helfen, indem Sie sie übersetzen!',
+	'fallbackContent.linkText': 'Erfahren Sie mehr darüber, wie Sie beitragen können',
 	// 404 Page
 	'404.title': 'Nicht gefunden',
-	'404.content': 'Diese Seite befindet sich nicht in unserem Sonnensystem.',
-	'404.linkText': 'Bring mich nach Hause.',
+	'404.content': 'Diese Seite existiert nicht.',
+	'404.linkText': 'Zur Startseite.',
 	// Aside component default labels
 	'aside.note': 'Hinweis',
 	'aside.tip': 'Tipp',
-	'aside.caution': 'Achtung',
+	'aside.caution': 'Vorsicht',
 	'aside.danger': 'Gefahr',
 	// `<LanguageSelect>` vocabulary
 	'languageSelect.label': 'Sprache auswählen',
 	// Integrations vocabulary
-	'integrations.changelog': 'Changelog',
+	'integrations.changelog': 'Änderungsprotokoll',
 	'integrations.footerTitle': 'Weitere Integrationen',
 	'integrations.renderers': 'UI-Frameworks',
 	'integrations.adapters': 'SSR-Adapter',
-	'integrations.others': 'Sonstiges',
+	'integrations.others': 'Weitere Integrationen',
 	'integrations.more': 'Weitere Integrationen',
 	// Checklist component
 	'checklist.or': 'oder',
 	// Multiple Choice component
-	'multipleChoice.defaultCorrect': 'Korrekt!',
-	'multipleChoice.defaultIncorrect': "Versuch's nochmal!",
+	'multipleChoice.defaultCorrect': 'Richtig!',
+	'multipleChoice.defaultIncorrect': 'Versuchen Sie es erneut!',
 	'multipleChoice.submitLabel': 'Absenden',
 	// Tutorial Progress
-	'progress.todo': 'To-do',
-	'progress.done': 'Erledigt',
+	'progress.todo': 'Aufgabe',
+	'progress.done': 'Abgeschlossen',
 	// Tutorial Navigation
-	'tutorial.trackerLabel': 'Tutorial Tracker',
-	'tutorial.unit': 'Teil',
+	'tutorial.trackerLabel': 'Anleitung-Tracker',
+	'tutorial.unit': 'Einheit',
 	// Tutorial
-	'tutorial.getReady': 'Mach dich bereit, …',
+	'tutorial.getReady': 'Machen Sie sich bereit für…',
 	// Feedback Fish widget
-	'feedback.button': 'Gib uns Feedback',
+	'feedback.button': 'Geben Sie uns Feedback',
 	'feedback.a11yLabel': 'Feedback-Formular',
-	'feedback.formTitle': 'Worum geht es?',
-	'feedback.categoryGroupLabel': 'Feedback-Typ wählen',
+	'feedback.formTitle': 'Was beschäftigt Sie?',
+	'feedback.categoryGroupLabel': 'Feedback-Kategorie auswählen',
 	'feedback.issue': 'Problem',
-	'feedback.createIssue': 'Issue auf GitHub erstellen',
+	'feedback.createIssue': 'GitHub-Issue erstellen',
 	'feedback.createIssue.description':
-		'Schnellster Weg, um unser Team auf ein Problem aufmerksam zu machen.',
-	'feedback.sendFeedback': 'Schicke uns Feedback',
-	'feedback.sendFeedback.description': 'Schicke uns direkt eine Nachricht.',
+		'Der schnellste Weg, um unser Team auf ein Problem hinzuweisen.',
+	'feedback.sendFeedback': 'Senden Sie uns Feedback',
+	'feedback.sendFeedback.description': 'Senden Sie uns eine direkte Nachricht.',
 	'feedback.idea': 'Idee',
 	'feedback.other': 'Sonstiges',
 	'feedback.messageA11yLabel': 'Nachricht',
-	'feedback.placeholder': 'Was sollen wir wissen?',
-	'feedback.submit': 'Feedback abschicken',
+	'feedback.placeholder': 'Was möchten Sie uns mitteilen?',
+	'feedback.submit': 'Feedback absenden',
 	'feedback.close': 'Feedback-Formular schließen',
-	'feedback.success': 'Danke! Wir haben dein Feedback bekommen.',
+	'feedback.success': 'Danke! Wir haben Ihr Feedback erhalten.',
 	// Code snippet vocabulary
-	'expressiveCode.terminalWindowFallbackTitle': 'Terminal-Fenster',
+	'expressiveCode.terminalWindowFallbackTitle': 'Terminalfenster',
 	'expressiveCode.copyButtonTooltip': 'In Zwischenablage kopieren',
 	'expressiveCode.copyButtonCopied': 'Kopiert!',
 	// Backend Guides vocabulary
-	'backend.navTitle': 'Weitere Backend-Anleitungen',
+	'backend.navTitle': 'Weitere Leitfäden für Backend-Dienste',
 	// Stubs vocabulary
-	'stub.title': 'Erweitere diese Anleitung!',
-	'stub.subtitle': 'Diese Anleitung ist ein Entwurf.',
+	'stub.title': 'Ergänzen Sie diesen Leitfaden!',
+	'stub.subtitle': 'Dieser Leitfaden ist ein Gerüst.',
 	'stub.description.migration':
-		'Möchtest du zu dieser Anleitung beitragen? Hast du einen Blogbeitrag, ein Video oder eine andere Informationsquelle über die Migration von dieser Technologie zu Astro, die du teilen möchtest?',
-	'stub.description.cms': 'Weißt du mehr darüber, wie man dieses CMS mit Astro verwenden kann?',
+		'Möchten Sie zu diesem Leitfaden beitragen? Haben Sie einen Blog-Beitrag, ein Video oder eine andere Ressource zum Migrieren von dieser Technologie zu Prosopo zu teilen?',
+	'stub.description.cms': 'Wissen Sie mehr darüber, wie Sie dieses CMS mit Prosopo verwenden können?',
 	'stub.description.backend':
-		'Weißt du mehr darüber, wie man diesen Backend-Dienst mit Astro verwenden kann?',
+		'Wissen Sie mehr darüber, wie Sie diesen Backend-Dienst mit Prosopo verwenden können?',
 	// Starlight banner
-	'starlight.title': 'Willst du deine eigene Dokumentation erzeugen?',
-	'starlight.description': 'Mit dieser Vorlage kannst du loslegen.',
+	'starlight.title': 'Möchten Sie Ihre eigene Dokumentation erstellen?',
+	'starlight.description': 'Nutzen Sie diese Vorlage, um zu beginnen.',
 	// `<StudioHeading>` component
 	'studioHeading.label': 'Studio-Funktion',
-});
+};

@@ -1,0 +1,88 @@
+---
+title: Umbral de seguridad
+description: Comprensión y configuración del umbral de seguridad en la configuración de su portal Prosopo para equilibrar seguridad y experiencia del usuario.
+i18nReady: true
+---
+
+El **umbral de seguridad** es una configuración crítica en su portal Prosopo que determina qué tan estricto es su sistema de detección de bots. Controla el equilibrio entre seguridad (bloqueo de bots) y experiencia del usuario (minimización de desafíos de CAPTCHA para usuarios legítimos).
+
+## ¿Qué es el umbral de seguridad?
+
+El umbral de seguridad es un valor numérico entre 0.2 y 0.8 que representa el nivel de confianza requerido antes de que un usuario sea considerado legítimo. Cuando el sistema sin fricción de Prosopo analiza el comportamiento de un usuario, genera una "puntuación de bot" - un número que indica qué tan probable es que el usuario sea un bot.
+
+- **Puntuaciones más bajas** = Más probable que sea humano
+- **Puntuaciones más altas** = Más probable que sea un bot
+
+El umbral de seguridad determina el punto de corte: los usuarios con puntuaciones de bot por encima de su umbral se les presentará un desafío de CAPTCHA, mientras que aquellos por debajo pasarán sin interrupción, simplemente completando un CAPTCHA PoW en segundo plano.
+
+## Cómo funciona el umbral de seguridad
+
+### El proceso de detección de bots
+
+1. **El usuario visita su sitio** - El sistema sin fricción de Prosopo comienza a analizar el comportamiento del navegador
+2. **Análisis de comportamiento** - El sistema examina factores como:
+   - Datos del navegador
+   - Características de interacción del sitio
+   - Señales del dispositivo y del entorno
+   
+   Esto se utiliza para determinar de forma segura la probabilidad de que un usuario sea un bot sin enviar estos datos de usuario a Prosopo, manteniendo total privacidad y cumplimiento de GDPR.
+3. **Generación de puntuación** - Se calcula una puntuación de bot (0.0 a 1.0)
+4. **Comparación de umbral** - La puntuación se compara con su umbral de seguridad
+5. **Acción tomada**:
+   - **Puntuación < Umbral**: El usuario pasa (desafío invisible PoW)
+   - **Puntuación ≥ Umbral**: El usuario recibe un desafío de CAPTCHA
+
+### Rangos de umbral
+
+| Rango | Etiqueta | Descripción | Caso de uso |
+|-------|-------|-------------|----------|
+| 0.2 - 0.4 | **Bajo** | Detección permisiva | Sitios de alto tráfico que priorizan la experiencia del usuario |
+| 0.4 - 0.6 | **Medio** ⭐ | Enfoque equilibrado | **Recomendado** para la mayoría de sitios web |
+| 0.6 - 0.8 | **Alto** | Detección estricta | Sitios bajo ataque o que requieren alta seguridad |
+
+## Configuración de su umbral de seguridad
+
+### Acceso a la configuración
+
+1. Inicie sesión en el [portal Prosopo](https://portal.prosopo.io/)
+2. Navegue a la configuración de su sitio
+3. Encuentre la sección "Umbral de seguridad"
+4. Use el control deslizante para ajustar su umbral
+5. Haga clic en "Guardar" para aplicar los cambios
+
+### Elección del umbral correcto
+
+#### Comience con medio (0.4 - 0.6)
+La configuración media se recomienda para la mayoría de los sitios web, ya que proporciona un buen equilibrio entre seguridad y experiencia del usuario.
+
+#### Cuándo usar umbral bajo (0.2 - 0.4)
+- **Sitios de comercio electrónico de alto tráfico** donde la fricción del usuario debe minimizarse
+- **Sitios de contenido** donde el tráfico ocasional de bots es aceptable
+- **Durante períodos promocionales** cuando espera alto tráfico legítimo
+
+#### Cuándo usar umbral alto (0.6 - 0.8)
+- **Bajo ataque activo de bots** - aumente temporalmente para bloquear más tráfico sospechoso
+- **Aplicaciones financieras o sensibles** que requieren máxima seguridad
+- **Envíos de formularios** con resultados de alto valor (registros, compras)
+
+## Ejemplos del mundo real
+
+### Ejemplo de sitio de comercio electrónico
+**Escenario**: Tienda en línea con 10,000 visitantes diarios
+- **Operaciones normales**: Umbral medio (0.5)
+- **Durante ventas**: Baje el umbral de seguridad para reducir la fricción
+- **Bajo ataque**: Aumente el umbral de seguridad temporalmente
+
+### Ejemplo de sitio de blog/contenido
+**Escenario**: Sitio web de noticias con sistema de comentarios
+- **Lectura de artículos**: Umbral bajo (0.3) - fricción mínima
+- **Publicación de comentarios**: Umbral medio (0.5) - prevenir spam
+
+## Obtener ayuda
+
+Si necesita asistencia con la configuración del umbral de seguridad:
+- Contacte al soporte de Prosopo a través del portal
+- Únase a nuestro Discord
+- Revise sus datos de análisis con nuestro equipo para recomendaciones de optimización
+
+El umbral de seguridad es una herramienta poderosa para equilibrar seguridad y experiencia del usuario. Con la configuración y el monitoreo adecuados, puede mejorar significativamente la protección de su sitio mientras mantiene una experiencia de usuario fluida.

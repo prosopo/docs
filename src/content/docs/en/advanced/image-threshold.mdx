@@ -1,0 +1,72 @@
+---
+title: Image Accuracy Threshold
+description: Configure how strict image CAPTCHA verification is by setting the accuracy threshold for correct answers.
+i18nReady: true
+---
+
+The **Image Accuracy Threshold** controls how many image selections a user must get right for their CAPTCHA solution to be accepted. It applies whenever a user is presented with an image CAPTCHA challenge — either directly (image CAPTCHA mode) or as a fallback from frictionless mode when the bot score is above the safety threshold.
+
+## How It Works
+
+When a user submits an image CAPTCHA solution, the system compares their selections against the known correct answers and calculates an accuracy percentage. The threshold determines the minimum accuracy required for the solution to pass:
+
+- **Accuracy >= Threshold**: Solution accepted
+- **Accuracy < Threshold**: Solution rejected — the user must try again
+
+## Threshold Levels
+
+The threshold is configured via a three-position slider in the portal:
+
+| Level | Value | Description |
+|-------|-------|-------------|
+| **Low** | 70% | More lenient. Easier for humans but may allow some bots through. |
+| **Medium** | 80% | Balanced approach suitable for most websites. **Recommended.** |
+| **High** | 90% | More stringent. Better security but may be more challenging for legitimate users. |
+
+### When to Use Low (70%)
+
+- High-traffic sites where user friction must be minimized
+- Audiences that may struggle with image recognition (accessibility considerations)
+- Content sites where occasional incorrect solves are acceptable
+
+### When to Use Medium (80%)
+
+- General-purpose websites
+- E-commerce and SaaS applications
+- Most use cases — this is the recommended default
+
+### When to Use High (90%)
+
+- Sites under active bot attack
+- Financial or sensitive applications requiring strong verification
+- High-value form submissions (registrations, purchases, payments)
+
+## Relationship to Other Settings
+
+### Safety Threshold
+
+The [Safety Threshold](/en/basics/safety-threshold/) determines *whether* a user sees an image CAPTCHA at all. The Image Accuracy Threshold determines *how accurately* they must solve it. These work together:
+
+1. User arrives and the frictionless system calculates a bot score
+2. If the bot score is below the Safety Threshold, the user passes with an invisible PoW challenge (Image Accuracy Threshold is not involved)
+3. If the bot score is above the Safety Threshold, the user is presented with an image CAPTCHA
+4. The Image Accuracy Threshold then determines how many selections must be correct
+
+### CAPTCHA Type
+
+The Image Accuracy Threshold only applies when image CAPTCHAs are served. If your site is configured to use only Proof of Work CAPTCHAs, this setting has no effect. In frictionless mode, it applies to the image CAPTCHA fallback.
+
+## Configuration
+
+1. Log in to the [Prosopo Portal](https://portal.prosopo.io)
+2. Navigate to **Site Settings > General Settings**
+3. Find the **Image Accuracy Threshold** card
+4. Use the slider to select Low, Medium, or High
+5. Click **Save All Changes**
+
+## Recommendations
+
+- **Start with Medium** for most sites — it provides a good balance between security and usability.
+- If you see a high rate of legitimate users failing image CAPTCHAs, consider lowering to Low temporarily and investigating whether the issue is with the threshold or with the captcha content.
+- If you're under attack and bots are solving image CAPTCHAs, raise the threshold to High and consider combining with other measures (Traffic Filter, IP Validation Rules).
+- Monitor your verification analytics in the Audit page to understand how threshold changes affect pass/fail rates.

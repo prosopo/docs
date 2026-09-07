@@ -1,0 +1,88 @@
+---
+title: Safety Threshold
+description: Comprendere e configurare la Safety Threshold nelle impostazioni del portale Prosopo per bilanciare sicurezza ed esperienza utente.
+i18nReady: true
+---
+
+La **Safety Threshold** è un'impostazione critica nel suo portale Prosopo che determina quanto rigoroso è il suo sistema di rilevamento dei bot. Controlla il bilanciamento tra sicurezza (blocco dei bot) ed esperienza utente (minimizzazione delle sfide CAPTCHA per gli utenti legittimi).
+
+## Cos'è la Safety Threshold?
+
+La Safety Threshold è un valore numerico tra 0.2 e 0.8 che rappresenta il livello di confidenza richiesto prima che un utente sia considerato legittimo. Quando il sistema frictionless di Prosopo analizza il comportamento di un utente, genera un "punteggio bot" - un numero che indica quanto è probabile che l'utente sia un bot.
+
+- **Punteggi più bassi** = Più probabile che sia umano
+- **Punteggi più alti** = Più probabile che sia un bot
+
+La Safety Threshold determina il punto di cutoff: gli utenti con punteggi bot superiori alla sua soglia riceveranno una sfida CAPTCHA, mentre quelli sotto passeranno senza interruzioni, completando semplicemente un CAPTCHA PoW in background.
+
+## Come funziona la Safety Threshold
+
+### Il processo di rilevamento dei bot
+
+1. **L'utente visita il suo sito** - Il sistema frictionless di Prosopo inizia ad analizzare il comportamento del browser
+2. **Analisi comportamentale** - Il sistema esamina fattori come:
+   - Dati del browser
+   - Caratteristiche di interazione con il sito
+   - Segnali del dispositivo e dell'ambiente
+   
+   Questo viene utilizzato per determinare in modo sicuro la probabilità che un utente sia un bot senza inviare questi dati utente a Prosopo, mantenendo la piena privacy e conformità GDPR.
+3. **Generazione del punteggio** - Viene calcolato un punteggio bot (da 0.0 a 1.0)
+4. **Confronto con la soglia** - Il punteggio viene confrontato con la sua Safety Threshold
+5. **Azione intrapresa**:
+   - **Punteggio < Soglia**: L'utente passa (sfida PoW invisibile)
+   - **Punteggio ≥ Soglia**: L'utente riceve una sfida CAPTCHA
+
+### Intervalli di soglia
+
+| Range | Label | Description | Use Case |
+|-------|-------|-------------|----------|
+| 0.2 - 0.4 | **Low** | Rilevamento permissivo | Siti ad alto traffico che danno priorità all'esperienza utente |
+| 0.4 - 0.6 | **Medium** ⭐ | Approccio bilanciato | **Consigliato** per la maggior parte dei siti web |
+| 0.6 - 0.8 | **High** | Rilevamento rigoroso | Siti sotto attacco o che richiedono alta sicurezza |
+
+## Configurare la Safety Threshold
+
+### Accedere alle impostazioni
+
+1. Acceda al [portale Prosopo](https://portal.prosopo.io/)
+2. Navighi alle impostazioni del suo sito
+3. Trovi la sezione "Safety Threshold"
+4. Utilizzi il cursore per regolare la sua soglia
+5. Clicchi "Save" per applicare le modifiche
+
+### Scegliere la soglia giusta
+
+#### Iniziare con Medium (0.4 - 0.6)
+L'impostazione medium è consigliata per la maggior parte dei siti web in quanto fornisce un buon equilibrio tra sicurezza ed esperienza utente.
+
+#### Quando utilizzare Low Threshold (0.2 - 0.4)
+- **Siti e-commerce ad alto traffico** dove l'attrito dell'utente deve essere minimizzato
+- **Siti di contenuti** dove il traffico bot occasionale è accettabile
+- **Durante periodi promozionali** quando si prevede un alto traffico legittimo
+
+#### Quando utilizzare High Threshold (0.6 - 0.8)
+- **Sotto attacco bot attivo** - aumentare temporaneamente per bloccare più traffico sospetto
+- **Applicazioni finanziarie o sensibili** che richiedono massima sicurezza
+- **Invio di moduli** con risultati ad alto valore (registrazioni, acquisti)
+
+## Esempi reali
+
+### Esempio di sito e-commerce
+**Scenario**: Negozio online con 10.000 visitatori giornalieri
+- **Operazioni normali**: Soglia medium (0.5)
+- **Durante i saldi**: Abbassare la Safety Threshold per ridurre l'attrito
+- **Sotto attacco**: Aumentare la Safety Threshold temporaneamente
+
+### Esempio di Blog/Sito di contenuti
+**Scenario**: Sito di notizie con sistema di commenti
+- **Lettura articoli**: Soglia low (0.3) - attrito minimo
+- **Pubblicazione commenti**: Soglia medium (0.5) - prevenire spam
+
+## Ottenere aiuto
+
+Se ha bisogno di assistenza con la configurazione della Safety Threshold:
+- Contatti il supporto Prosopo tramite il portale
+- Si unisca al nostro Discord
+- Riveda i dati analitici con il nostro team per raccomandazioni di ottimizzazione
+
+La Safety Threshold è uno strumento potente per bilanciare sicurezza ed esperienza utente. Con una configurazione e un monitoraggio appropriati, può migliorare significativamente la protezione del suo sito mantenendo un'esperienza utente fluida.

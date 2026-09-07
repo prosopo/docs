@@ -1,0 +1,44 @@
+---
+title: "Integração React"
+description: "Procaptcha tem um component React oficial, que fornece integração simples do Prosopo Procaptcha em qualquer projeto React."
+i18nReady: true
+---
+
+Procaptcha fornece um [component React oficial](https://www.npmjs.com/package/@prosopo/react-procaptcha-wrapper) para fácil integração do Prosopo Procaptcha em qualquer projeto React.
+O component de integração suporta todas as [opções de renderização do Procaptcha](/pt-br/basics/client-side-rendering/#procaptcha-options).
+
+## 1. Instalação
+
+`npm install @prosopo/react-procaptcha-wrapper`
+
+## 2. Exemplo de uso
+
+### 2.1) Configuração básica
+
+```typescript jsx
+import {ProcaptchaComponent} from "@prosopo/react-procaptcha-wrapper";
+
+// ...
+
+<ProcaptchaComponent siteKey={"my-site-key"}/>;
+```
+
+### 2.2) Uso avançado
+
+```typescript jsx
+// ...
+
+<ProcaptchaComponent
+    siteKey={siteKey}
+    language={"en"}
+    callback={(token: string): void => {
+        console.log("verified", token);
+    }}
+    htmlAttributes={{
+        className: "my-app__procaptcha",
+        style: {
+            maxWidth: "600px",
+        },
+    }}
+/>
+```
