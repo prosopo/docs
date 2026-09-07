@@ -326,21 +326,54 @@ with no `score` where you normally receive one is the hint.
 ### Failure reasons
 
 On the Professional and Enterprise Tiers, a `verified: false` response may carry a `reason` identifying the rejection.
-The values are stable identifiers:
+The values are stable identifiers, grouped below by what they say about the request.
+
+The token itself:
 
 | `reason` | Meaning |
 | --- | --- |
 | `API.USER_NOT_VERIFIED` | Generic failure, including an incorrectly solved challenge. |
 | `API.USER_ALREADY_VERIFIED` | The token was already verified once. Tokens are single use. |
+| `API.USER_NOT_VERIFIED_NO_SOLUTION` | The token names no solution, or the provider holds no solution under that id. |
+| `API.USER_NOT_VERIFIED_TIME_EXPIRED` | The solve is older than the cached-verification window for its captcha type. |
 | `API.TIMESTAMP_TOO_OLD` | Too much time passed between the solve and your verify call. |
 | `API.CLIENT_SESSION_MISMATCH` | The `clientSessionId` you passed does not match the session the widget was rendered with. |
-| `API.ACCESS_POLICY_BLOCK` | An [access control rule](/en/advanced/access-control-rules) on your site blocked this visitor. |
-| `API.VPN_BLOCKED`, `API.PROXY_BLOCKED`, `API.TOR_BLOCKED`, `API.DATACENTER_BLOCKED`, `API.ABUSER_BLOCKED`, `API.CRAWLER_BLOCKED`, `API.MOBILE_BLOCKED`, `API.SATELLITE_BLOCKED` | Your traffic filter settings rejected the visitor's IP category. |
+| `CAPTCHA.DAPP_USER_SOLUTION_NOT_FOUND` | The provider has no record of the challenge in this token. |
+| `CAPTCHA.INVALID_SOLUTION` | The challenge was answered incorrectly. |
+| `CAPTCHA.INVALID_SALT` | The solve carried a salt the provider could not decode. |
+
+The visitor:
+
+| `reason` | Meaning |
+| --- | --- |
+| `API.ACCESS_POLICY_BLOCK` | An [access control rule](/en/advanced/access-control-rules/) on your site blocked this visitor. |
 | `API.FAILED_IP_VALIDATION` | The `ip` you passed failed validation against the IP that solved the captcha (applies when IP validation rules are enabled for the site). |
-| `API.SPAM_EMAIL_DOMAIN`, `API.SPAM_EMAIL_RULE`, `API.SPAM_EMAIL_COUNT_EXCEEDED` | The `email` you passed was rejected by spam filtering: a known disposable domain, one of your custom email rules, or too many submissions from one address. |
 | `API.DISALLOWED_WEBVIEW` | The solve came from an in-app WebView and your site settings disallow WebViews. |
 | `CAPTCHA.DECISION_MACHINE_DENIED` | A custom decision rule on your account denied the request. |
-| `CAPTCHA.DAPP_USER_SOLUTION_NOT_FOUND` | The provider has no record of the challenge in this token. |
+
+Your traffic filter settings, each naming the IP category that was rejected:
+
+| `reason` | Meaning |
+| --- | --- |
+| `API.VPN_BLOCKED` | A VPN connection. |
+| `API.PROXY_BLOCKED` | A proxy server. |
+| `API.TOR_BLOCKED` | A Tor exit node. |
+| `API.DATACENTER_BLOCKED` | A datacenter IP address. |
+| `API.ABUSER_BLOCKED` | A network flagged for abuse. |
+| `API.CRAWLER_BLOCKED` | A known crawler. |
+| `API.MOBILE_BLOCKED` | A mobile network connection. |
+| `API.SATELLITE_BLOCKED` | A satellite connection. |
+
+The `email` you passed, when spam filtering is enabled:
+
+| `reason` | Meaning |
+| --- | --- |
+| `API.SPAM_EMAIL_DOMAIN` | A known disposable or blocked domain. |
+| `API.SPAM_EMAIL_RULE` | One of your custom email rules matched. |
+| `API.SPAM_EMAIL_COUNT_EXCEEDED` | Too many submissions from this address. |
+
+These are the values you are likely to meet. Treat `reason` as an open set: branch on the ones you handle explicitly and
+fall back to "challenge failed" for anything else, so a new value never breaks your integration.
 
 ### HTTP 4xx: client and integration errors
 
