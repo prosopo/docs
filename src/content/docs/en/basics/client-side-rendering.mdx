@@ -13,6 +13,8 @@ are both fine.
 <script nomodule src="https://js.prosopo.io/js/procaptcha.bundle.iife.js" async defer></script>
 ```
 
+The `nomodule` fallback ensures the widget also loads in environments that do not execute ES module scripts (older browsers, some crawlers).
+
 Now, you can either render the Procaptcha widget implicitly or explicitly.
 
 ## Implicit Rendering
