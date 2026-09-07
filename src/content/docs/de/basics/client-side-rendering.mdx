@@ -10,6 +10,7 @@ sind beide in Ordnung.
 
 ```html
 <script type="module" src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+<script nomodule src="https://js.prosopo.io/js/procaptcha.bundle.iife.js" async defer></script>
 ```
 
 Nun können Sie das Procaptcha Widget entweder implizit oder explizit rendern.
@@ -42,6 +43,7 @@ gelöst wurde.
     <head>
         <title>Procaptcha Demo</title>
         <script type="module" src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+        <script nomodule src="https://js.prosopo.io/js/procaptcha.bundle.iife.js" async defer></script>
     </head>
     <body>
         <form action="" method="POST">
@@ -75,6 +77,7 @@ ID `procaptcha-container` erstellt, in dem das Widget gerendert wird.
             async
             defer
         ></script>
+        <script nomodule src="https://js.prosopo.io/js/procaptcha.bundle.iife.js" async defer></script>
     </head>
     <body>
         <div id="procaptcha-container"></div>
@@ -160,7 +163,7 @@ Sie können beim Rendern der Procaptcha-Komponente jeden der folgenden CAPTCHA-T
 
 Verschiedene Frameworks wurden mit Procaptcha integriert. Die Dokumentation für jedes Framework finden Sie unten:
 
-- [React Integration](/de/framework-integrations/angular-integration/)
+- [React Integration](/de/framework-integrations/react-integration/)
 - [Vue Integration](/de/framework-integrations/vue-integration/)
 - [Angular Integration](/de/framework-integrations/angular-integration/)
 - [Svelte Integration](/de/framework-integrations/svelte-integration/)

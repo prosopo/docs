@@ -88,16 +88,44 @@ Patterns are validated when saved:
 
 ### Spam Email Domain List
 
-A separate toggle (`spamEmailDomainCheckEnabled`) checks the email domain against a maintained list of known disposable/spam email providers. This runs independently of the rules above.
+Toggle **Spam email domain checking** (`spamEmailDomainCheckEnabled`) on to block signups from known disposable and throwaway email providers — `tempmail.*`, `guerrillamail.*`, `mailinator.*` and the thousands of recycled variants spammers cycle through.
+
+The check goes beyond matching the address's domain directly: Prosopo also follows the domain through any HTTP redirect, CNAME alias and MX record, so newly-registered throwaway domains can't bypass the list by simply pointing at a known disposable backend.
+
+The blocklist is maintained and refreshed for you — there's nothing to configure beyond the toggle. Rejected requests come back with status `API.SPAM_EMAIL_DOMAIN`.
+
+#### Standalone Endpoint
+
+You can also check an address without running a full CAPTCHA verification:
+
+```http
+POST /v1/prosopo/provider/client/spam/email
+Content-Type: application/json
+
+{
+    "email": "user@example.com",
+    "dapp": "YOUR_SITE_KEY"
+}
+```
+
+```json
+{
+    "isSpam": true,
+    "emailDomain": "example.com"
+}
+```
+
+Available to sites with the domain check enabled, and rate-limited per site key.
 
 ## Evaluation Order
 
-When the email filter is enabled and an email is provided, rules are evaluated in this order:
+When the email filter is enabled and an email is provided, the verification endpoint evaluates the email in this order:
 
-1. **Email validity** — malformed addresses are rejected
-2. **Maximum dots** — if configured, checked first
-3. **Default patterns** — if enabled, evaluated next
-4. **Custom regex blocklist** — each pattern is tested in order; first match wins
+1. **Email validity** — malformed addresses are rejected immediately.
+2. **Maximum dots** — if configured, checked first.
+3. **Default patterns** — if enabled, evaluated next.
+4. **Custom regex blocklist** — each pattern is tested in order; first match wins.
+5. **Spam-email-domain list** — if enabled, the domain (and any redirect, CNAME or MX it points at) is checked against the maintained blocklist.
 
 Evaluation stops at the first match. The rejection reason is recorded for audit purposes.
 

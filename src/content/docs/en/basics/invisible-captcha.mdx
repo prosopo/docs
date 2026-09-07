@@ -11,7 +11,7 @@ Invisible CAPTCHA is currently in **beta**. Features and behavior may change in 
 :::
 
 :::note[Tier Restriction]
-Invisible CAPTCHA is only available for **Pro and Enterprise** tier users. Free tier users cannot access this feature.
+Invisible CAPTCHA is only available for **Professional and Enterprise** tier users. Free tier users cannot access this feature.
 :::
 
 ## Overview
@@ -142,9 +142,10 @@ For more control over the CAPTCHA lifecycle:
             // Handle failure
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // Render invisible CAPTCHA
-            widgetId = render(document.getElementById('captcha-container'), {
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Render invisible CAPTCHA. render() is async, so await it before
+            // using the id it resolves to.
+            widgetId = await render(document.getElementById('procaptcha'), {
                 siteKey: 'your_site_key',
                 captchaType: 'frictionless',
                 size: 'invisible',
@@ -155,8 +156,9 @@ For more control over the CAPTCHA lifecycle:
             // Handle form submission
             document.getElementById('demo-form').addEventListener('submit', function(e) {
                 e.preventDefault();
-                // Trigger CAPTCHA verification
-                execute();
+                // Trigger CAPTCHA verification. Pass the widget id to trigger only
+                // this widget; with no argument every widget on the page runs.
+                execute(widgetId);
             });
         });
     </script>
@@ -173,6 +175,8 @@ For more control over the CAPTCHA lifecycle:
 | `data-callback` | Function name | Called when CAPTCHA is successfully verified |
 | `data-failed-callback` | Function name | Called when CAPTCHA verification fails |
 | `data-sitekey` | Your site key | **Required.** Your Procaptcha site key |
+| `data-bind` | CSS selector | A button on your page that triggers this widget, instead of your code calling `execute()`. The button's default action is prevented. See [Binding a button to the widget](/en/basics/client-side-rendering/#binding-a-button-to-the-widget). |
+| `data-placement` | `"popup"` | Accepted for consistency with visible widgets, but an invisible widget has no checkbox to anchor a `float` challenge to, so its challenge always opens as a centred popup. |
 
 ## Best Practices
 
@@ -221,18 +225,18 @@ const response = await fetch('https://api.prosopo.io/siteverify', {
     },
     body: JSON.stringify({
         secret: 'your_secret_key',
-        response: token, // Token from Procaptcha callback
-        remoteip: userIP // Optional
+        token: token, // Token from Procaptcha callback
+        ip: userIP // Optional
     })
 });
 
 const result = await response.json();
-if (result.success) {
+if (result.verified) {
     // Procaptcha verified successfully
     console.log('Verification successful');
 } else {
     // Verification failed
-    console.log('Verification failed:', result['error-codes']);
+    console.log('Verification failed:', result.status);
 }
 ```
 
