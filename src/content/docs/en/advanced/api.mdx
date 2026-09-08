@@ -285,9 +285,3 @@ through `/api-keys/create`.
 - Edge rule `verdict` is `allow`, `challenge` or `block`, and `type` is one of the fields Protect matches on:
   `ip`, `ipMask`, `ja4Hash`, `userAgent`, `countryCode` or `asn`.
 - The read endpoints proxy the verdict-log service and return its payload unchanged.
-
-## Permissions without an endpoint
-
-The key editor offers a few permissions that no endpoint currently checks: `getSuggestion`, `getSuggestions`,
-`applySuggestions` and `updateApiKey`. Granting them does nothing today. There is also a `verify` permission
-which `/siteverify` does not use — verification authenticates with the site secret key instead.
