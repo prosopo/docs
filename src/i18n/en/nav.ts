@@ -123,6 +123,11 @@ export default [
         key: 'advanced/api-keys',
     },
     {
+        text: 'API',
+        slug: 'advanced/api',
+        key: 'advanced/api',
+    },
+    {
         text: 'Audit',
         slug: 'advanced/audit',
         key: 'advanced/audit',

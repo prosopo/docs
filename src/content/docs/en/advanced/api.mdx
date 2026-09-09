@@ -1,0 +1,287 @@
+---
+title: API
+description: The Prosopo HTTP API — every endpoint you can call from outside the portal, what it is for, and what it expects.
+i18nReady: false
+---
+
+Anything you can do on the portal you can also do over HTTP: provision site keys, write access control
+rules, pull traffic and audit data, manage team members and configure Prosopo Protect. This page lists
+every endpoint that is reachable from outside Prosopo and what each one is for.
+
+**Base URL:** `https://api.prosopo.io`
+
+## Two kinds of credential
+
+| | Credential | Endpoints |
+|---|---|---|
+| **Verification** | Your site's **secret key**, in the request body | [`/siteverify`](/en/basics/server-side-verification/) |
+| **Management API** | An **API key**, in the `Authorization` header | Everything on this page |
+
+Verification is the hot path your backend calls once per form submission, so it is deliberately separate:
+it takes the secret key of the site being verified and needs no API key. See
+[Server-side verification](/en/basics/server-side-verification/).
+
+Everything else is the management API, described below.
+
+## Authentication
+
+Create an API key in the portal under **API Keys**, or with [`/api-keys/create`](#api-keys). Send it as a
+bearer token:
+
+```bash
+curl -X POST https://api.prosopo.io/sites/get \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+A call succeeds only if all of the following hold:
+
+- The **API** feature is enabled on your account. It is off by default — contact support to have it turned on.
+- The feature the endpoint belongs to (Sites, Access Rules, Traffic, …) is enabled on your account.
+- The key carries the permission listed against that endpoint below.
+- The key has not expired.
+
+Two things follow from how the token is built:
+
+- **The token carries only your account id and the key id.** Permissions live on your account and are read on
+  every request, so a key never has to be reissued to stay valid — but there is no endpoint for editing them
+  either. Changing what a key can do means deleting it and creating a replacement.
+- **The account comes from the key.** Several request bodies still accept an `accountId` or `token` field;
+  they are ignored for API-key callers, and the account is always the one that owns the key.
+
+### Key expiry
+
+Every key expires. `expiresIn` (seconds) is set at creation and defaults to **30 days** if you omit it —
+there is no non-expiring key. An expired key returns `401`. Rotate by creating a new key and deleting the old one.
+
+## Request and response format
+
+Send `POST` with a JSON body unless the table says otherwise (`application/x-www-form-urlencoded` and
+`multipart/form-data` are also accepted). Endpoints that take no parameters accept an empty body or `{}`.
+
+Errors come back as:
+
+```json
+{ "error": { "code": 403, "message": "Insufficient permissions", "key": "API.INSUFFICIENT_PERMISSIONS" } }
+```
+
+| Status | When |
+|---|---|
+| `400` | Body missing, unparsable, or failing schema validation |
+| `401` | `Authorization` header missing, malformed, or the key has expired |
+| `403` | Key lacks the permission, the feature is not enabled on the account, the account is disabled, or a write was attempted on an account that still owes a payment method |
+| `404` | Account, site key or Protect instance not found |
+| `500` | Unhandled server error |
+
+The `key` is stable and never translated, so log that rather than the message. Errors the widget itself
+shows visitors are listed in the [Error Reference](/en/basics/error-reference/).
+
+## Sites
+
+Provision and configure site keys from your own tooling — useful if you spin up tenants, staging
+environments or customer sites programmatically rather than clicking through the portal.
+
+Requires the **Sites** feature.
+
+| Endpoint | Permission | Body | Returns |
+|---|---|---|---|
+| `POST /sites/get` | `getSites` | `{}` | Array of every site on the account |
+| `POST /site/get` | `getSite` | `{ siteKey }` | One site |
+| `POST /sites/create` | `createSite` | `{ name, settings }` | The created site |
+| `POST /sites/update` | `updateSite` | `{ siteKey, name?, settings?, isDefault? }` | The updated site |
+| `POST /sites/delete` | `deleteSite` | `{ siteKey }` | `{ success, deactivatedSiteKey }` |
+
+A site object carries `name`, `siteKey`, `secretKey`, `settings`, `active`, `createdAt` and `updatedAt`.
+Treat responses as secret: they contain the site's secret key.
+
+`settings` is the same configuration the portal edits — `domains` (required, at least one), `captchaType`,
+`frictionlessThreshold`, `imageThreshold`, `powDifficulty`, `verifiedTimeout`, `solutionTimeout`,
+`ipValidationRules`, `spamFilter`, `trafficFilter`, `honeypot` and the rest. See
+[CAPTCHA Types](/en/basics/captcha-types/), [Safety Threshold](/en/basics/safety-threshold/),
+[Image Accuracy Threshold](/en/advanced/image-threshold/), [IP Validation Rules](/en/advanced/ip-validation-rules/),
+[Traffic Filter](/en/advanced/traffic-filter/) and [Email Filter](/en/advanced/spam-filter/).
+
+On create:
+
+- `name` must be alphanumeric with hyphens and underscores, and unique within your account.
+- The site key and secret key are generated for you; you cannot choose them.
+- Domains are normalised before they are stored: lowercased, with `http(s)://`, a leading `www.` and any
+  trailing slash stripped. Subdomain wildcards such as `*.example.com` are accepted; a bare `*` is not.
+- The number of non-localhost domains a site may carry is capped by your plan — one on the free tier.
+- Delete deactivates the site rather than erasing it, and the last remaining site cannot be deactivated.
+
+New and changed sites are pushed to the CAPTCHA providers asynchronously, so allow a short delay before
+the widget picks up a change.
+
+## Access control rules
+
+Write and revoke rules from your own detection stack — feed a SIEM verdict, a fraud signal or an abuse
+report straight into a block without a human in the portal.
+
+Requires the **Access Rules** feature. The concepts (fields, operators, policies, precedence) are covered in
+[Access Control Rules](/en/advanced/access-control-rules/).
+
+| Endpoint | Permission | Body | Returns |
+|---|---|---|---|
+| `POST /access-control/get` | `getRules` | `{ page?, limit?, ruleGroupId?, sortBy?, sortOrder? }` | `{ rules, ruleCount, ruleGroupsAndCounts, page, pages }` |
+| `POST /access-control/create` | `createRule` | `{ rule }` | `{ status: "Added new rule" }` |
+| `POST /access-control/delete` | `deleteRule` | `{ userScopeHash }` | `{ status: "Deleted rule" }` |
+| `POST /access-control/group/delete` | `deleteRuleGroup` | `{ ruleGroupId }` | `{ status: "Group removal pending. Job ID: …" }` |
+
+`sortBy` is one of `createdAt`, `description`, `expiry`, `userScopeHash`, `ruleGroupId`; `sortOrder` is `1`
+or `-1`; `limit` caps at 10000.
+
+A `rule` looks like this:
+
+```bash
+curl -X POST https://api.prosopo.io/access-control/create \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rule": {
+      "type": "block",
+      "description": "Scraper reported by fraud pipeline",
+      "conditions": [
+        { "field": "ip", "operator": "equals", "value": "1.1.1.1" },
+        { "field": "countryCode", "operator": "equals", "value": "US" }
+      ],
+      "expiry": "2026-01-01T00:00:00.000Z"
+    }
+  }'
+```
+
+- `type` is `block` (fail the request outright) or `restrict` (serve a harder or easier challenge). A
+  `restrict` rule may also carry `captchaType`, `solvedImagesCount`, `imageThreshold`, `powDifficulty`,
+  `unsolvedImagesCount`, `frictionlessScore` or `deferToVerify`. A `block` rule must not set `captchaType`
+  or `solvedImagesCount` — those are rejected, because a block applies to every CAPTCHA type.
+- `conditions` are ANDed. `field` is one of `ip`, `ipMask`, `userId`, `ja4Hash`, `userAgent`, `countryCode`,
+  `asn`; `operator` must be `equals` — any other operator is dropped silently.
+- **`expiry` defaults to one hour from creation if you omit it.** Set it explicitly for anything long-lived.
+- `ruleGroupId` is a free-form string; group deletion removes every rule sharing it, asynchronously via a job.
+- Rules apply account-wide, across every site key, and are pushed to the providers asynchronously.
+
+To delete a single rule you need its `userScopeHash`, which is returned by `/access-control/get`. Each rule
+comes back with its `conditions` rebuilt, so a read round-trips into the shape `create` accepts.
+
+## Traffic
+
+Pull the numbers behind the portal's charts into your own dashboards or billing reconciliation.
+
+Requires the **Traffic** feature and the `getTraffic` permission.
+
+| Endpoint | Body | Returns |
+|---|---|---|
+| `POST /gettrafficdata` | `{ token, accountId, siteKeys?, startDate?, endDate?, month?, year? }` | Array of per-period count rows |
+| `POST /getlivesessions` | `{ token, accountId, siteKey, windowMinutes?, bucketSeconds? }` | `{ points, windowMinutes, bucketSeconds, uniqueIps, topIps }` |
+
+- `token` and `accountId` are required by the schema but ignored — the account comes from your API key.
+  Send any non-empty string.
+- `/gettrafficdata` takes either an ISO `startDate`/`endDate` pair or a `month` (1–12) and `year`, defaulting
+  to the current month. Omit `siteKeys` for every site on the account; naming a site key you do not own is a
+  `404`. Ranges longer than seven days are aggregated per day rather than per hour.
+- `/getlivesessions` reads raw sessions, so it is capped: `windowMinutes` 5–360 (default 60) and
+  `bucketSeconds` 30–3600 (default 60). `points` only contains buckets that saw traffic — gap-fill client-side.
+  `topIps` is annotated with country, ASN and VPN/proxy/datacenter flags on Professional and Enterprise plans.
+
+## Audit records
+
+Search individual CAPTCHA attempts — the same data as the portal's [Audit](/en/advanced/audit/) page — to
+investigate an incident or export evidence.
+
+Requires the **Search Captcha Records** feature and the `searchCaptchaRecords` permission.
+
+| Endpoint | Body | Returns |
+|---|---|---|
+| `POST /audit/searchcaptcharecords` | `{ siteKey?, captchaType?, searchCriteria?, startDate?, endDate?, pagination? }` | `{ records, total, totalIsExact?, limit, hasMore, lastId?, lastTimestamp? }` |
+
+- `captchaType` is `pow`, `image`, `puzzle`, `all` (default) or `blocked` — the last covers requests stopped
+  before a CAPTCHA was chosen, which exist only as sessions.
+- `startDate` / `endDate` are epoch milliseconds. They default to the last seven days, and are clamped to a
+  30-day lookback — an older `startDate` is silently pulled forward rather than rejected.
+- Omit `siteKey` to search every site on the account; naming one you do not own is a `404`.
+- `pagination` is `{ limit, lastId?, lastTimestamp? }`, `limit` 1–100 (default 20). Page forward by feeding
+  the `lastId` and `lastTimestamp` from the previous response back in.
+- `searchCriteria` narrows on `ip`, `ja4`, `userAgent`, `userAccount`, `countryCode`, `deviceType`, `vpn`,
+  `webView`, `iFrame`, `status`, `selectionReason`, `resultReason`, `accessRule`, `policyType`,
+  `triggeredDetectors` or a `freeText` substring across the displayable fields.
+- `total` is capped server-side; when `totalIsExact` is `false` the real total is higher.
+
+## Team members
+
+Mirror your own identity system — add a starter, revoke a leaver — without anyone logging into the portal.
+
+Requires the **Users** feature.
+
+| Endpoint | Permission | Body | Returns |
+|---|---|---|---|
+| `GET /users/get` | `getUsers` | — | Array of users |
+| `POST /users/create` | `createUser` | `{ email, name, role }` | The created user |
+| `PUT /users/update` | `updateUser` | `{ email, name?, userType?, marketingPreferences? }` | `{ success }` |
+| `POST /users/delete` | `deleteUser` | `{ email }` | `{ success, deletedUserEmail }` |
+
+`role` and `userType` are `admin` or `viewer`. The account owner cannot be created, changed or removed
+through the API, and the last remaining user cannot be deleted.
+
+## API keys
+
+Rotate credentials on a schedule from CI, and grant permissions the portal's key editor does not offer.
+
+Requires the **API** feature.
+
+| Endpoint | Permission | Body | Returns |
+|---|---|---|---|
+| `POST /api-keys/get` | `getApiKeys` | `{}` | Array of keys, each including its token |
+| `POST /api-keys/create` | `createApiKey` | `{ name, permissions, expiresIn? }` | The created key, including its token |
+| `POST /api-keys/delete` | `deleteApiKey` | `{ apiKeyId }` | `{ success: true }` |
+
+`permissions` is keyed by feature:
+
+```json
+{
+  "name": "CI rule writer",
+  "expiresIn": 604800,
+  "permissions": {
+    "AccessRules": ["getRules", "createRule", "deleteRule"],
+    "Traffic": ["getTraffic"]
+  }
+}
+```
+
+Every feature named must be enabled on the account, and at least one permission must be granted, or the
+call is rejected. Deleting a key invalidates it immediately. See [API Keys](/en/advanced/api-keys/) for the
+full permission list.
+
+## Prosopo Protect
+
+Configure and observe edge protection: manage instances, read the verdict log and maintain the edge access
+rules. See [Prosopo Protect](/en/protect-edge/) for what the product does.
+
+Requires the **Protect** feature, and every endpoint takes the single `updateProtectSettings` permission.
+The portal's key editor does not offer Protect permissions, so a key that can reach these must be created
+through `/api-keys/create`.
+
+| Endpoint | Body | Purpose |
+|---|---|---|
+| `POST /protect/instances` | `{}` | List instances |
+| `POST /protect/instances/create` | `{ name, cname, globalSiteKey, ipCategoryRules, … }` | Create an instance |
+| `POST /protect/instances/update` | `{ id, … }` | Update an instance |
+| `POST /protect/instances/delete` | `{ id }` | Delete an instance |
+| `POST /protect/client-jwt/generate` | `{ protectInstanceId, expiresInWeeks }` | Issue the JWT the edge worker authenticates with (`0` weeks = effectively unlimited) |
+| `POST /protect/verdicts` | `{ siteKey?, since?, until?, limit?, offset?, decision?, sources?, firedRules?, asn?, deviceType?, requestPath?, minRulesFired? }` | Page the verdict log |
+| `POST /protect/verdicts/search` | `{ ip?, jti?, asn?, siteKey? }` | Find verdicts for one client |
+| `POST /protect/verdicts/distinct-sources` | `{ since, until?, siteKey? }` | Distinct verdict sources in a window |
+| `POST /protect/verdicts/distinct-fired-rules` | `{ since, until?, siteKey? }` | Distinct fired rule ids in a window |
+| `POST /protect/risk-history` | `{ jti, siteKey? }` | Risk score history for one session |
+| `POST /protect/session-telemetry` | `{ jti, siteKey? }` | Telemetry for one session |
+| `POST /protect/traffic-summary` | `{ siteKey?, since?, bucket?, source? }` | Bucketed traffic totals |
+| `POST /protect/traffic-by-dimension` | `{ groupBy, siteKey?, since?, until?, bucket?, topN?, … }` | Time series split by `decision`, `source`, `country`, `asn`, `ip_category`, `ja4`, `user_agent`, `request_path`, `fired_rule`, `device_type`, `enforcement_policy` or `none` |
+| `POST /protect/access-rules` | `{ siteKey? }` | List edge access rules |
+| `POST /protect/access-rules/create` | `{ rules: [{ type, value, verdict }] }` | Add edge access rules |
+| `POST /protect/access-rules/delete` | `{ conditions: [{ type, value }] }` | Remove edge access rules |
+
+- Omit `siteKey` and the endpoint uses your account's active instance; with no matching instance the response
+  is `404` with `{ "error": "No active protect instance found" }`.
+- Edge rule `verdict` is `allow`, `challenge` or `block`, and `type` is one of the fields Protect matches on:
+  `ip`, `ipMask`, `ja4Hash`, `userAgent`, `countryCode` or `asn`.
+- The read endpoints proxy the verdict-log service and return its payload unchanged.
