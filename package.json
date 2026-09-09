@@ -61,7 +61,7 @@
     "@typescript-eslint/eslint-plugin": "6.13.2",
     "@typescript-eslint/parser": "6.0.0",
     "@vitest/coverage-v8": "2.1.1",
-    "astro": "4.16.13",
+    "astro": "7.2.8",
     "astro-auto-import": "0.4.2",
     "astro-eslint-parser": "0.16.0",
     "astro-og-canvas": "0.5.0",
