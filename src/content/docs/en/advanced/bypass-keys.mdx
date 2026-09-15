@@ -1,0 +1,114 @@
+---
+title: Bypass Keys
+description: Let your own developers and automated tests skip the CAPTCHA on one site with a secret key you can revoke.
+i18nReady: true
+---
+
+A bypass key is a secret you create in the portal for one site. A browser that carries the key skips the CAPTCHA on
+that site: the widget completes straight away and your server receives a token it can verify as usual. They are meant
+for people and systems you trust, such as your QA team, staff testing a checkout, or end-to-end tests running against
+production.
+
+:::caution
+Anyone holding a bypass key passes the CAPTCHA on that site. Treat it like a password: do not put it in public client
+code or commit it to a repository, give each person or pipeline their own key, and revoke keys you no longer need.
+:::
+
+## How it works
+
+1. You create a key in the portal. Prosopo shows it to you once and stores only its SHA-256 hash, as an
+   [access control rule](/en/advanced/access-control-rules/#allow) with the **Allow** policy, scoped to that site.
+2. Within about a minute the rule reaches every Prosopo server.
+3. You set the key as a cookie named `prosopo_bypass_key` on your site's domain.
+4. When the widget loads, it reads the cookie and sends the key with its first request. Prosopo hashes the key and
+   looks for a matching Allow rule on your site. If there is one, the visitor gets an `authenticated` token with no
+   challenge.
+5. Your server verifies the token with [server-side verification](/en/basics/server-side-verification/), exactly as
+   it does for any other token, and must include the visitor's IP address.
+
+The key never leaves the browser except to reach Prosopo, and Prosopo never stores it, so a key cannot be read back
+out of the portal or the API later.
+
+## Creating a key
+
+1. Open the **Access Control** page in the [portal](https://portal.prosopo.io) and select the site.
+2. Open the **Procaptcha Editor** tab and choose **Bypass Keys**.
+3. Give the key a name you will recognise later, such as `QA team` or `GitHub Actions`, and choose when it expires:
+   7, 30 or 90 days, or never.
+4. Click **Create key**, then copy the key before you close the panel. It is not shown again.
+
+The panel also gives you a one-line snippet that sets the cookie in a browser.
+
+## Using a key
+
+The cookie must be set on the domain of the page that shows the CAPTCHA, and it must be readable by JavaScript, so do
+not mark it `HttpOnly`.
+
+### In a browser
+
+Open your site, then run this in the browser's developer console:
+
+```javascript
+document.cookie = "prosopo_bypass_key=pbk_YOUR_KEY; path=/; max-age=31536000; secure; samesite=lax";
+```
+
+Reload the page. The CAPTCHA completes on its own until the cookie is cleared or the key is revoked.
+
+### In automated tests
+
+Set the cookie before the test visits a page with the CAPTCHA. Keep the key in your CI secrets.
+
+Playwright:
+
+```typescript
+await context.addCookies([
+  {
+    name: "prosopo_bypass_key",
+    value: process.env.PROSOPO_BYPASS_KEY ?? "",
+    domain: "www.example.com",
+    path: "/",
+  },
+]);
+```
+
+Cypress:
+
+```typescript
+cy.setCookie("prosopo_bypass_key", Cypress.env("PROSOPO_BYPASS_KEY"));
+```
+
+## Verifying the token
+
+Your server-side verification does not change: send the token to `/siteverify` (or use `@prosopo/server`) as you do
+today. The one requirement is the `ip` field. A token earned with a bypass key is tied to the IP address that earned it
+and can be verified once, which stops a copied token from being used anywhere else.
+
+| `reason` | What happened |
+| --- | --- |
+| `API.AUTHENTICATED_IP_REQUIRED` | The verification request did not include `ip`. |
+| `API.AUTHENTICATED_IP_MISMATCH` | The `ip` you sent is not the one the token was issued to. |
+| `API.USER_ALREADY_VERIFIED` | The token has already been verified once. |
+
+## Revoking a key
+
+Click **Revoke** next to the key on the **Bypass Keys** tab. Within about a minute, browsers carrying that key see the
+CAPTCHA again. Keys with an expiry stop working on their own when they expire.
+
+## Things worth knowing
+
+- **Frictionless only.** Bypass keys are checked when the site's [CAPTCHA type](/en/basics/captcha-types/) is
+  Frictionless, which is the default. A site set to image, proof of work or puzzle ignores them.
+- **One site per key.** A key works only on the site it was created for, even though access control rules can apply
+  across your account.
+- **Blocks still win.** If a Block or Restrict rule also matches the visitor, that rule applies instead of the key.
+- **Iframes.** The widget reads cookies from the page it is running in. If you render the CAPTCHA inside an iframe on
+  another domain, set the cookie on that domain instead.
+- **Trusting a network instead.** To skip the CAPTCHA for everyone on an office network or a known server, create an
+  [Allow rule](/en/advanced/access-control-rules/#allow) on its IP address or range instead of handing out keys.
+- **Not the same as test keys.** The [test site keys](/en/basics/test-keys/) always pass or always fail and are for
+  development environments. Bypass keys work with your real site key.
+
+## Availability
+
+Bypass keys are part of Access Control Rules, which are available to customers with the Access Rules feature flag
+enabled. Contact support to enable this feature for your account.

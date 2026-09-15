@@ -151,12 +151,16 @@ curl -X POST https://api.prosopo.io/access-control/create \
   }'
 ```
 
-- `type` is `block` (fail the request outright) or `restrict` (serve a harder or easier challenge). A
+- `type` is `block` (fail the request outright), `restrict` (serve a harder or easier challenge) or `allow`
+  (skip the challenge; see [Allow](/en/advanced/access-control-rules/#allow)). A
   `restrict` rule may also carry `captchaType`, `solvedImagesCount`, `imageThreshold`, `powDifficulty`,
   `unsolvedImagesCount`, `frictionlessScore` or `deferToVerify`. A `block` rule must not set `captchaType`
   or `solvedImagesCount` — those are rejected, because a block applies to every CAPTCHA type.
 - `conditions` are ANDed. `field` is one of `ip`, `ipMask`, `userId`, `ja4Hash`, `userAgent`, `countryCode`,
-  `asn`; `operator` must be `equals` — any other operator is dropped silently.
+  `asn`, `bypassKeyHash`; `operator` must be `equals` — any other operator is dropped silently.
+- `bypassKeyHash` is the lowercase hex SHA-256 of a [bypass key](/en/advanced/bypass-keys/). Send the hash, never
+  the key: a value that is not a 64-character hex string is rejected. Pair it with `type: "allow"` and a
+  `clientId` naming the site the key is for.
 - **`expiry` defaults to one hour from creation if you omit it.** Set it explicitly for anything long-lived.
 - `ruleGroupId` is a free-form string; group deletion removes every rule sharing it, asynchronously via a job.
 - Rules apply account-wide, across every site key, and are pushed to the providers asynchronously.
