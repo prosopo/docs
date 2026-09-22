@@ -1,0 +1,324 @@
+---
+title: Self-Hosting
+description: Run the whole Procaptcha stack on your own servers using the public provider image. No fork, no source edits, and no image dataset.
+i18nReady: true
+---
+
+You can run Procaptcha entirely on your own infrastructure using the published `prosopo/provider` Docker image. You do
+not need to fork the repository, edit any TypeScript, or produce an image dataset.
+
+The short version: pick `pow` or `puzzle` as your CAPTCHA type, and the provider serves challenges on its own with
+nothing else attached.
+
+## What you get
+
+Serving challenges is one half of bot protection. The other half is deciding *who* should be challenged or blocked in
+the first place — continuously scoring traffic, running machine learning over it, and acting on the result. Self-hosting
+gives you the first half. The managed Professional and Enterprise tiers give you both.
+
+| | Self-hosted | Professional / Enterprise |
+| --- | --- | --- |
+| Proof of Work (`pow`) | Yes | Yes |
+| Slider puzzle (`puzzle`) | Yes | Yes |
+| Image CAPTCHA (`image`) | Yes, with [a dataset you build](#image-captchas) | Yes |
+| Client-side bot detection | No — see [What self-hosting does not give you](#what-self-hosting-does-not-give-you) | Yes |
+| ML scoring and automatic blocking | No | Yes |
+| Access rules, traffic filters, analytics | No | Yes |
+
+`pow` needs no imagery at all, and `puzzle` generates its imagery procedurally at request time, so both work out of the
+box. `image` is also available to you — it just needs a dataset you build and host yourself, so it is covered
+[further down](#image-captchas) rather than in the main flow.
+
+Self-hosting is the right choice when you want a privacy-preserving, GDPR-friendly challenge on your forms and you
+control your own infrastructure. It is not the right choice when you are being actively targeted by adaptive bots —
+that is what the managed tiers are for.
+
+## Before you start
+
+- A host with Docker and Docker Compose, and at least 4&nbsp;GB of RAM.
+- A public domain name pointing at that host, with ports 80 and 443 reachable from the internet. The provider itself
+  speaks plain HTTP on 9229 and obtains no certificates; the bundled Caddy container does that for it.
+- Node.js 24, to generate accounts and build the widget.
+
+You don't need to write a reverse-proxy config. The repository ships the one we run in production at
+[`docker/provider.Caddyfile`](https://github.com/prosopo/captcha/blob/main/docker/provider.Caddyfile), and it is driven
+entirely by environment variables — the compose file below wires it up.
+
+## 1. Clone and generate your environment file
+
+One script writes the whole thing: it generates the provider account, the site key account and strong random passwords
+for Mongo and Redis, and fills in every other value from the hostname you give it.
+
+```bash
+git clone https://github.com/prosopo/captcha
+cd captcha
+npm ci
+
+npx tsx ./dev/scripts/src/scripts/generateSelfHostedEnv.ts --host captcha.example.com
+```
+
+```
+@polkadot/util has multiple versions, ensure that there is only one installed.
+Either remove and explicitly install matching versions or dedupe using your package manager.
+The following conflicting packages were found:
+	esm 14.0.3	node_modules/@polkadot/util/
+[AsyncFunction: makeDirectory]
+{"scope":"generateSelfHostedEnv","level":"info","data":{"siteKeyAddress":"5FpdLFe3Mhi1JSo3vyu1UheV7vG5kFYfiWfNvbLCA2a2W4Sz","providerAddress":"5GnjcGsBoGLrVMhmfnkdXcTtACSGWhxokSx71U3PaWLRg1ti"},"msg":"Accounts generated"}
+{"scope":"generateSelfHostedEnv","level":"info","data":{"outputPath":"/home/you/captcha/.env"},"msg":"Environment file written"}
+```
+
+Only the last two lines matter. The `@polkadot/util` warning and the `[AsyncFunction: makeDirectory]` line are noise
+from the build tooling and repeat a few times — the script has not failed.
+
+Note the `siteKeyAddress`. That is the public `data-sitekey` value you put on your web pages and register in
+[step 3](#3-register-your-site-key). You can read it back out of the file at any time:
+
+```bash
+grep PROSOPO_SITE_KEY= .env
+```
+
+`.env` is written with `0600` permissions because it holds two mnemonics and both database passwords. Keep
+it out of version control, and back it up — regenerating it gives your provider a new identity and new credentials for
+a database that still has the old ones.
+
+Options: `--output <path>` to write somewhere else, `--force` to overwrite an existing file.
+
+<aside>
+Never reuse the addresses above. They are from a throwaway run and are public by virtue of being in documentation.
+</aside>
+
+## 2. Start the stack
+
+The compose file ships with the repo, so there is nothing to paste:
+
+```bash
+docker compose -f docker-compose.self-hosted.yml up -d
+curl localhost:9229/healthz                # the provider directly
+curl https://captcha.example.com/healthz   # through Caddy, once the certificate is issued
+```
+
+A healthy provider replies `{"ok":true,"host":"captcha.example.com"}`.
+
+Four containers — Mongo for storage, Redis for sessions and access rules, the provider, and Caddy terminating TLS in
+front of it. Redis must be `redis-stack` rather than stock Redis: the provider stores access rules in a RediSearch
+index. Caddy is `prosopo/caddy` rather than upstream Caddy, because
+[`docker/provider.Caddyfile`](https://github.com/prosopo/captcha/blob/main/docker/provider.Caddyfile) — the config we
+run in production — needs four plugins compiled in (`caddy-l4`, `chaddy`, `caddy-ratelimit`, `caddy-requestid`).
+
+Pin different image versions with `PROSOPO_PROVIDER_IMAGE_VERSION` and `CADDY_IMAGE_VERSION` in your `.env`.
+
+Two warnings in the startup log are expected and harmless on a self-hosted node:
+
+```
+bundle pool directory does not exist
+No datasets found in database. Image captchas will not work until a dataset is uploaded.
+```
+
+The first means no bot detector is installed, the second means no image dataset. Neither affects `pow` or `puzzle`.
+
+The `9229` port mapping is only there so you can curl the provider directly while setting up; real traffic arrives
+through Caddy on 443. Drop it once you're happy.
+
+<aside>
+Caddy requests certificates for three names: your domain plus `ipv4.` and `ipv6.` prefixed variants, which exist so
+clients can pin a single IP stack. Each is a separate certificate, so if you don't create those two DNS records the
+main one still works — you'll just see ACME retry errors for the other two in the log. Add `ipv4.captcha.example.com`
+(A) and `ipv6.captcha.example.com` (AAAA) pointing at the same host to silence them.
+</aside>
+
+## 3. Register your site key
+
+This is the step that makes everything else unnecessary. Registering a site key with an explicit `captcha_type` tells
+the provider to serve that challenge directly, skipping bot detection entirely:
+
+```bash
+docker compose exec provider /nodejs/bin/node /usr/src/app/provider.cli.bundle.js site_key_register \
+  "$(grep '^PROSOPO_SITE_KEY=' .env | cut -d= -f2)" enterprise \
+  --captcha_type puzzle \
+  --domains example.com \
+  --pow_difficulty 4 \
+  --frictionless_threshold 0.5 \
+  --image_threshold 0.8
+```
+
+Use `--captcha_type pow` for the invisible proof-of-work challenge instead.
+
+`--pow_difficulty`, `--frictionless_threshold` and `--image_threshold` are required by the command even when they do not
+apply to your chosen type; the values above are safe defaults.
+
+The tier is `free`, `professional` or `enterprise`. A self-hosted node enforces no request quota whatever you pick — the
+only thing it changes is that `free` omits the `score` and `reason` fields from the verification response. Use
+`enterprise` if you want them included.
+
+To change the type later, run the same command again with a different `--captcha_type`.
+
+## 4. Build the widget
+
+The published bundle on Prosopo's CDN is compiled to talk to Prosopo's fleet, so build your own copy with
+`PROSOPO_PROVIDER_LIST` baked in. This is a plain production build — you are not editing any source:
+
+```bash
+npm run build:all
+
+NODE_ENV=production \
+PROSOPO_PROVIDER_LIST=https://captcha.example.com \
+npm run -w @prosopo/procaptcha-bundle bundle
+```
+
+Serve the contents of `packages/procaptcha-bundle/dist/bundle/` from your own static hosting, then load it like any
+other CAPTCHA script:
+
+```html
+<script src="https://your-cdn.example.com/procaptcha.bundle.js" async defer></script>
+<div class="procaptcha" data-sitekey="5Fpd..."></div>
+```
+
+A widget built this way never contacts Prosopo: it skips the hosted provider list and the `/healthz` discovery call
+and goes straight to the providers you named.
+
+The CAPTCHA type is decided by the provider from the site key record, not by the page. A `data-captcha-type` attribute
+on the element is ignored.
+
+## 5. Verify tokens on your server
+
+When a user solves the challenge your form receives a `procaptcha-response` token. Verify it with
+[`@prosopo/server`](/en/basics/server-side-verification/), configured against your own provider:
+
+```bash
+PROSOPO_DEFAULT_ENVIRONMENT=production
+PROSOPO_PROVIDER_LIST=https://captcha.example.com
+PROSOPO_SITE_KEY=5Fpd...
+PROSOPO_SITE_PRIVATE_KEY="..."
+```
+
+All four are already in the `.env` you generated in step 1 — copy them across, or point your app at the
+same file.
+
+This is read at runtime, so no rebuild is needed if you add a provider later.
+
+Every URL must match its `CADDY_DOMAIN` exactly. A token carries the provider URL it was minted against and the
+verifier finds the issuer by exact string match, so a provider missing from this list makes its tokens unverifiable.
+Trailing slashes are normalised for you, but nothing else is.
+
+## What self-hosting does not give you
+
+A self-hosted node serves challenges and validates solutions. It does not decide who is a bot.
+
+**The client-side detector.** The frictionless CAPTCHA type scores each visitor in the browser to decide whether to let
+them through silently or challenge them. That detector is the one closed-source part of the stack and is not in the
+public image. This does not block you: an explicit `captcha_type` bypasses the scoring path altogether, so `pow` and
+`puzzle` behave exactly as they do on the managed service, and a site key left on `frictionless` against a detector-less
+provider falls back to serving proof of work.
+
+**The detection layer.** On Professional and Enterprise, every session feeds a pipeline that scores traffic, runs
+machine learning over it, and blocks or challenges suspicious visitors automatically — along with the access rules,
+traffic filters and analytics you use to tune it. None of that runs on a self-hosted node. A self-hosted `pow` or
+`puzzle` challenge is a fixed obstacle in front of your form: good against opportunistic and low-effort automation,
+but it does not adapt, and a determined attacker only has to solve it once per request.
+
+If you want the detector on your own node, [contact us](https://prosopo.io/contact/) — we supply obfuscated bundles for
+self-hosted deployments. Support for bringing your own detector is planned.
+
+## Image CAPTCHAs
+
+`image` works on a self-hosted node too — it just needs a dataset, which is why it is not in the main flow above. You
+build one with [`@prosopo/datasets-fs`](https://github.com/prosopo/captcha/tree/main/packages/datasets-fs); its README
+documents every command.
+
+The one thing worth knowing up front: **a dataset does not contain images.** Each entry holds a URL that the browser
+fetches while the user solves the challenge, so you host the images yourself on any static host or CDN and the dataset
+points at them.
+
+Starting from a directory with one subdirectory per label:
+
+```bash
+npm run -w @prosopo/datasets-fs build
+cd packages/datasets-fs
+
+# Collapse the tree into one image directory plus a label map.
+node dist/cli.js flatten --in ./data --out ./flat --overwrite
+node dist/cli.js labels --in ./flat/data.json --out ./labels.json --overwrite
+
+# Upload ./flat/images somewhere public, then rewrite the paths to match.
+node dist/cli.js relocate --in ./flat/data.json --out ./data-hosted.json \
+  --from /abs/path/flat/images --to https://img.example.com --overwrite
+node dist/cli.js get --in ./data-hosted.json      # confirms every URL resolves
+
+node dist/cli.js generate-v2 --out ./captchas.json \
+  --labelled ./data-hosted.json --unlabelled ./data-hosted.json \
+  --labels ./labels.json --seed 0 --size 9 --count 100 \
+  --minCorrect 1 --minIncorrect 1 --minLabelled 2 --maxLabelled 7 \
+  --allowDuplicates --overwrite
+```
+
+`--count` defaults to zero. Omit it and the command still succeeds, having written a dataset with no captchas in it.
+
+Load it and switch the site key over:
+
+```bash
+docker compose cp ./captchas.json provider:/usr/src/app/captchas.json
+docker compose exec provider /nodejs/bin/node /usr/src/app/provider.cli.bundle.js provider_set_data_set --file /usr/src/app/captchas.json
+docker compose restart provider
+
+docker compose exec provider /nodejs/bin/node /usr/src/app/provider.cli.bundle.js site_key_register "$(grep '^PROSOPO_SITE_KEY=' .env | cut -d= -f2)" enterprise \
+  --captcha_type image --domains example.com \
+  --pow_difficulty 4 --frictionless_threshold 0.5 --image_threshold 0.8
+```
+
+The restart is not optional. The provider resolves its default dataset once at startup, so a dataset uploaded into a
+running provider is stored but not served, and image challenges keep failing with `No dataset available` until the
+process restarts.
+
+## Image asset signing
+
+The provider can rewrite captcha image URLs into short-lived signed or sealed URLs at serve time, so a URL harvested
+from a challenge dies within its TTL instead of being refetchable forever, offline and unattributably.
+
+**Both are opt-in and off unless you supply a key.** A self-hosted dataset of plain `https://` URLs works exactly as
+described above: whatever URL is in your dataset is the URL the browser is handed. Verified against
+`prosopo/provider:3.8.19` — with no asset variables set, the image challenge returns the dataset URL verbatim, with no
+token, no expiry and no rewritten path.
+
+Turn it on only if your CDN supports the corresponding scheme:
+
+| variable | effect |
+| --- | --- |
+| `PROSOPO_ASSET_TOKEN_KEY` | Bunny-style token signing. Enables the feature. |
+| `PROSOPO_ASSET_TOKEN_TTL_SECONDS` | How long a signed URL stays valid. |
+| `PROSOPO_ASSET_TOKEN_BIND_IP` | Also bind the URL to the requesting IP. Must match the pull zone's `ZoneSecurityIncludeHashRemoteIP` exactly or every image 403s, and it breaks clients whose images egress from a different address than their API call. |
+| `PROSOPO_ASSET_SEAL_KEYS` | Opaque sealed paths opened at the edge, with `PROSOPO_ASSET_SEAL_ACTIVE_KEY_ID`, `PROSOPO_ASSET_SEAL_TTL_SECONDS` and `PROSOPO_ASSET_SEAL_URL_PREFIX`. |
+
+Signing happens strictly below `item.data` — the item hash, the captchaId and the datasetId are untouched — so turning
+it on later changes nothing about an existing dataset or its verification.
+
+## Running more than one provider
+
+`PROSOPO_PROVIDER_LIST` takes a list, so scaling out is a matter of naming the extra nodes. Comma-separated URLs are
+enough when you just want traffic spread evenly:
+
+```ini
+PROSOPO_PROVIDER_LIST=https://captcha1.example.com,https://captcha2.example.com
+```
+
+The widget picks one per session and, if that node errors, retries against a different one. For uneven capacity, use
+the same JSON the hosted provider list serves and give each node a `weight` from 1 to 100:
+
+```ini
+PROSOPO_PROVIDER_LIST={"one":{"address":"5Abc...","url":"https://captcha1.example.com","datasetId":"","weight":3},"two":{"address":"5Def...","url":"https://captcha2.example.com","datasetId":"","weight":1}}
+```
+
+Here the first node takes about three quarters of the traffic. The format is documented in full in the
+[`@prosopo/load-balancer` README](https://github.com/prosopo/captcha/tree/main/packages/load-balancer).
+
+Every node needs its own `CADDY_DOMAIN` and certificate, and they can share one Mongo and Redis or run their own —
+sessions are looked up by the node that created them, so a shared Redis is only needed if you want a session to survive
+being routed to a different node mid-challenge.
+
+Rebuild the widget whenever the list changes, and update your verifier's copy too.
+
+## Optional extras
+
+- **Database indexes.** Mongo creates these automatically, but you can force them with
+  `docker compose exec provider /nodejs/bin/node /usr/src/app/provider.cli.bundle.js ensure_indexes`.
+- **Upgrades.** Bump the `prosopo/provider` tag and run `docker compose up -d`. Rebuild the widget when you upgrade so
+  the two stay on the same release.

@@ -132,6 +132,12 @@ export default [
         slug: 'advanced/audit',
         key: 'advanced/audit',
     },
+    {text: 'Self-Hosting', header: true, type: 'learn', key: 'self-hosting'},
+    {
+        text: 'Run Your Own Provider',
+        slug: 'self-hosting/',
+        key: 'self-hosting/',
+    },
     {text: 'Prosopo Protect (Edge)', header: true, type: 'learn', key: 'protect-edge'},
     {
         text: 'Overview',
