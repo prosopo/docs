@@ -22,6 +22,13 @@ export function getPagePathnamesFromSitemap(options: LinkCheckerOptions) {
 		paths.forEach((path) => uniquePagePaths.add(path));
 	}
 
+	// A baseUrl that doesn't match the sitemap would otherwise check nothing and pass.
+	if (uniquePagePaths.size === 0) {
+		throw new Error(
+			`Found no pages under ${options.baseUrl} in the sitemaps of ${options.buildOutputDir}`
+		);
+	}
+
 	return Array.from(uniquePagePaths);
 }
 
