@@ -7,11 +7,10 @@ import CMSGuidesNav from '../CMSGuidesNav.astro';
 import DeployGuidesNav from '../DeployGuidesNav.astro';
 import IntegrationsNav from '../IntegrationsNav.astro';
 import MigrationGuidesNav from '../MigrationGuidesNav.astro';
-import type { Props } from '@astrojs/starlight/props';
 
 const t = useTranslations(Astro);
 
-const { entry } = Astro.props;
+const { entry } = Astro.locals.starlightRoute;
 ---
 
 <div class="sl-markdown-content">

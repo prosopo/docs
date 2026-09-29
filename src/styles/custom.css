@@ -9,3 +9,11 @@
 		grid-template-columns: 1fr 1fr;
 	}
 }
+
+/* Mark sidebar links to pages that fall back to English content. */
+.fallback::after {
+	content: 'EN';
+	vertical-align: super;
+	font-size: 0.75em;
+	font-weight: 700;
+}
