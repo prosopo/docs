@@ -1,10 +1,9 @@
 ---
 import docs from '~/assets/docs.svg?raw';
 import logo from '~/assets/prosopo-logo.svg?raw';
-import type { Props } from '@astrojs/starlight/props';
 
 const main = 'https://prosopo.io/';
-const self = '/' + (Astro.props.locale || 'en') + '/welcome/';
+const self = '/' + (Astro.locals.starlightRoute.locale || 'en') + '/welcome/';
 ---
 
 <span class="site-title sl-flex">
