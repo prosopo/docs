@@ -6,9 +6,11 @@ i18nReady: true
 import { Image } from 'astro:assets';
 import ApiKeyCreate from '~/assets/api-key-create.png';
 
-API keys allow you to interact with Prosopo services programmatically — for example, managing access control rules, querying traffic data, or verifying CAPTCHA solutions from your backend without using the portal UI.
+API keys allow you to interact with Prosopo services programmatically — for example, managing access control rules, provisioning sites or querying traffic data from your backend without using the portal UI. Every endpoint a key can call is listed in the [API reference](/en/advanced/api/).
 
-API key management is available to accounts with the API feature enabled. Check your account's feature flags in the portal.
+API keys are not used for CAPTCHA verification. [`/siteverify`](/en/basics/server-side-verification/) authenticates with your site's secret key instead.
+
+API key management is available to accounts with the API feature enabled. It is off by default — contact support to have it turned on.
 
 ## Creating an API Key
 
@@ -17,26 +19,23 @@ API key management is available to accounts with the API feature enabled. Check 
 3. Click **Create API Key**
 4. Fill in the required fields:
    - **Name** (required): A descriptive label for the key, e.g. "Production Backend" or "CI/CD Pipeline"
-   - **Expiration Time** (optional): Time in seconds until the key expires. Leave empty for a key that does not expire.
+   - **Expiration Time** (optional): Time in seconds until the key expires. Leave it empty, or enter `0`, for a key that does not expire.
    - **Permissions** (required): Select which operations this key can perform (see below)
 5. Click **Create API Key**
 
 <Image src={ApiKeyCreate} alt="prosopo portal create API key dialog" style="margin: 20px auto;"/>
 
-After creation, the full API key is displayed once. Copy it immediately — it cannot be retrieved later.
+The key stays available after creation: it is listed on the API Keys page, hidden until you click to show it, and is also returned by [`/api-keys/get`](/en/advanced/api/#api-keys). Treat that page and that endpoint as secret.
 
 ## Permissions
 
-Each API key is scoped to a specific set of permissions. Only grant the permissions the key actually needs.
+Each API key is scoped to a specific set of permissions. Only grant the permissions the key actually needs. A permission group only appears when the matching feature is enabled on your account.
 
 ### Access Rules
 
 | Permission | Description |
 |-----------|-------------|
 | `getRules` | List access control rules |
-| `getSuggestion` | Get a single rule suggestion |
-| `getSuggestions` | List rule suggestions |
-| `applySuggestions` | Apply suggested rules |
 | `createRule` | Create a new access control rule |
 | `deleteRule` | Delete an access control rule |
 | `deleteRuleGroup` | Delete an access control rule group |
@@ -57,8 +56,9 @@ Each API key is scoped to a specific set of permissions. Only grant the permissi
 |-----------|-------------|
 | `getApiKeys` | List API keys |
 | `createApiKey` | Create a new API key |
-| `updateApiKey` | Update an existing API key |
 | `deleteApiKey` | Delete an API key |
+
+There is no way to edit a key's permissions after creation. To change them, create a replacement key and delete the old one.
 
 ### Users
 
@@ -75,53 +75,63 @@ Each API key is scoped to a specific set of permissions. Only grant the permissi
 |-----------|-------------|
 | `getTraffic` | Query traffic analytics data |
 
-### Verify
-
-| Permission | Description |
-|-----------|-------------|
-| `verify` | Verify CAPTCHA solutions |
-
 ### Search Captcha Records
 
 | Permission | Description |
 |-----------|-------------|
 | `searchCaptchaRecords` | Search and retrieve CAPTCHA audit records |
 
+### Protect
+
+| Permission | Description |
+|-----------|-------------|
+| `updateProtectSettings` | Manage Protect instances and edge access rules, and read verdicts and traffic |
+| `ingestClientEvents` | Send client events to Protect, and nothing else |
+
+`ingestClientEvents` is deliberately separate so a log shipper on your own infrastructure can report events without being able to change what Protect enforces.
+
+The dialog also offers `getSuggestion`, `getSuggestions`, `applySuggestions` and `updateApiKey`. No endpoint currently checks them, so granting them has no effect.
+
 ## Using an API Key
 
-Include the API key in the `Authorization` header of your HTTP requests:
+Include the API key in the `Authorization` header of your HTTP requests. This example lists your access control rules and needs the `getRules` permission:
 
 ```bash
-curl -X GET https://api.prosopo.io/v1/prosopo/provider/admin/rules \
+curl -X POST https://api.prosopo.io/access-control/get \
   -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json"
+  -H "Content-Type: application/json" \
+  -d '{}'
 ```
 
 Or in code:
 
 ```javascript
-const response = await fetch('https://api.prosopo.io/v1/prosopo/provider/admin/rules', {
+const response = await fetch('https://api.prosopo.io/access-control/get', {
+  method: 'POST',
   headers: {
     'Authorization': `Bearer ${apiKey}`,
     'Content-Type': 'application/json',
   },
+  body: JSON.stringify({}),
 });
 ```
+
+See the [API reference](/en/advanced/api/) for every endpoint, its permission and its request body.
 
 ## Managing API Keys
 
 ### Viewing Keys
 
-The API Keys page shows all keys for your account:
+The API Keys page shows all keys for your account. Each one displays:
 
 - **Name**: The label you gave the key
-- **Created**: When the key was created
-- **Expires**: When the key expires (or "Never" for non-expiring keys)
+- **Token**: The key itself, hidden until you click to show it
+- **Expires At**: When the key expires, or "Never" for non-expiring keys
 - **Permissions**: Which operations the key can perform
 
 ### Deleting Keys
 
-To revoke an API key, click the delete button next to it in the API Keys list. The key is immediately invalidated — any requests using it will be rejected.
+To revoke an API key, click **Remove** on it in the API Keys list. The key is immediately invalidated — any requests using it will be rejected.
 
 Deletion is permanent and cannot be undone. If you delete a key by mistake, create a new one and update your application with the new key.
 
@@ -129,7 +139,7 @@ Deletion is permanent and cannot be undone. If you delete a key by mistake, crea
 
 ### Principle of Least Privilege
 
-Only grant the permissions each key actually needs. A key used solely for CAPTCHA verification should only have the `verify` permission — it does not need `createSite` or `deleteRule`.
+Only grant the permissions each key actually needs. A key used solely to sync access control rules needs `getRules`, `createRule` and `deleteRule` — it does not need `createSite` or `deleteUser`.
 
 ### Use Expiring Keys for Temporary Access
 
