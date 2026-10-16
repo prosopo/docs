@@ -34,17 +34,11 @@ Extract it and you get:
 
 Versioned tarballs are at `https://packages.prosopo.io/cloud/Prosopo-Cloudflare-<version>.tgz` if you want to pin to a specific release.
 
-Part 2 (client-side) is hosted by us. Either the worker injects the `<script>` tag automatically (see [Deployment modes](#deployment-modes)) or you add one `<script>` tag pointing at `https://js.protect.prosopo.io/protect.bundle.js`. Nothing to download or bundle yourself. We publish new versions to that URL; your pages pick them up on their next reload without a redeploy from you.
+Part 2 (client-side) is hosted by us. You add one `<script>` tag pointing at `https://js.protect.prosopo.io/protect.bundle.js`. Nothing to download or bundle yourself. We publish new versions to that URL; your pages pick them up on their next reload without a redeploy from you.
 
-## Deployment modes
+## Why the worker doesn't add the script for you
 
-The client-side bundle can reach your users two ways. Pick one:
-
-**Auto-inject (recommended).** Set `SITE_KEY` in `wrangler.toml` alongside `PROTECT_URL`. On every allowed HTML response the worker streams the response through Cloudflare's `HTMLRewriter` and appends the Protect bundle `<script>` tags into `<head>`. You never touch your HTML. Adding, removing, or updating pages requires no coordination — every page the worker serves gets the tags. This is the default DataDome-style install.
-
-**Manual snippet.** Leave `SITE_KEY` out of `wrangler.toml` and paste the two-tag block into a shared header/footer template yourself (see [Part 2: Manual snippet](#2b-manual-snippet-if-you-havent-set-site_key)). Slightly more work upfront but useful when you want per-template control (e.g. omit the bundle on a specific landing page, or add extra attributes to the script tag).
-
-`CLIENT_JWT` and `PROTECT_URL` are required in **both** modes — the worker calls the Protect API on every request regardless of injection mode.
+The worker never changes the pages your origin sends back. You add the Protect script to your own HTML, so you decide which pages load it, where it sits in the page and when it loads. The [Lambda@Edge integration](/protect-edge/lambda-edge) works the same way.
 
 ## Prerequisites
 
@@ -112,11 +106,6 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 PROTECT_URL = "https://protect.<your-domain>"
-
-# Auto-inject mode: set SITE_KEY here and the worker adds the client
-# bundle <script> tags to every HTML response. Omit to run in manual
-# mode (add the snippet to your HTML yourself — see Part 2).
-# SITE_KEY = "<your-site-key>"
 
 # ORIGIN_URL is where the worker forwards allowed requests. Set this
 # for any deployment that fronts a real backend. Two hostnames are
@@ -204,24 +193,9 @@ Worker verified? Move to Part 2.
 
 ## Part 2: the Protect JS bundle (client-side)
 
-**This part is mandatory.** Without the bundle no session cookie is ever set, and the worker returns 401 `no-session` on every `/api/*` or `/forms/*` call in perpetuity. How you get the bundle onto your pages depends on which [deployment mode](#deployment-modes) you picked.
+**This part is mandatory.** Without the bundle no session cookie is ever set, and the worker returns 401 `no-session` on every `/api/*` or `/forms/*` call in perpetuity.
 
-### 2a. Auto-inject (if you set `SITE_KEY`)
-
-Nothing to do. The worker rewrites every allowed HTML response through Cloudflare's `HTMLRewriter` and appends these two tags at the end of `<head>`:
-
-```html
-<script>window.prosopo_config={site_key:"<your-site-key>",protect_url:"https://protect.<your-domain>"};</script>
-<script src="https://js.protect.prosopo.io/protect.bundle.js" async></script>
-```
-
-The rewriter is streaming so there's no measurable latency cost. Non-HTML responses (JSON, CSS, images, XHR replies) pass through untouched.
-
-**CSP note.** If your site sets a `Content-Security-Policy` header, add `https://js.protect.prosopo.io` to `script-src` so the injected `<script>` is allowed to load. `https://protect.<your-domain>` needs to be in `connect-src` too so the bundle's `fetch` and telemetry uploads aren't blocked.
-
-Skip to [Verify the bundle](#2d-verify-the-bundle).
-
-### 2b. Manual snippet (if you haven't set `SITE_KEY`)
+### 2a. Add the Protect script to your pages
 
 Add this snippet to every HTML page your site serves. A shared header or footer template is the usual spot:
 
@@ -237,7 +211,9 @@ Add this snippet to every HTML page your site serves. A shared header or footer 
 
 Both tags are required. The first sets `window.prosopo_config` before the second loads; the bundle reads that config to know which Protect API to talk to. Skipping the first tag causes the bundle to fall back to the CDN's own origin (`js.protect.prosopo.io`) as its API URL, which returns 405 on the CORS preflight for `/api/protect/init` and hangs the bundle's patched `fetch`.
 
-Either mode, once loaded the bundle:
+**CSP note.** If your site sets a `Content-Security-Policy` header, add `https://js.protect.prosopo.io` to `script-src` so the script is allowed to load. `https://protect.<your-domain>` needs to be in `connect-src` too so the bundle's `fetch` and telemetry uploads aren't blocked.
+
+Once loaded, the bundle:
 
 1. Calls `POST https://protect.<your-domain>/api/protect/init`.
 2. Receives a `prosopo_session` cookie scoped to `.<your-domain>`.
@@ -245,7 +221,7 @@ Either mode, once loaded the bundle:
 
 Every subsequent request from that browser carries the cookie, and the worker looks up a real verdict on `/api/*` or `/forms/*` calls.
 
-### 2c. Gate fast form submissions and link clicks (optional)
+### 2b. Gate fast form submissions and link clicks (optional)
 
 Users can click **Submit** before the bundle finishes creating the session. The browser fires a full-page POST with no cookie and gets a 401. The security is correct but the UX is bad.
 
@@ -266,7 +242,7 @@ The bundle intercepts marked forms and same-origin links in the capture phase, h
 
 Attributes on an ancestor cover every descendant form or link, so `<nav data-prosopo-gate>` gates every link inside.
 
-### 2d. Verify the bundle
+### 2c. Verify the bundle
 
 Open your site in a real browser with DevTools on the Network tab. On first page load you should see:
 
