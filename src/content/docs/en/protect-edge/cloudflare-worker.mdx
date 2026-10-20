@@ -36,7 +36,7 @@ Versioned tarballs are at `https://packages.prosopo.io/cloud/Prosopo-Cloudflare-
 
 Part 2 (client-side) is hosted by us. You add two `<script>` tags to your pages, the second pointing at `https://js.protect.prosopo.io/protect.bundle.js`. Nothing to download or bundle yourself. We publish new versions to that URL; your pages pick them up on their next reload without a redeploy from you.
 
-The worker never edits your pages. Earlier releases had a `SITE_KEY` var that made the worker rewrite every HTML response to add those tags for you; that mode has been removed. Adding the tags yourself means you control where and when the bundle loads, and the worker's response path stays a straight pass-through.
+The worker never edits your pages, so you control where and when the bundle loads and the worker's response path stays a straight pass-through.
 
 ## Prerequisites
 
@@ -112,20 +112,20 @@ required = ["CLIENT_JWT"]
 enabled = true
 ```
 
-That is the whole configuration. There is no origin URL to set: see [How the worker reaches your origin](#how-the-worker-reaches-your-origin).
+That is the whole configuration. There is no origin URL to set: see [How the worker reaches your origin](#1d-how-the-worker-reaches-your-origin).
 
 `PROTECT_URL` ships as the placeholder `REPLACE_WITH_https://protect.<your-domain>`, which is deliberately not a URL. Until you replace it the worker logs an error and lets every request through unchecked, rather than failing your site — so a half-finished deploy is visible in `wrangler tail` instead of silently blocking users.
 
 `[secrets] required` makes `wrangler deploy` refuse to deploy until `CLIENT_JWT` is set, so you cannot ship a worker that has no way to authenticate to the Protect API.
 
-### How the worker reaches your origin
+### 1d. How the worker reaches your origin
 
 On `allow` the worker passes the request on with `fetch(request)`. On a route, Cloudflare sends that to the origin named by the hostname's own DNS record — it does not re-enter the worker. So **your existing DNS record is the origin**, and there is nothing to configure:
 
 - `www.<your-domain>`: proxied (orange cloud), pointing at your server as it already does. The worker runs here because of the route.
 - Allowed requests continue to that same server.
 
-You do **not** need a second hostname, and there is no loop to avoid. Earlier releases took an `ORIGIN_URL` var and required a separate grey-clouded `origin.<your-domain>` record; both are gone.
+You do **not** need a second hostname for the origin, and there is no forwarding loop to avoid.
 
 Push `CLIENT_JWT` as a secret (persists across deploys) and deploy:
 
@@ -152,7 +152,7 @@ Then `wrangler deploy`. The worker now runs on every request to `www.<your-domai
 
 Your account manager notifies you when a new `worker.js` is available. Replace the file and re-run `wrangler deploy`. Secrets persist.
 
-### 1d. Verify the worker
+### 1e. Verify the worker
 
 ```bash
 SITE=https://www.<your-domain>
@@ -215,7 +215,7 @@ Once loaded the bundle:
 
 Every subsequent request from that browser carries the cookie, and the worker looks up a real verdict on the paths your protected-path list covers.
 
-### 2c. Gate fast form submissions and link clicks (optional)
+### 2b. Gate fast form submissions and link clicks (optional)
 
 Users can click **Submit** before the bundle finishes creating the session. The browser fires a full-page POST with no cookie and gets a 401. The security is correct but the UX is bad.
 
@@ -236,7 +236,7 @@ The bundle intercepts marked forms and same-origin links in the capture phase, h
 
 Attributes on an ancestor cover every descendant form or link, so `<nav data-prosopo-gate>` gates every link inside.
 
-### 2d. Verify the bundle
+### 2c. Verify the bundle
 
 Open your site in a real browser with DevTools on the Network tab. On first page load you should see:
 
@@ -275,7 +275,7 @@ routes = [
 ]
 ```
 
-**One hostname is all you need.** `www.<your-domain>` stays orange-clouded and pointing at your server exactly as it does today; the route makes the worker run in front of it, and allowed requests continue to that same server. See [How the worker reaches your origin](#how-the-worker-reaches-your-origin).
+**One hostname is all you need.** `www.<your-domain>` stays orange-clouded and pointing at your server exactly as it does today; the route makes the worker run in front of it, and allowed requests continue to that same server. See [How the worker reaches your origin](#1d-how-the-worker-reaches-your-origin).
 
 ## Excluding paths from the check
 
