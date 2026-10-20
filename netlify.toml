@@ -36,6 +36,11 @@
     to = "/:lang/:splat"
 
   [[redirects]]
+    from = "/:lang/basics/context-awareness"
+    to = "/:lang/advanced/context-awareness/"
+    status = 301
+
+  [[redirects]]
     from = "/:lang/core-concepts/partial-hydration"
     to = "/:lang/concepts/islands"
 
