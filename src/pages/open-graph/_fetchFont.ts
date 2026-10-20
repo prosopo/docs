@@ -27,7 +27,7 @@ export async function fetchBrandFont() {
 		console.log('Creating directory', fontDir);
 		await mkdir(fontDir, { recursive: true });
 		console.log('Saving file', fontFile);
-		await writeFile(fontFile, Buffer.from(fontArrayBuffer));
+		await writeFile(fontFile, new Uint8Array(fontArrayBuffer));
 		return fontFile;
 	} catch (error) {
 		// When running locally, if anything goes wrong, we can safely return

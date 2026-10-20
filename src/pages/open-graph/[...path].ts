@@ -1,33 +1,24 @@
-import { OGImageRoute } from 'astro-og-canvas';
+import { type OGImageOptions, OGImageRoute } from 'astro-og-canvas';
 import { allPages } from '~/content';
 import { fetchBrandFont } from './_fetchFont';
 import { getLangFromSlug } from '~/util';
 import { rtlLanguages } from '~/i18n/languages';
-
-type OGImageOptions = Awaited<ReturnType<Parameters<typeof OGImageRoute>[0]['getImageOptions']>>;
 
 const brandFont = await fetchBrandFont();
 
 /** Paths for all of our Markdown content we want to generate OG images for. */
 const paths = process.env.SKIP_OG ? [] : allPages;
 
-/** An object mapping file paths to file metadata. */
-const pages = Object.fromEntries(paths.map(({ id, slug, data }) => [id, { data, slug }]));
+/** An object mapping entry IDs to entry metadata. */
+const pages = Object.fromEntries(paths.map(({ id, data }) => [id, data]));
 
-export const { getStaticPaths, GET } = OGImageRoute({
-	param: 'path',
-
+export const { getStaticPaths, GET } = await OGImageRoute({
 	pages,
 
-	getSlug(path) {
-		path = path.replace(/^\/src\/pages\//, '');
-		path = path.replace(/\.[^.]*$/, '') + '.webp';
-		path = path.replace(/\/index\.webp$/, '.webp');
-		return path;
-	},
+	getSlug: (id) => `${id}.webp`,
 
-	getImageOptions: async (_, { data, slug }: (typeof pages)[string]): Promise<OGImageOptions> => {
-		const isRtl = rtlLanguages.has(getLangFromSlug(slug));
+	getImageOptions: async (id, data: (typeof pages)[string]): Promise<OGImageOptions> => {
+		const isRtl = rtlLanguages.has(getLangFromSlug(id));
 		return {
 			format: 'WEBP',
 			quality: 90,

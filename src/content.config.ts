@@ -1,21 +1,13 @@
-import { type CollectionEntry, defineCollection, z } from 'astro:content';
+import { type CollectionEntry, defineCollection } from 'astro:content';
+import { docsLoader } from '@astrojs/starlight/loaders';
 import { docsSchema } from '@astrojs/starlight/schema';
+import { z } from 'astro/zod';
 
 export const baseSchema = z.object({
 	type: z.literal('base').optional().default('base'),
 	i18nReady: z.boolean().default(false),
-	githubURL: z.string().url().optional(),
+	githubURL: z.url().optional(),
 	hasREADME: z.boolean().optional(),
-	// Extends Starlight’s default `hero` schema with custom fields.
-	hero: z
-		.object({
-			facepile: z.object({
-				tagline: z.string(),
-				linkText: z.string(),
-				link: z.string(),
-			}),
-		})
-		.optional(),
 });
 
 export const deploySchema = baseSchema.extend({
@@ -43,7 +35,7 @@ export const integrationSchema = baseSchema.extend({
 			'"title" must start with "@astrojs/" for integration docs.'
 		),
 	category: z.enum(['renderer', 'adapter', 'other']),
-	githubIntegrationURL: z.string().url(),
+	githubIntegrationURL: z.url(),
 });
 
 export const migrationSchema = baseSchema.extend({
@@ -114,12 +106,15 @@ export const isMigrationEntry = createIsDocsEntry('migration');
 export const isRecipeEntry = createIsDocsEntry('recipe');
 
 export function createIsLangEntry(lang: string) {
-	return (entry: CollectionEntry<'docs'>): boolean => entry.slug.startsWith(lang + '/');
+	return (entry: CollectionEntry<'docs'>): boolean => entry.id.startsWith(lang + '/');
 }
 
 export const isEnglishEntry = createIsLangEntry('en');
 export const isKoreanEntry = createIsLangEntry('ko');
 
 export const collections = {
-	docs: defineCollection({ schema: docsSchema({ extend: docsCollectionSchema }) }),
+	docs: defineCollection({
+		loader: docsLoader(),
+		schema: docsSchema({ extend: docsCollectionSchema }),
+	}),
 };

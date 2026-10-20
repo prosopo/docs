@@ -1,7 +1,7 @@
 import { groupPagesByLang } from './groupPagesByLang';
 import { stripLangFromSlug } from '~/util';
 import path from 'node:path';
-import type { TutorialEntry } from '~/content/config';
+import type { TutorialEntry } from '~/content.config';
 
 /** Get a full list of pages for the tutorial in the current language, falling back to English if not available. */
 export function getTutorialPages(allPages: TutorialEntry[], lang: string) {
@@ -9,9 +9,9 @@ export function getTutorialPages(allPages: TutorialEntry[], lang: string) {
 	return pagesByLang['en']
 		? pagesByLang['en']
 				.map((englishPage) => {
-					const enSlug = stripLangFromSlug(englishPage.slug);
+					const enSlug = stripLangFromSlug(englishPage.id);
 					const langPage = pagesByLang[lang]?.find(
-						(page) => stripLangFromSlug(page.slug) === enSlug
+						(page) => stripLangFromSlug(page.id) === enSlug
 					);
 					return {
 						...((langPage as TutorialEntry) || (englishPage as TutorialEntry)),
@@ -19,8 +19,8 @@ export function getTutorialPages(allPages: TutorialEntry[], lang: string) {
 					};
 				})
 				.sort((a, b) => {
-					const aPath = path.parse(a.id);
-					const bPath = path.parse(b.id);
+					const aPath = path.parse(a.filePath ?? a.id);
+					const bPath = path.parse(b.filePath ?? b.id);
 					// Directories are numbered so pages in different directories can be sorted easily.
 					const aPathDir = path.basename(aPath.dir);
 					const bPathDir = path.basename(bPath.dir);
