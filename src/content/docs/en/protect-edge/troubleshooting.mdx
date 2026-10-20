@@ -77,7 +77,7 @@ Common block sources:
 2. Filter for `protect.bundle.js`. If it's not there, the `<script>` tag isn't reaching your HTML. Check your header or footer template.
 3. Filter for `/api/protect/init`. It should be a `POST` to `https://protect.<your-domain>` returning 200 with `Set-Cookie: prosopo_session=…`.
 
-   - If it's going to `https://js.protect.prosopo.io/api/protect/init` instead and getting a 405, your snippet is missing the `window.prosopo_config` block. Add it above the `<script src=…>` line. See [the CF Worker install step](/protect-edge/cloudflare-worker#step-1-add-the-protect-js-bundle-to-every-html-page).
+   - If it's going to `https://js.protect.prosopo.io/api/protect/init` instead and getting a 405, your snippet is missing the `window.prosopo_config` block. Add it above the `<script src=…>` line. See [the CF Worker install step](/protect-edge/cloudflare-worker#2a-add-the-snippet).
    - If it's going to the right hostname but returning `4xx`, check the Portal settings and DNS.
 4. Filter for cookies. The `prosopo_session` cookie should be set with `Domain=.<your-domain>` after the init call.
 
