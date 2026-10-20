@@ -36,10 +36,6 @@ Versioned tarballs are at `https://packages.prosopo.io/cloud/Prosopo-Cloudflare-
 
 Part 2 (client-side) is hosted by us. You add two `<script>` tags to your pages, the second pointing at `https://js.protect.prosopo.io/protect.bundle.js`. Nothing to download or bundle yourself. We publish new versions to that URL; your pages pick them up on their next reload without a redeploy from you.
 
-## Why the worker doesn't add the script for you
-
-The worker never changes the pages your origin sends back. You add the Protect script to your own HTML, so you decide which pages load it, where it sits in the page and when it loads. The [Lambda@Edge integration](/protect-edge/lambda-edge) works the same way.
-
 ## Prerequisites
 
 - A Cloudflare account with an API token carrying:
