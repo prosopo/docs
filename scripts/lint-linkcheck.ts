@@ -65,7 +65,7 @@ class LinkChecker {
 
 // Use our class to check for link issues
 const linkChecker = new LinkChecker({
-	baseUrl: 'https://docs.astro.build',
+	baseUrl: 'https://docs.prosopo.io',
 	buildOutputDir: './dist',
 	pageSourceDir: './src/content/docs',
 	checks: [
