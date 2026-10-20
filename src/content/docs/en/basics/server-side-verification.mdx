@@ -338,6 +338,8 @@ The token itself:
 | `API.USER_NOT_VERIFIED_TIME_EXPIRED` | The solve is older than the cached-verification window for its captcha type. |
 | `API.TIMESTAMP_TOO_OLD` | Too much time passed between the solve and your verify call. |
 | `API.CLIENT_SESSION_MISMATCH` | The `clientSessionId` you passed does not match the session the widget was rendered with. |
+| `API.AUTHENTICATED_IP_REQUIRED` | The token was issued without a challenge, by an [Allow rule](/en/advanced/access-control-rules/#allow) or a [bypass key](/en/advanced/bypass-keys/), and these tokens can only be verified with the visitor's `ip`. |
+| `API.AUTHENTICATED_IP_MISMATCH` | The token was issued without a challenge, and the `ip` you passed is not the address it was issued to. |
 | `CAPTCHA.DAPP_USER_SOLUTION_NOT_FOUND` | The provider has no record of the challenge in this token. |
 | `CAPTCHA.INVALID_SOLUTION` | The challenge was answered incorrectly. |
 | `CAPTCHA.INVALID_SALT` | The solve carried a salt the provider could not decode. |

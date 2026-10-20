@@ -6,7 +6,7 @@ i18nReady: true
 import {Image} from 'astro:assets';
 import AccessControlRules from '~/assets/access-control-rules.png';
 
-Access Control Rules allow you to configure custom CAPTCHA policies for specific users or groups based on their attributes. You can increase or decrease CAPTCHA difficulty, or block access entirely, based on combinations of IP addresses, user IDs, browser fingerprints, and other identifiers.
+Access Control Rules allow you to configure custom CAPTCHA policies for specific users or groups based on their attributes. You can increase or decrease CAPTCHA difficulty, skip the CAPTCHA for traffic you trust, or block access entirely, based on combinations of IP addresses, user IDs, browser fingerprints, and other identifiers.
 
 :::note[Account-Wide Rules]
 Access control rules are applied **account-wide** to all site keys in your account. A rule created for one site will affect CAPTCHA verification for all sites in your account.
@@ -140,6 +140,31 @@ Require the user to complete a computational challenge.
 
 **Use case:** Slow down automated requests without requiring user interaction.
 
+### Allow
+
+Skips the CAPTCHA for matching visitors. Instead of a challenge, the widget completes straight away and your server
+receives an `authenticated` token.
+
+The most common use is allow-listing a network you trust, such as your office or a partner's servers, with an **IP
+Address** or **IP Mask** condition. To let individual people or test pipelines skip the CAPTCHA wherever they are,
+use [bypass keys](/en/advanced/bypass-keys/), which are Allow rules managed for you.
+
+Things to know before relying on an Allow rule:
+
+- **Verify with the visitor's IP.** An `authenticated` token is tied to the IP address that earned it. When you
+  [verify it](/en/basics/server-side-verification/), you must send that address in the `ip` field, and the token can be
+  verified only once. Without `ip` verification fails with `API.AUTHENTICATED_IP_REQUIRED`; with a different address it
+  fails with `API.AUTHENTICATED_IP_MISMATCH`.
+- **Frictionless only.** Allow rules are checked when the site's [CAPTCHA type](/en/basics/captcha-types/) is
+  Frictionless, the default. A site set directly to image, proof of work or puzzle still shows its challenge.
+- **Block and Restrict win.** If a Block or Restrict rule also matches the request, it applies instead of the Allow
+  rule, so you can allow a range and still block one address inside it.
+- **Everyone who matches passes.** An Allow rule on a shared or dynamic IP range lets every visitor from that range
+  through. Keep ranges as narrow as you can and give the rule an expiry where possible.
+
+**Use case:** Let staff on the office network, or a partner's integration servers, use your forms without solving a
+CAPTCHA.
+
 ## Rule Expiry
 
 All rules have an expiration time. When a rule expires, it is no longer evaluated and will not affect incoming requests.
@@ -159,7 +184,7 @@ Access control rules can be managed through the [Prosopo Portal](https://portal.
 
 Create custom rules by:
 1. Adding one or more conditions (field, operator, value)
-2. Configuring the policy (block or custom CAPTCHA)
+2. Configuring the policy (block, custom CAPTCHA or allow)
 3. Setting the expiration time
 4. Adding an optional description
 
@@ -222,12 +247,27 @@ View all active and expired rules for your site. Rules can be deleted individual
 
 This rule only matches requests that satisfy both the country AND IP mask conditions.
 
+---
+
+### Allow an Office Network
+
+**Conditions:**
+- IP Mask equals `198.51.100.0/24`
+
+**Policy:** Allow
+
+**Expiry:** 90 days
+
+**Description:** Skip the CAPTCHA for staff on the office network
+
+Your server must pass the visitor's `ip` when verifying the token these visitors receive.
+
 ## Rule Creation Workflow
 
 1. **Navigate** to Access Control page in the portal
 2. **Switch** to the Editor tab
 3. **Add conditions** by selecting field, operator, and entering value
-4. **Configure policy** - choose between block or custom CAPTCHA type
+4. **Configure policy** - choose between block, custom CAPTCHA type or allow
 5. **Set expiry** - choose duration and unit
 6. **Add description** (optional) - explain the rule's purpose
 7. **Submit** the rule
