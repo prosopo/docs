@@ -97,6 +97,14 @@ Common block sources:
 
 Check the dashboard's traffic summary for your site to see request throughput broken down by verdict.
 
+## Some requests skip Protect entirely
+
+**Symptom:** Pages load for visitors who should be blocked or challenged, and those requests are missing from the dashboard's traffic summary.
+
+**Cause:** Workers Cache is enabled in `wrangler.toml` (`[cache] enabled = true`). Cloudflare then serves cached responses before the worker runs, so Protect never sees those requests. See [Cloudflare's Workers Cache docs](https://developers.cloudflare.com/workers/cache/).
+
+**Fix:** Remove the `[cache]` section from `wrangler.toml` and run `wrangler deploy`.
+
 ## Configuration drift
 
 **Symptom:** Behaviour changed without anyone deploying. Verify commands that previously worked now fail (or vice versa).

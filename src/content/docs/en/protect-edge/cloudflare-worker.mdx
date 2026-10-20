@@ -150,6 +150,10 @@ Then `wrangler deploy`. The worker now runs on every request to `www.<your-domai
 
 **Deploy on a route, not `workers.dev`, before testing.** A `workers.dev` URL is not in front of anything, so there is no origin for `fetch(request)` to reach: an allowed request re-enters the worker and Cloudflare returns **Error 1042**. That is expected on `workers.dev` and not a fault in your config. Only a route has an origin behind it.
 
+:::caution[Do not enable Workers Cache]
+Leave the `[cache]` section out of `wrangler.toml`. With `[cache] enabled = true`, Cloudflare checks its cache before running the worker, so a cached response is served without Protect checking the request. By default one cached copy is served to every visitor, which means a page cached after one visitor was allowed is then served to bots too. See [Cloudflare's Workers Cache docs](https://developers.cloudflare.com/workers/cache/).
+:::
+
 Your account manager notifies you when a new `worker.js` is available. Replace the file and re-run `wrangler deploy`. Secrets persist.
 
 ### 1e. Verify the worker
