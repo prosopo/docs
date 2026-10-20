@@ -36,7 +36,9 @@ Versioned tarballs are at `https://packages.prosopo.io/cloud/Prosopo-Cloudflare-
 
 Part 2 (client-side) is hosted by us. You add two `<script>` tags to your pages, the second pointing at `https://js.protect.prosopo.io/protect.bundle.js`. Nothing to download or bundle yourself. We publish new versions to that URL; your pages pick them up on their next reload without a redeploy from you.
 
-The worker never edits your pages, so you control where and when the bundle loads and the worker's response path stays a straight pass-through.
+## Why the worker doesn't add the script for you
+
+The worker never changes the pages your origin sends back. You add the Protect script to your own HTML, so you decide which pages load it, where it sits in the page and when it loads. The [Lambda@Edge integration](/protect-edge/lambda-edge) works the same way.
 
 ## Prerequisites
 
@@ -191,7 +193,7 @@ Worker verified? Move to Part 2.
 
 **This part is mandatory.** Without the bundle no session cookie is ever set, and the worker returns 401 `no-session` on every protected path in perpetuity. The worker does not add it for you.
 
-### 2a. Add the snippet
+### 2a. Add the Protect script to your pages
 
 Add this snippet to the `<head>` of every HTML page your site serves, as early as you can. A shared header template is the usual spot:
 
