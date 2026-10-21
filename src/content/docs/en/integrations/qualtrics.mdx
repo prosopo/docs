@@ -1,0 +1,281 @@
+---
+title: Qualtrics
+description: Stop bots from taking your Qualtrics surveys. Respondents pass Procaptcha first, and Qualtrics checks the result with Prosopo before it shows any questions.
+i18nReady: true
+---
+import { Image } from 'astro:assets';
+import PortalSite from '~/assets/qualtrics/portal-site.png';
+import SurveySecurityCheck from '~/assets/qualtrics/survey-security-check.png';
+import GatePage from '~/assets/qualtrics/gate-page.png';
+import FlowAddElement from '~/assets/qualtrics/flow-add-element.png';
+import FlowEmbeddedData from '~/assets/qualtrics/flow-embedded-data.png';
+import FlowNoTokenBranch from '~/assets/qualtrics/flow-no-token-branch.png';
+import FlowWebService from '~/assets/qualtrics/flow-web-service.png';
+import FlowBranch from '~/assets/qualtrics/flow-branch.png';
+import FlowEndOfSurveyOptions from '~/assets/qualtrics/flow-end-of-survey-options.png';
+import FlowOverview from '~/assets/qualtrics/flow-overview.png';
+import SurveyPassed from '~/assets/qualtrics/survey-passed.png';
+import SurveyBlocked from '~/assets/qualtrics/survey-blocked.png';
+import ResponseData from '~/assets/qualtrics/response-data.png';
+
+This guide adds Procaptcha to a [Qualtrics](https://www.qualtrics.com/) survey. People who pass the check see your
+questions. Bots, and anyone who tries to skip the check, are sent straight to the end of the survey.
+
+You don't need to write code, host anything, or have JavaScript enabled on your Qualtrics licence.
+
+## How it works
+
+1. The respondent opens your normal Qualtrics survey link. The first page asks them to start a security check.
+2. The link takes them to a Prosopo page that shows the Procaptcha widget.
+3. When they pass, they are sent back to your survey with a one-time token added to the link.
+4. Before showing any questions, the survey's **Survey Flow** sends that token and your secret key to Prosopo's
+   [`siteverify`](/en/basics/server-side-verification/) endpoint.
+5. If Prosopo answers `verified: true`, the survey continues. Otherwise the survey ends.
+
+A token works once and expires after a few minutes, so a copied or shared link stops working after it has been used.
+The check happens on Qualtrics' servers, not in the respondent's browser, so it cannot be skipped by editing the page
+or adding `captcha_verified=true` to the link.
+
+## What you need
+
+- A Qualtrics licence that includes the **Web Service** element in Survey Flow. To check, open **Survey flow**, select
+  **Add a New Element Here**, and look for **Web Service**.
+- A Prosopo site key and secret key from the [Prosopo portal](https://portal.prosopo.io).
+
+## 1. Create a site in the Prosopo portal
+
+1. Log in to the [Prosopo portal](https://portal.prosopo.io) and open **Site Management**.
+2. Select **Create New Site** and give it a name, such as `qualtrics-survey`.
+3. Under **Allowed Domains**, add `js.prosopo.io`. This is where the Procaptcha widget is shown.
+4. Copy the **Site Key** and the **Secret Key**.
+
+<Image src={PortalSite} alt="A Prosopo site with its site key, hidden secret key and allowed domains" style="margin: 20px auto;"/>
+
+## 2. Add the security check page to your survey
+
+1. Open your survey in the **Builder**, select **Add Block**, and name the block `Security check`.
+2. Add a **Text / Graphic** question to it.
+3. Select the question text, then **HTML View**, and paste the following. Replace `YOUR_SITE_KEY` with your site key,
+   and `YOUR_SURVEY_LINK` with your survey's anonymous link (in Qualtrics: **Distributions** → **Anonymous link**).
+   It looks like `https://yourorg.qualtrics.com/jfe/form/SV_xxxxxxxxxxxxxxx`. The security check page only sends
+   people to Qualtrics survey links in this form.
+
+```html
+<p>Before you start, please complete a quick security check.</p>
+<p><a href="https://js.prosopo.io/integrations/qualtrics.html?sitekey=YOUR_SITE_KEY&amp;survey=YOUR_SURVEY_LINK" target="_self">Start the security check</a></p>
+```
+
+The respondent sees this:
+
+<Image src={SurveySecurityCheck} alt="The first page of the survey asking the respondent to start the security check" style="margin: 20px auto;"/>
+
+When they select the link, they see the security check:
+
+<Image src={GatePage} alt="The Procaptcha widget on the security check page" style="margin: 20px auto;"/>
+
+## 3. Set up the Survey Flow
+
+Open your survey and select **Survey flow** in the left-hand menu. Each element below is added with **Add a New
+Element Here**, or **Add Below** on the element above it.
+
+<Image src={FlowAddElement} alt="The Survey Flow add element menu, with Embedded Data, Branch, Web Service and End of Survey" style="margin: 20px auto;"/>
+
+### Embedded Data
+
+Add an **Embedded Data** element at the top, with two fields:
+
+| Field | Value |
+| --- | --- |
+| `procaptcha_token` | Leave as **Value will be set from Panel or URL**. This reads the token from the link. |
+| `captcha_verified` | Select **Set a Value Now** and enter `false`. |
+
+Setting `captcha_verified` to `false` here means it can only become `true` if Prosopo says so. Without it, someone could
+add `captcha_verified=true` to the link and get in if the Prosopo call ever failed.
+
+<Image src={FlowEmbeddedData} alt="Embedded Data element with procaptcha_token from the URL and captcha_verified set to false" style="margin: 20px auto;"/>
+
+### Show the security check to people without a token
+
+1. Below the Embedded Data element, add a **Branch**.
+2. Select **Add a Condition** and set it to **Embedded Data** → `procaptcha_token` → **Is Empty**.
+3. Under the branch, add a **Block** and choose `Security check`.
+
+<Image src={FlowNoTokenBranch} alt="Branch that shows the Security check block when procaptcha_token is empty" style="margin: 20px auto;"/>
+
+If someone selects **Next** instead of the link, they still have no token, so the check below fails and the survey
+ends.
+
+### Web Service
+
+Add a **Web Service** element below the branch (not inside it):
+
+1. **URL**: `https://api.prosopo.io/siteverify`
+2. **Method**: `POST`
+3. Select **Add a body parameter to send to web service...** and change the format to `application/json`.
+4. Add two body parameters:
+
+   | Parameter | Value |
+   | --- | --- |
+   | `secret` | Your Prosopo secret key |
+   | `token` | `${e://Field/procaptcha_token}` |
+
+5. Under **Set Embedded Data**, select **Add Embedded Data...**. Enter `captcha_verified` on the left and `verified`
+   on the right. This copies the `verified` value from Prosopo's answer into `captcha_verified`.
+
+Leave **Fire and Forget** unticked, because the survey needs to wait for the answer.
+
+<Image src={FlowWebService} alt="Web Service element posting secret and token as JSON to the Prosopo siteverify endpoint" style="margin: 20px auto;"/>
+
+The secret key is stored in Survey Flow, which respondents cannot see. Anyone you give edit access to the survey can
+see it.
+
+On the [Professional and Enterprise Tiers](https://prosopo.io/pricing/), also send the respondent's IP address so
+Prosopo can run [extra checks](/en/basics/server-side-verification/#ip-address) on it. Add a third body parameter:
+
+| Parameter | Value |
+| --- | --- |
+| `ip` | `${loc://IPAddress}` |
+
+### End the survey if the check failed
+
+1. Add a **Branch** below the Web Service.
+2. Set its condition to **Embedded Data** → `captcha_verified` → **Is Not Equal to** → `true`.
+3. Under the branch, add an **End of Survey** element.
+
+<Image src={FlowBranch} alt="Branch that runs when captcha_verified is not equal to true" style="margin: 20px auto;"/>
+
+So that blocked attempts are not counted as completed responses, select **Customize** on the End of Survey element,
+tick **Override Survey Options**, then tick **Flag Response As** → **Screened-Out**.
+
+<Image src={FlowEndOfSurveyOptions} alt="End of Survey options with the response flagged as screened-out" style="margin: 20px auto;"/>
+
+### Put your questions last
+
+Your question blocks must come **after** the second branch. When you add a block in the Builder, Qualtrics also adds
+it to the bottom of the Survey Flow, so check that `Security check` only appears inside the first branch, and delete
+any other copy of it.
+
+The finished flow looks like this:
+
+<Image src={FlowOverview} alt="The finished Survey Flow: Embedded Data, a branch showing the security check when there is no token, Web Service, a branch ending the survey if not verified, then the main survey block" style="margin: 20px auto;"/>
+
+Select **Apply**, then **Publish**.
+
+## 4. Test it
+
+| Test | What should happen |
+| --- | --- |
+| Open the survey link, select **Start the security check** and pass it | Your first question appears. |
+| Open the survey link and select **Next** without doing the check | The survey ends. |
+| Open the survey link with `?captcha_verified=true&procaptcha_token=anything` | The survey ends straight away. |
+| Pass the check, then open the same link (with the same token) again | The survey ends straight away, because the token has been used. |
+
+<Image src={SurveyPassed} alt="Survey showing its first question after the respondent passed the check" style="margin: 20px auto;"/>
+
+<Image src={SurveyBlocked} alt="Survey ending because there was no valid token" style="margin: 20px auto;"/>
+
+In **Data & Analysis**, add the `captcha_verified` column with **Column chooser** → **Embedded Data**. Real
+respondents show `true`. Blocked attempts show `false`.
+
+<Image src={ResponseData} alt="Response data with the captcha_verified column showing true for a real respondent and false for blocked attempts" style="margin: 20px auto;"/>
+
+## Hosting the security check page yourself
+
+If you would rather show the widget on your own website, save this page there and add your website's domain to the
+site's **Allowed Domains**. You can then either link to it from the `Security check` question, or share it with
+respondents instead of the Qualtrics link.
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Security check</title>
+    <script type="module" src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+</head>
+<body>
+    <h1>Before you start the survey</h1>
+    <p>Please complete the security check below.</p>
+    <div class="procaptcha" data-sitekey="YOUR_SITE_KEY" data-callback="startSurvey"></div>
+    <script>
+        const SURVEY_URL = "https://yourorg.qualtrics.com/jfe/form/SV_xxxxxxxxxxxxxxx";
+
+        function startSurvey(token) {
+            const url = new URL(SURVEY_URL);
+            url.searchParams.set("procaptcha_token", token);
+            window.location.assign(url.toString());
+        }
+    </script>
+</body>
+</html>
+```
+
+Never put your secret key in this page. Anyone can read it.
+
+## Showing the widget inside the survey
+
+If your Qualtrics licence lets you add JavaScript to questions, you can show the widget directly on the first page of
+the survey. Free and trial Qualtrics accounts cannot do this. To check, select a question and look for **JavaScript**
+under **Question behavior**.
+
+1. In the Prosopo portal, add your Qualtrics domain (for example `yourorg.qualtrics.com`) to the site's **Allowed
+   Domains**.
+2. In the `Security check` question, replace the link with a short instruction, such as "Please complete the security
+   check below to continue."
+3. Select **Question behavior** → **JavaScript** and replace its contents with the code below. Replace
+   `YOUR_SITE_KEY` with your site key.
+
+   ```javascript
+   Qualtrics.SurveyEngine.addOnReady(function () {
+       var question = this;
+       var container = document.createElement("div");
+       question.getQuestionContainer().appendChild(container);
+       question.hideNextButton();
+
+       function render() {
+           window.procaptcha.render(container, {
+               siteKey: "YOUR_SITE_KEY",
+               callback: function (token) {
+                   Qualtrics.SurveyEngine.setJSEmbeddedData("procaptcha_token", token);
+                   question.showNextButton();
+               },
+               "expired-callback": function () {
+                   Qualtrics.SurveyEngine.setJSEmbeddedData("procaptcha_token", "");
+                   question.hideNextButton();
+               },
+           });
+       }
+
+       if (window.procaptcha) {
+           render();
+           return;
+       }
+       var script = document.createElement("script");
+       script.type = "module";
+       script.src = "https://js.prosopo.io/js/procaptcha.bundle.js";
+       script.onload = render;
+       document.head.appendChild(script);
+   });
+   ```
+
+4. In the Survey Flow:
+   - In the Embedded Data element, rename `procaptcha_token` to `__js_procaptcha_token`. Qualtrics adds the `__js_`
+     prefix to values set by `setJSEmbeddedData`.
+   - Remove the branch around `Security check`, so the block always shows.
+   - Change the Web Service `token` value to `${e://Field/__js_procaptcha_token}`.
+
+The order is: Embedded Data → `Security check` block → Web Service → Branch with End of Survey → your questions.
+
+Hiding the **Next** button only helps real people. The Web Service check is what stops bots, so keep it in place.
+
+## Notes
+
+- Qualtrics records a response for every visit, including blocked ones. Flagging them as screened-out (see above)
+  keeps them out of your completed responses.
+- Bots can still open your survey link over and over, creating a screened-out response each time. To cut this down,
+  go to **Survey options** → **Security** and turn on **In Survey: Prevent multiple submissions**.
+- If Prosopo cannot be reached, `captcha_verified` stays `false` and the survey ends. Nobody gets in without a valid
+  token.
+- To change how strict the check is, see [CAPTCHA types](/en/basics/captcha-types/) and
+  [Traffic Filter](/en/advanced/traffic-filter/).
