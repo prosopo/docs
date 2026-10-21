@@ -174,6 +174,12 @@ export default [
         slug: 'framework-integrations/vue-integration',
         key: 'framework-integrations/vue-integration',
     },
+    {text: 'Platform integrations', header: true, type: 'learn', key: 'integrations'},
+    {
+        text: 'Qualtrics',
+        slug: 'integrations/qualtrics',
+        key: 'integrations/qualtrics',
+    },
     {text: 'Demos', header: true, type: 'learn', key: 'demos'},
     {
         text: 'HTML Frontend Client Example',
