@@ -21,7 +21,7 @@ gives you the first half. The managed Professional and Enterprise tiers give you
 | Proof of Work (`pow`) | Yes | Yes |
 | Slider puzzle (`puzzle`) | Yes | Yes |
 | Image CAPTCHA (`image`) | Yes, with [a dataset you build](#image-captchas) | Yes |
-| Client-side bot detection | No — see [What self-hosting does not give you](#what-self-hosting-does-not-give-you) | Yes |
+| Client-side bot detection | Yes, with [a detector you build](#bring-your-own-detector), such as the BotD example | Yes, ours |
 | ML scoring and automatic blocking | No | Yes |
 | Access rules, traffic filters, analytics | No | Yes |
 
@@ -38,7 +38,7 @@ that is what the managed tiers are for.
 - A host with Docker and Docker Compose, and at least 4&nbsp;GB of RAM.
 - A public domain name pointing at that host, with ports 80 and 443 reachable from the internet. The provider itself
   speaks plain HTTP on 9229 and obtains no certificates; the bundled Caddy container does that for it.
-- Node.js 24, to generate accounts and build the widget.
+- Node.js 24 and pnpm (via `corepack enable`), to generate accounts and build the widget.
 
 You don't need to write a reverse-proxy config. The repository ships the one we run in production at
 [`docker/provider.Caddyfile`](https://github.com/prosopo/captcha/blob/main/docker/provider.Caddyfile), and it is driven
@@ -52,23 +52,19 @@ for Mongo and Redis, and fills in every other value from the hostname you give i
 ```bash
 git clone https://github.com/prosopo/captcha
 cd captcha
-npm ci
+corepack enable
+pnpm install --frozen-lockfile
 
-npx tsx ./dev/scripts/src/scripts/generateSelfHostedEnv.ts --host captcha.example.com
+pnpm exec tsx ./dev/scripts/src/scripts/generateSelfHostedEnv.ts --host captcha.example.com
 ```
 
 ```
-@polkadot/util has multiple versions, ensure that there is only one installed.
-Either remove and explicitly install matching versions or dedupe using your package manager.
-The following conflicting packages were found:
-	esm 14.0.3	node_modules/@polkadot/util/
-[AsyncFunction: makeDirectory]
 {"scope":"generateSelfHostedEnv","level":"info","data":{"siteKeyAddress":"5FpdLFe3Mhi1JSo3vyu1UheV7vG5kFYfiWfNvbLCA2a2W4Sz","providerAddress":"5GnjcGsBoGLrVMhmfnkdXcTtACSGWhxokSx71U3PaWLRg1ti"},"msg":"Accounts generated"}
 {"scope":"generateSelfHostedEnv","level":"info","data":{"outputPath":"/home/you/captcha/.env"},"msg":"Environment file written"}
 ```
 
-Only the last two lines matter. The `@polkadot/util` warning and the `[AsyncFunction: makeDirectory]` line are noise
-from the build tooling and repeat a few times — the script has not failed.
+Anything printed above those two lines, such as a `@polkadot/util has multiple versions` warning or
+`[AsyncFunction: makeDirectory]`, is noise from the build tooling — the script has not failed.
 
 Note the `siteKeyAddress`. That is the public `data-sitekey` value you put on your web pages and register in
 [step 3](#3-register-your-site-key). You can read it back out of the file at any time:
@@ -105,16 +101,18 @@ index. Caddy is `prosopo/caddy` rather than upstream Caddy, because
 [`docker/provider.Caddyfile`](https://github.com/prosopo/captcha/blob/main/docker/provider.Caddyfile) — the config we
 run in production — needs four plugins compiled in (`caddy-l4`, `chaddy`, `caddy-ratelimit`, `caddy-requestid`).
 
-Pin different image versions with `PROSOPO_PROVIDER_IMAGE_VERSION` and `CADDY_IMAGE_VERSION` in your `.env`.
+`PROSOPO_PROVIDER_IMAGE_VERSION` in your `.env` is set to the release your checkout documents, so the image and these
+instructions stay in step. When you pull a newer checkout, change it to match. `CADDY_IMAGE_VERSION` pins Caddy the same
+way.
 
-Two warnings in the startup log are expected and harmless on a self-hosted node:
+Two lines in the startup log are expected on a fresh node:
 
 ```
-bundle pool directory does not exist
+bundle pool loaded {"count":0}
 No datasets found in database. Image captchas will not work until a dataset is uploaded.
 ```
 
-The first means no bot detector is installed, the second means no image dataset. Neither affects `pow` or `puzzle`.
+The first means no bot detector is loaded yet, the second means no image dataset. Neither affects `pow` or `puzzle`.
 
 The `9229` port mapping is only there so you can curl the provider directly while setting up; real traffic arrives
 through Caddy on 443. Drop it once you're happy.
@@ -158,18 +156,18 @@ The published bundle on Prosopo's CDN is compiled to talk to Prosopo's fleet, so
 `PROSOPO_PROVIDER_LIST` baked in. This is a plain production build — you are not editing any source:
 
 ```bash
-npm run build:all
+pnpm run build:all
 
 NODE_ENV=production \
 PROSOPO_PROVIDER_LIST=https://captcha.example.com \
-npm run -w @prosopo/procaptcha-bundle bundle
+pnpm --filter @prosopo/procaptcha-bundle run bundle
 ```
 
-Serve the contents of `packages/procaptcha-bundle/dist/bundle/` from your own static hosting, then load it like any
-other CAPTCHA script:
+Serve the whole of `packages/procaptcha-bundle/dist/bundle/` from your own static hosting, then load it as a module.
+The bundle is split into chunks that it imports, so `type="module"` is required and the files must be hosted together:
 
 ```html
-<script src="https://your-cdn.example.com/procaptcha.bundle.js" async defer></script>
+<script type="module" src="https://your-cdn.example.com/procaptcha.bundle.js" async defer></script>
 <div class="procaptcha" data-sitekey="5Fpd..."></div>
 ```
 
@@ -200,13 +198,100 @@ Every URL must match its `CADDY_DOMAIN` exactly. A token carries the provider UR
 verifier finds the issuer by exact string match, so a provider missing from this list makes its tokens unverifiable.
 Trailing slashes are normalised for you, but nothing else is.
 
+## Bring your own detector
+
+The steps above serve the same challenge to everyone. To score visitors yourself, load a detector of your own and
+register the site key as `frictionless`. The provider then picks a challenge per visitor from your detector's score.
+
+<aside>
+This needs a provider image newer than 3.8.38. Check `PROSOPO_PROVIDER_IMAGE_VERSION` in your `.env`.
+</aside>
+
+[`demos/detector-botd`](https://github.com/prosopo/captcha/tree/main/demos/detector-botd) is a working example built on
+[BotD](https://github.com/fingerprintjs/BotD). It reports a score of `1` when BotD flags the browser as automated
+(headless Chrome, Selenium, Playwright, PhantomJS and others) and `0` otherwise. It makes no requests to anyone but your
+provider.
+
+```bash
+pnpm --filter @prosopo/detector-botd run build
+pnpm --filter @prosopo/detector-botd run pool --out detector-pool.json
+
+docker compose exec -T provider /nodejs/bin/node /usr/src/app/provider.cli.bundle.js detector_pool_set < detector-pool.json
+docker compose restart provider
+
+docker compose exec provider /nodejs/bin/node /usr/src/app/provider.cli.bundle.js site_key_register \
+  "$(grep '^PROSOPO_SITE_KEY=' .env | cut -d= -f2)" enterprise \
+  --captcha_type frictionless \
+  --domains example.com \
+  --pow_difficulty 4 \
+  --frictionless_threshold 0.5 \
+  --frictionless_image_threshold 2 \
+  --image_threshold 0.8
+```
+
+After the restart the provider log shows `bundle pool loaded {"count":4}`.
+
+`pool` builds four bundles, each with its own RSA keypair: the public key goes into the bundle's JavaScript and the
+private key stays on your provider. You never handle the encryption yourself. The provider hands each visitor one of
+the bundles, and the detector encrypts what it reports with that bundle's key.
+
+The pool is piped in on stdin rather than copied in as a file, because the provider container does not run as root and
+could not read a copied file. It is kept in the `detector_pool` volume, so it survives restarts and upgrades. Run the
+same commands again to replace it.
+
+The score thresholds on the site key decide what each visitor gets:
+
+| score | served |
+| --- | --- |
+| below `--frictionless_threshold` (0.5) | invisible proof of work |
+| from there up to `--frictionless_image_threshold` | slider puzzle |
+| at or above `--frictionless_image_threshold` | image challenge |
+
+The example sets the image threshold to `2`, above any score BotD gives, so flagged browsers get a puzzle. Leave it at
+its default of `1` only if you have [loaded an image dataset](#image-captchas) — without one, a visitor routed to an
+image challenge gets an error.
+
+### Writing your own
+
+Replace `collectSignals` in
+[`demos/detector-botd/src/detector.ts`](https://github.com/prosopo/captcha/blob/main/demos/detector-botd/src/detector.ts)
+and rebuild the pool. It returns a `score` and a `d` object:
+
+```ts
+const collectSignals = async (): Promise<Signals> => ({
+  score: navigator.webdriver ? 1 : 0,
+  d: { webDriver: navigator.webdriver, languages: navigator.languages.length },
+});
+```
+
+Everything in `d` is stored on the session and passed to decision and routing machines as `input.d`, so a rule can act
+on `input.d.botKind` or any key you add. Nothing on the provider declares the keys. Values must be plain JSON: keys
+containing `.` or starting with `$` are dropped, and a `d` larger than 8&nbsp;KB is dropped whole.
+
+The rest of the file handles the contract with the widget and the provider — the visitor's account, hashes of the user
+agent and of `document.head`, a timestamp, and the encryption. Leave it as it is.
+
+### What a detector you build can and cannot do
+
+Your detector runs in the visitor's browser, and its public key ships inside the bundle, so anyone who reads the bundle
+can send whatever score they like. The provider checks that a report was made for this visitor, this browser and this
+page within the last ten minutes. It cannot check that the score is honest. That is true of every client-side detector;
+ours resists it with obfuscation and per-bundle rotation, which the example does not attempt.
+
+So a detector like this one stops off-the-shelf automation — default headless browsers and frameworks that make no
+effort to hide — and gives your rules signals to work with. It will not stop someone who studies your bundle and
+targets your site.
+
+Detectors built this way only load on a provider with `PROSOPO_DETECTOR_OPEN_FORMAT=1`. The self-hosted compose file
+sets it for you.
+
 ## What self-hosting does not give you
 
-A self-hosted node serves challenges and validates solutions. It does not decide who is a bot.
+A self-hosted node serves challenges and validates solutions. Unless you [load a detector](#bring-your-own-detector), it
+does not decide who is a bot.
 
-**The client-side detector.** The frictionless CAPTCHA type scores each visitor in the browser to decide whether to let
-them through silently or challenge them. That detector is the one closed-source part of the stack and is not in the
-public image. This does not block you: an explicit `captcha_type` bypasses the scoring path altogether, so `pow` and
+**Our client-side detector.** Our frictionless scoring uses a detector that is the one closed-source part of the stack
+and is not in the public image. This does not block you: an explicit `captcha_type` bypasses the scoring path altogether, so `pow` and
 `puzzle` behave exactly as they do on the managed service, and a site key left on `frictionless` against a detector-less
 provider falls back to serving proof of work.
 
@@ -216,8 +301,8 @@ traffic filters and analytics you use to tune it. None of that runs on a self-ho
 `puzzle` challenge is a fixed obstacle in front of your form: good against opportunistic and low-effort automation,
 but it does not adapt, and a determined attacker only has to solve it once per request.
 
-If you want the detector on your own node, [contact us](https://prosopo.io/contact/) — we supply obfuscated bundles for
-self-hosted deployments. Support for bringing your own detector is planned.
+A [detector of your own](#bring-your-own-detector) adds scoring on signals you choose. If you want ours on your own node,
+[contact us](https://prosopo.io/contact/) — we supply obfuscated bundles for self-hosted deployments.
 
 ## Image CAPTCHAs
 
@@ -232,7 +317,7 @@ points at them.
 Starting from a directory with one subdirectory per label:
 
 ```bash
-npm run -w @prosopo/datasets-fs build
+pnpm --filter @prosopo/datasets-fs run build
 cd packages/datasets-fs
 
 # Collapse the tree into one image directory plus a label map.
@@ -320,5 +405,6 @@ Rebuild the widget whenever the list changes, and update your verifier's copy to
 
 - **Database indexes.** Mongo creates these automatically, but you can force them with
   `docker compose exec provider /nodejs/bin/node /usr/src/app/provider.cli.bundle.js ensure_indexes`.
-- **Upgrades.** Bump the `prosopo/provider` tag and run `docker compose up -d`. Rebuild the widget when you upgrade so
+- **Upgrades.** Pull a newer checkout, set `PROSOPO_PROVIDER_IMAGE_VERSION` in `.env` to match, and run
+  `docker compose up -d`. Rebuild the widget when you upgrade so
   the two stay on the same release.
