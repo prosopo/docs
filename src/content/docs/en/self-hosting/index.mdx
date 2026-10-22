@@ -35,6 +35,11 @@ that is what the managed tiers are for.
 
 ## Before you start
 
+<aside>
+No server with a public IP? [Run it on Cloudflare's free plan](/en/self-hosting/cloudflare/) instead — any machine with
+Docker will do, and you don't need a domain.
+</aside>
+
 - A host with Docker and Docker Compose, and at least 4&nbsp;GB of RAM.
 - A public domain name pointing at that host, with ports 80 and 443 reachable from the internet. The provider itself
   speaks plain HTTP on 9229 and obtains no certificates; the bundled Caddy container does that for it.
