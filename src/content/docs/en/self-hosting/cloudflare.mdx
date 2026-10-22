@@ -1,0 +1,135 @@
+---
+title: Self-Hosting on Cloudflare's Free Plan
+description: Run your own Procaptcha provider on any machine with Docker, with Cloudflare in front of it. No domain, no public IP, no open ports and no certificates.
+i18nReady: true
+---
+
+The [main guide](/en/self-hosting/) assumes a server with a public IP and ports 80 and 443 open. If you don't have one,
+any machine that can run Docker will do — a spare PC, a home server, a laptop — with Cloudflare in front of it.
+
+All you need is a **free Cloudflare account**. No domain, no public IP, no open ports, no certificates.
+
+## How it works
+
+One Worker on your free `workers.dev` subdomain does two jobs:
+
+- it serves the widget, and a demo page for testing;
+- it forwards API calls to your provider through a [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/),
+  using a [Workers VPC](https://developers.cloudflare.com/workers-vpc/) binding.
+
+The tunnel connects **outbound** from your machine, so nothing on your network is exposed. Cloudflare handles HTTPS,
+so the Caddy container from the main guide is not used.
+
+| Part | Where it runs |
+| --- | --- |
+| Mongo, Redis, the provider, `cloudflared` | Docker on your machine |
+| The widget, the demo page, the API forwarder | A Worker on `procaptcha.<subdomain>.workers.dev` |
+
+## 1. Clone and build
+
+Follow [step 1 of the main guide](/en/self-hosting/#1-clone-and-generate-your-environment-file) up to and including
+`pnpm run build:all`, but don't generate the environment file yet — you'll generate it below with the Worker's
+hostname.
+
+## 2. Create the tunnel
+
+From the repository root:
+
+```bash
+npx wrangler@4.151.3 login
+npx wrangler@4.151.3 tunnel create procaptcha        # note the ID it prints
+```
+
+Open the tunnel in the Cloudflare dashboard: **Zero Trust → Networks → Tunnels → procaptcha**. Its install command
+contains `--token <token>` — copy the token. You don't need to add a public hostname.
+
+## 3. Generate your environment file
+
+Your Worker will be at `procaptcha.<subdomain>.workers.dev`. Your `<subdomain>` is shown in the dashboard under
+**Workers & Pages**.
+
+```bash
+pnpm exec tsx ./dev/scripts/src/scripts/generateSelfHostedEnv.ts \
+  --host procaptcha.<subdomain>.workers.dev --cloudflare
+```
+
+Paste the token into `CLOUDFLARE_TUNNEL_TOKEN` in `.env`.
+
+`--cloudflare` sets `COMPOSE_FILE` to load
+[`docker-compose.self-hosted.cloudflare.yml`](https://github.com/prosopo/captcha/blob/main/docker-compose.self-hosted.cloudflare.yml) on top of the main compose
+file. It adds `cloudflared` and leaves Caddy out.
+
+## 4. Start the stack
+
+```bash
+docker compose up -d
+```
+
+Four containers start: Mongo, Redis, the provider and `cloudflared`. The tunnel shows as **Healthy** in the
+dashboard once `cloudflared` connects.
+
+## 5. Let Workers reach the provider
+
+```bash
+npx wrangler@4.151.3 vpc service create procaptcha-provider \
+  --type http --tunnel-id <tunnel ID> --hostname provider --http-port 9229
+```
+
+Put the service ID it prints into [`docker/cloudflare/wrangler.jsonc`](https://github.com/prosopo/captcha/blob/main/docker/cloudflare/wrangler.jsonc), in place
+of `REPLACE_WITH_YOUR_VPC_SERVICE_ID`.
+
+`provider` is the provider's service name in the compose file. `cloudflared` resolves it on the Docker network, so
+it keeps working when the container restarts and gets a new address.
+
+## 6. Register your site key
+
+As in [step 3 of the main guide](/en/self-hosting/#3-register-your-site-key), with the Worker's hostname added to
+`--domains` so its demo page works:
+
+```bash
+docker compose exec provider /nodejs/bin/node /usr/src/app/provider.cli.bundle.js site_key_register \
+  "$(grep '^PROSOPO_SITE_KEY=' .env | cut -d= -f2)" enterprise \
+  --captcha_type puzzle \
+  --domains example.com procaptcha.<subdomain>.workers.dev \
+  --pow_difficulty 4 \
+  --frictionless_threshold 0.5 \
+  --image_threshold 0.8
+```
+
+## 7. Build the widget and deploy the Worker
+
+```bash
+NODE_ENV=production \
+PROSOPO_PROVIDER_LIST=https://procaptcha.<subdomain>.workers.dev \
+pnpm --filter @prosopo/procaptcha-bundle run bundle
+
+npx wrangler@4.151.3 deploy --config docker/cloudflare/wrangler.jsonc
+```
+
+## 8. Try it
+
+Open `https://procaptcha.<subdomain>.workers.dev/?sitekey=<your site key>`. The demo page shows whether the provider
+is reachable, renders the CAPTCHA, and shows the response token once it is solved.
+
+On your own site, load the widget from the Worker:
+
+```html
+<script type="module" src="https://procaptcha.<subdomain>.workers.dev/procaptcha.bundle.js" async defer></script>
+<div class="procaptcha" data-sitekey="5Fpd..."></div>
+```
+
+Verify tokens as in [step 5 of the main guide](/en/self-hosting/#5-verify-tokens-on-your-server).
+`PROSOPO_PROVIDER_LIST` in your `.env` already points at the Worker.
+
+Everything else in the main guide applies unchanged, including
+[bringing your own detector](/en/self-hosting/#bring-your-own-detector) and [image CAPTCHAs](/en/self-hosting/#image-captchas).
+
+## Worth knowing
+
+- **Workers VPC is in open beta.** It is what lets the Worker reach the tunnel.
+- **The free Workers plan has a daily request allowance.** Each solve is a handful of requests, so check
+  [the current limits](https://developers.cloudflare.com/workers/platform/limits/) against your traffic.
+- **Visitor addresses are passed through.** The Worker sets `X-Forwarded-For` to each visitor's address. Without that,
+  the provider would see every visitor as the tunnel, and per-IP rate limits and rules would apply to all of them
+  together.
+- **The provider only runs while your machine does.** The containers restart on their own when Docker comes back.

@@ -138,6 +138,11 @@ export default [
         slug: 'self-hosting/',
         key: 'self-hosting/',
     },
+    {
+        text: 'Run It on Cloudflare (Free)',
+        slug: 'self-hosting/cloudflare/',
+        key: 'self-hosting/cloudflare/',
+    },
     {text: 'Prosopo Protect (Edge)', header: true, type: 'learn', key: 'protect-edge'},
     {
         text: 'Overview',
