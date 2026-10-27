@@ -19,7 +19,7 @@ gives you the first half. The managed Professional and Enterprise tiers give you
 | | Self-hosted | Professional / Enterprise |
 | --- | --- | --- |
 | Proof of Work (`pow`) | Yes | Yes |
-| Slider puzzle (`puzzle`) | Yes | Yes |
+| Jigsaw puzzle (`puzzle`) | Yes | Yes |
 | Image CAPTCHA (`image`) | Yes, with [a dataset you build](#image-captchas) | Yes |
 | Client-side bot detection | Yes, with [a detector you build](#bring-your-own-detector), such as the BotD example | Yes, ours |
 | ML scoring and automatic blocking | No | Yes |
@@ -250,7 +250,7 @@ The score thresholds on the site key decide what each visitor gets:
 | score | served |
 | --- | --- |
 | below `--frictionless_threshold` (0.5) | invisible proof of work |
-| from there up to `--frictionless_image_threshold` | slider puzzle |
+| from there up to `--frictionless_image_threshold` | jigsaw puzzle |
 | at or above `--frictionless_image_threshold` | image challenge |
 
 The example sets the image threshold to `2`, above any score BotD gives, so flagged browsers get a puzzle. Leave it at
