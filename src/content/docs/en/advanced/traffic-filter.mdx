@@ -1,7 +1,6 @@
 ---
-title: Traffic Filter
+title: Traffic filter
 description: Block verification requests by connection type — VPN, proxy, Tor, datacenter, crawler, abusive networks, and more.
-i18nReady: true
 ---
 import { Image } from 'astro:assets';
 import TrafficFilter from '~/assets/traffic-filter.png';
@@ -10,7 +9,7 @@ The Traffic Filter lets you block CAPTCHA verification requests based on the typ
 
 Traffic from abusive networks is blocked by default for every account, including free tier. All other filters are available to Professional and Enterprise tier customers.
 
-## Available Filters
+## Available filters
 
 | Filter | Setting | Status Code | Default |
 |--------|---------|-------------|---------|
@@ -29,7 +28,7 @@ Each filter is its own toggle on the **Traffic Filter** tab of Site Settings:
 
 Each filter returns a specific status code when it blocks a request. Your application can use these codes to show the user a tailored message (for example, asking a VPN user to disconnect and retry).
 
-## How It Works
+## How it works
 
 1. A user submits a CAPTCHA solution.
 2. Your server calls the Prosopo verification endpoint, optionally including the user's IP address.
@@ -40,7 +39,7 @@ Each filter returns a specific status code when it blocks a request. Your applic
 
 Traffic filter checks run before other verification logic (captcha correctness, IP distance, email rules, etc.), so blocked traffic is rejected early without wasting compute.
 
-## Providing the IP Address
+## Providing the IP address
 
 Traffic filters always run. By default they evaluate the IP recorded when the user initiated the captcha session (the browser's IP at session-start time, captured by the provider when the widget first contacted it).
 
@@ -54,9 +53,9 @@ If the end user's IP may have changed between solving the captcha and your serve
 }
 ```
 
-See the [Server-side Verification](/en/basics/server-side-verification/#optional-ip-address) docs for details.
+See the [Server-side Verification](/en/basics/server-side-verification/#ip-address) docs for details.
 
-## Filter Details
+## Filter details
 
 ### VPN
 
@@ -92,17 +91,17 @@ Blocks connections from satellite internet providers. This is a niche filter for
 
 Blocks known web crawlers and automated bots. This includes search engine bots and other well-known crawlers.
 
-## Configuration via Portal
+## Configuration via portal
 
 Traffic filters are configured in the [Prosopo Portal](https://portal.prosopo.io) under **Site Settings > Traffic Filter**. Each filter has an independent toggle switch.
 
 Free-tier accounts see the abusive-network toggle locked on, with the remaining filters showing an upgrade prompt. Professional and Enterprise tier accounts can toggle all filters freely.
 
-## Fail-Open Behavior
+## Fail-open behavior
 
 If the IP information lookup fails (network timeout, service unavailable, etc.), the traffic filter allows the request through rather than blocking it. This prevents an outage in the IP intelligence service from blocking all legitimate traffic.
 
-## Verification Response
+## Verification response
 
 When a traffic filter blocks a request, the verification endpoint returns:
 
@@ -123,9 +122,9 @@ if (result.status === 'API.VPN_BLOCKED') {
 }
 ```
 
-## Use Cases
+## Use cases
 
-### E-Commerce (Moderate Security)
+### E-commerce (moderate security)
 
 Block the highest-risk traffic while allowing most legitimate users:
 
@@ -134,7 +133,7 @@ Block the highest-risk traffic while allowing most legitimate users:
 - **Crawler**: On
 - Everything else: Off
 
-### Financial Services (High Security)
+### Financial services (high security)
 
 Strict filtering to minimize automated fraud:
 
@@ -145,7 +144,7 @@ Strict filtering to minimize automated fraud:
 - **Datacenter**: On
 - **Crawler**: On
 
-### Consumer App (Permissive)
+### Consumer app (permissive)
 
 Rely on the default abusive-network blocking only:
 

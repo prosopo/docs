@@ -1,14 +1,12 @@
 ---
 import { getEntry } from 'astro:content';
-import { isSubPage } from '~/util/isSubPage';
-import { stripLangFromSlug } from '~/util';
 import { stripLeadingAndTrailingSlashes } from '../../../node_modules/@astrojs/starlight/utils/path';
 import MobileMenuFooter from 'virtual:starlight/components/MobileMenuFooter';
 import SidebarSublist from '@astrojs/starlight/components/SidebarSublist.astro';
 import type { Props } from '@astrojs/starlight/props';
 import type { SidebarEntry } from '@astrojs/starlight/utils/navigation';
 
-let { sidebar, slug } = Astro.props;
+let { sidebar } = Astro.props;
 
 async function remap(i: SidebarEntry) {
 	if (i.type === 'group') {
@@ -17,12 +15,8 @@ async function remap(i: SidebarEntry) {
 	}
 
 	const itemSlug = stripLeadingAndTrailingSlashes(i.href);
-	// @ts-expect-error i.href is not defined as a page slug, even though we know it is
-	const itemSlugWithoutLang = stripLangFromSlug(itemSlug);
-
 	const fallback = (await getEntry('docs', itemSlug)) ? undefined : true;
 
-	i.isCurrent = isSubPage(slug, itemSlugWithoutLang);
 	i.attrs.class = fallback ? 'fallback' : undefined;
 	return i;
 }
@@ -37,11 +31,6 @@ sidebar = await Promise.all(sidebar.map(remap));
 </div>
 
 <style>
-	p {
-		color: var(--sl-color-gray-3);
-		font-family: 'Courier New', Courier, monospace;
-	}
-
 	:global(.fallback)::after {
 		content: 'EN';
 		vertical-align: super;

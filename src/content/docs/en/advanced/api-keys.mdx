@@ -1,7 +1,6 @@
 ---
-title: API Keys
+title: API keys
 description: Create and manage API keys for programmatic access to Prosopo services.
-i18nReady: true
 ---
 import { Image } from 'astro:assets';
 import ApiKeyCreate from '~/assets/api-key-create.png';
@@ -12,7 +11,7 @@ API keys are not used for CAPTCHA verification. [`/siteverify`](/en/basics/serve
 
 API key management is available to accounts with the API feature enabled. It is off by default — contact support to have it turned on.
 
-## Creating an API Key
+## Creating an API key
 
 1. Log in to the [Prosopo Portal](https://portal.prosopo.io)
 2. Navigate to **API Keys** from the main menu
@@ -31,7 +30,7 @@ The key stays available after creation: it is listed on the API Keys page, hidde
 
 Each API key is scoped to a specific set of permissions. Only grant the permissions the key actually needs. A permission group only appears when the matching feature is enabled on your account.
 
-### Access Rules
+### Access rules
 
 | Permission | Description |
 |-----------|-------------|
@@ -50,7 +49,7 @@ Each API key is scoped to a specific set of permissions. Only grant the permissi
 | `deleteSite` | Delete a site |
 | `updateSite` | Update site settings |
 
-### API Keys
+### API keys
 
 | Permission | Description |
 |-----------|-------------|
@@ -75,7 +74,7 @@ There is no way to edit a key's permissions after creation. To change them, crea
 |-----------|-------------|
 | `getTraffic` | Query traffic analytics data |
 
-### Search Captcha Records
+### Search captcha records
 
 | Permission | Description |
 |-----------|-------------|
@@ -92,7 +91,7 @@ There is no way to edit a key's permissions after creation. To change them, crea
 
 The dialog also offers `getSuggestion`, `getSuggestions`, `applySuggestions` and `updateApiKey`. No endpoint currently checks them, so granting them has no effect.
 
-## Using an API Key
+## Using an API key
 
 Include the API key in the `Authorization` header of your HTTP requests. This example lists your access control rules and needs the `getRules` permission:
 
@@ -118,9 +117,9 @@ const response = await fetch('https://api.prosopo.io/access-control/get', {
 
 See the [API reference](/en/advanced/api/) for every endpoint, its permission and its request body.
 
-## Managing API Keys
+## Managing API keys
 
-### Viewing Keys
+### Viewing keys
 
 The API Keys page shows all keys for your account. Each one displays:
 
@@ -129,23 +128,23 @@ The API Keys page shows all keys for your account. Each one displays:
 - **Expires At**: When the key expires, or "Never" for non-expiring keys
 - **Permissions**: Which operations the key can perform
 
-### Deleting Keys
+### Deleting keys
 
 To revoke an API key, click **Remove** on it in the API Keys list. The key is immediately invalidated — any requests using it will be rejected.
 
 Deletion is permanent and cannot be undone. If you delete a key by mistake, create a new one and update your application with the new key.
 
-## Security Best Practices
+## Security best practices
 
-### Principle of Least Privilege
+### Principle of least privilege
 
 Only grant the permissions each key actually needs. A key used solely to sync access control rules needs `getRules`, `createRule` and `deleteRule` — it does not need `createSite` or `deleteUser`.
 
-### Use Expiring Keys for Temporary Access
+### Use expiring keys for temporary access
 
 When granting access to a contractor, CI/CD pipeline, or temporary integration, set an expiration time so the key is automatically invalidated.
 
-### Rotate Keys Regularly
+### Rotate keys regularly
 
 For long-lived production keys, rotate them periodically:
 
@@ -154,10 +153,10 @@ For long-lived production keys, rotate them periodically:
 3. Verify the new key works
 4. Delete the old key
 
-### Never Expose Keys Client-Side
+### Never expose keys client-side
 
 API keys should only be used in server-side code. Never embed them in frontend JavaScript, mobile apps, or public repositories. For client-side CAPTCHA integration, use site keys instead — see [Client-side Rendering](/en/basics/client-side-rendering/).
 
-### Monitor Usage
+### Monitor usage
 
 Review the Audit page and traffic analytics to detect any unexpected API key usage patterns that could indicate a compromised key.

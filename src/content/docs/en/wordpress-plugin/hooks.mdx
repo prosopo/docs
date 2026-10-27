@@ -1,11 +1,11 @@
 ---
-title: 'Filters and Hooks'
+title: 'Filters and hooks'
 description: 'Filters and hooks.'
 ---
 
 The Procaptcha plugin introduces new WordPress filters and hooks, allowing you to customize its behavior.
 
-## 1. Captcha Visibility
+## 1. Captcha visibility
 
 By default, Procaptcha is displayed only to unauthorized users.
 
@@ -16,7 +16,7 @@ For example, to make Procaptcha required for everyone, add the following code to
 add_filter('prosopo/procaptcha/is_captcha_present', '__return_true');`
 ```
 
-## 2. Custom Error Message
+## 2. Custom error message
 
 You can customize the default error message by adding this code to your theme's functions.php file:
 
@@ -26,7 +26,7 @@ add_filter('prosopo/procaptcha/validation_error_message', function (string $mess
 });
 ```
 
-## 3. Customizing Procaptcha Attributes
+## 3. Customizing Procaptcha attributes
 
 Beyond the style preferences in the plugin settings, you can customize any supported [Procaptcha data attributes](https://docs.prosopo.io/en/basics/client-side-rendering/#procaptcha-options) using the **prosopo/procaptcha/captcha_attributes** filter.
 
@@ -37,7 +37,7 @@ add_filter('prosopo/procaptcha/captcha_attributes', function (array $attributes)
 });
 ```
 
-## 4. Forms with Procaptcha in Tests
+## 4. Forms with Procaptcha in tests
 
 If your tests involve forms with Procaptcha, you can bypass the Procaptcha by adding the following constant to your wp-config.php file:
 

@@ -44,7 +44,5 @@ export default NavDictionary({
 	'wordpress-plugin/jetpack': 'JetPack',
 	'wordpress-plugin/woocommerce': 'WooCommerce',
 	'wordpress-plugin/spectra': 'Spectra',
-
-	'contribute': 'Contribuir',
 });
 

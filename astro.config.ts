@@ -12,41 +12,32 @@ import tailwind from '@astrojs/tailwind';
 import json5Plugin from 'vite-plugin-json5';
 import { builtinModules } from 'module';
 
-/* https://vercel.com/docs/projects/environment-variables/system-environment-variables#system-environment-variables */
-const VERCEL_PREVIEW_SITE =
-	process.env.VERCEL_ENV !== 'production' &&
-	process.env.VERCEL_URL &&
-	`https://${process.env.VERCEL_URL}`;
-
-const site = VERCEL_PREVIEW_SITE || 'https://docs.prosopo.io/';
+const site = 'https://docs.prosopo.io/';
 
 const allExternal = [
 	...builtinModules,
 	...builtinModules.map((m) => `node:${m}`)
 ]
 
-// https://astro.build/config
 export default defineConfig({
 	site,
 
 	integrations: [
 		starlight({
-			title: 'Docs',
+			title: 'Prosopo Docs',
 
-			customCss: ['./src/styles/custom.css', './src/styles/tailwind.css'],
+			customCss: ['./src/styles/custom.css', './src/styles/brand.css'],
 			components: {
 				EditLink: './src/components/starlight/EditLink.astro',
 				Head: './src/components/starlight/Head.astro',
-				Hero: './src/components/starlight/Hero.astro',
 				MarkdownContent: './src/components/starlight/MarkdownContent.astro',
-				MobileTableOfContents: './src/components/starlight/MobileTableOfContents.astro',
 				TableOfContents: './src/components/starlight/TableOfContents.astro',
 				PageSidebar: './src/components/starlight/PageSidebar.astro',
-				Pagination: './src/components/starlight/Pagination.astro',
 				SiteTitle: './src/components/starlight/SiteTitle.astro',
 				Search: './src/components/starlight/Search.astro',
 				Sidebar: './src/components/starlight/Sidebar.astro',
-				PageTitle: './src/components/starlight/PageTitle.astro',
+				ThemeProvider: './src/components/starlight/ThemeProvider.astro',
+				ThemeSelect: './src/components/starlight/ThemeSelect.astro',
 			},
 			editLink: {
 				baseUrl: 'https://github.com/prosopo/docs/edit/main',
@@ -99,7 +90,6 @@ export default defineConfig({
 		],
 	},
 	image: {
-		domains: ['avatars.githubusercontent.com'],
 		service: sharpImageService(),
 	},
 	experimental: {

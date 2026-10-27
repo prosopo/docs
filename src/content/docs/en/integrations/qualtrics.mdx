@@ -1,7 +1,6 @@
 ---
 title: Qualtrics
 description: Stop bots from taking your Qualtrics surveys. Respondents pass Procaptcha first, and Qualtrics checks the result with Prosopo before it shows any questions.
-i18nReady: true
 ---
 import { Image } from 'astro:assets';
 import PortalSite from '~/assets/qualtrics/portal-site.png';
@@ -105,7 +104,7 @@ add `captcha_verified=true` to the link and get in if the Prosopo call ever fail
 If someone selects **Next** instead of the link, they still have no token, so the check below fails and the survey
 ends.
 
-### Web Service
+### Web service
 
 Add a **Web Service** element below the branch (not inside it):
 
