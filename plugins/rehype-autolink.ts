@@ -49,7 +49,7 @@ const autolinkConfig: AutolinkOptions = {
  */
 function rehypei18nAutolinkHeadings() {
 	const pageSourceDir = nodeResolve('./src/content/docs');
-	const baseUrl = 'https://docs.astro.build/';
+	const baseUrl = 'https://docs.prosopo.io/';
 
 	const transformer: Transformer<Root> = (tree, file) => {
 		const pageUrl = mdFilePathToUrl(file.path, pageSourceDir, baseUrl);

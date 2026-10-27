@@ -6,7 +6,7 @@ import type { Root } from 'mdast';
 
 export function remarkFallbackLang(): Plugin<[], Root> {
 	const pageSourceDir = path.resolve('./src/content/docs');
-	const baseUrl = 'https://docs.astro.build/';
+	const baseUrl = 'https://docs.prosopo.io/';
 
 	const transformer: Transformer<Root> = (tree, file) => {
 		const pageUrl = mdFilePathToUrl(file.path, pageSourceDir, baseUrl);

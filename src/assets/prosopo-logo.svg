@@ -1,11 +1,5 @@
 <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2062.63 468.67" height="28">
-    <defs>
-        <linearGradient id="gradient" x1="4" x2="76" y1="100" y2="79.4" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#eb427e"/>
-            <stop offset="1" stop-color="#ffffff"/>
-        </linearGradient>
-    </defs>
-    <title>Prosopo Logo Pink and White</title>
+    <title>Prosopo</title>
     <path class="cls-1"
           d="M335.55,1825.19A147.75,147.75,0,0,1,483.3,1972.94h50.5c0-109.49-88.76-198.25-198.25-198.25v50.5Z"
           transform="translate(-215.73 -1774.69)"/>
@@ -40,8 +34,8 @@
           d="M2249.14,2124.32q-29.2,36.06-88.69,36.06t-88.69-36.06q-29.22-36.06-29.21-86.82,0-49.9,29.21-86.5t88.69-36.59q59.49,0,88.69,36.59t29.22,86.5Q2278.36,2088.26,2249.14,2124.32ZM2200.88,2091q14.19-18.81,14.18-53.48t-14.18-53.37q-14.18-18.7-40.64-18.71t-40.75,18.71q-14.28,18.72-14.29,53.37t14.29,53.48q14.3,18.81,40.75,18.81T2200.88,2091Z"
           transform="translate(-215.73 -1774.69)"/>
     <style>
-        [data-theme="dark"] .cls-1 {
-        fill: url(#gradient);
+        .cls-1 {
+        fill: currentColor;
         }
     </style>
 </svg>

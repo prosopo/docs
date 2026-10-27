@@ -1,7 +1,6 @@
 ---
-title: 'Invisible CAPTCHA (Beta)'
+title: 'Invisible CAPTCHA (beta)'
 description: 'Learn how to implement invisible CAPTCHA with Procaptcha for seamless user experiences.'
-i18nReady: true
 ---
 
 Invisible CAPTCHA provides seamless bot protection without interrupting the user experience. The CAPTCHA challenge runs in the background and only presents a visible challenge if additional verification is needed.
@@ -41,9 +40,9 @@ Which challenge runs behind it is a property of the site key, chosen in the
 site key most visitors complete an invisible Proof of Work and never see anything; a visitor who scores as risky is
 shown a puzzle or an image challenge at the point of submission.
 
-## Implementation Methods
+## Implementation methods
 
-### Implicit Rendering
+### Implicit rendering
 
 Add the `procaptcha` class and data attributes directly to your form elements:
 
@@ -83,7 +82,7 @@ Add the `procaptcha` class and data attributes directly to your form elements:
 </html>
 ```
 
-### Explicit Rendering
+### Explicit rendering
 
 For more control over the CAPTCHA lifecycle:
 
@@ -139,7 +138,7 @@ For more control over the CAPTCHA lifecycle:
 </html>
 ```
 
-## Configuration Options
+## Configuration options
 
 | Attribute | Value | Description |
 |-----------|-------|-------------|
@@ -151,15 +150,15 @@ For more control over the CAPTCHA lifecycle:
 | `data-bind` | CSS selector | A button on your page that triggers this widget, instead of your code calling `execute()`. The button's default action is prevented. See [Binding a button to the widget](/en/basics/client-side-rendering/#binding-a-button-to-the-widget). |
 | `data-placement` | `"popup"` | Accepted for consistency with visible widgets, but an invisible widget has no checkbox to anchor a `float` challenge to, so its challenge always opens as a centred popup. |
 
-## Best Practices
+## Best practices
 
-### 1. Choose the Right Type
+### 1. Choose the right type
 Set this on the site key in the [portal](https://portal.prosopo.io), not in your markup:
 - **Frictionless**: best for most use cases — it adapts per visitor, and most of them see nothing at all
 - **PoW**: when you want every visitor to get the same invisible challenge and never a visible one
 - **Puzzle** or **Image**: when every visitor should get the same visible challenge on submission
 
-### 2. Handle Failures Gracefully
+### 2. Handle failures gracefully
 Always implement a failed callback to handle verification failures:
 
 ```javascript
@@ -170,7 +169,7 @@ function onCaptchaFailed() {
 }
 ```
 
-### 3. Provide Loading Indicators
+### 3. Provide loading indicators
 Since verification happens in the background, consider showing loading states:
 
 ```javascript
@@ -186,7 +185,7 @@ function onCaptchaComplete(token) {
 }
 ```
 
-## Server-Side Verification
+## Server-side verification
 
 Always verify the Procaptcha response on your server:
 
@@ -216,25 +215,25 @@ if (result.verified) {
 
 ## Troubleshooting
 
-### CAPTCHA Not Triggering
+### CAPTCHA not triggering
 - Ensure `data-size="invisible"` is set
 - Check that your site key is correct and active
 - Verify your domain is registered in the portal
 - Confirm you're on Pro or Enterprise tier
 
-### Unexpected Visible Challenges
+### Unexpected visible challenges
 This is normal behavior when:
 - User behavior appears suspicious
 - Browser characteristics suggest automation
 - Additional verification is needed for security
 
-### Integration Issues
+### Integration issues
 - Make sure the Procaptcha script loads before your code runs
 - Check browser console for error messages
 - Verify callback functions are defined globally
 - Test with different CAPTCHA types to isolate issues
 
-## Migration from Visible CAPTCHA
+## Migration from visible CAPTCHA
 
 To convert existing visible CAPTCHA implementations:
 
@@ -244,7 +243,7 @@ To convert existing visible CAPTCHA implementations:
 4. Test user flows to ensure smooth experience
 5. Update any size-dependent CSS or JavaScript
 
-## Next Steps
+## Next steps
 
 - [Server-side verification](/en/basics/server-side-verification/)
 - [CAPTCHA Types](/en/basics/captcha-types/)

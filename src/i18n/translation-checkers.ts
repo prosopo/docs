@@ -1,5 +1,5 @@
 import enNav from './en/nav';
-import type { allLanguages } from './languages';
+import type languages from './languages';
 import type docsearch from '@docsearch/js';
 import type enUI from './en/ui';
 
@@ -7,7 +7,7 @@ type ModalTranslations = NonNullable<Parameters<typeof docsearch>[0]['translatio
 
 export type UIDictionaryKeys = keyof typeof enUI;
 export type UIDict = Partial<typeof enUI>;
-export type UILanguageKeys = keyof typeof allLanguages;
+export type UILanguageKeys = keyof typeof languages;
 
 /** Helper to type check a dictionary of UI string translations. */
 export const UIDictionary = (dict: Partial<typeof enUI>) => dict;

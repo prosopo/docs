@@ -1,7 +1,6 @@
 ---
-title: Self-Hosting on Cloudflare's Free Plan
+title: Self-hosting on Cloudflare's free plan
 description: Run your own Procaptcha provider on any machine with Docker, with Cloudflare in front of it. No domain, no public IP, no open ports and no certificates.
-i18nReady: true
 ---
 
 The [main guide](/en/self-hosting/) assumes a server with a public IP and ports 80 and 443 open. If you don't have one,
@@ -96,7 +95,7 @@ docker compose exec provider /nodejs/bin/node /usr/src/app/provider.cli.bundle.j
   --image_threshold 0.8
 ```
 
-## 7. Build the widget and deploy the Worker
+## 7. Build the widget and deploy the worker
 
 ```bash
 NODE_ENV=production \
