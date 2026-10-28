@@ -194,11 +194,20 @@ import {getPair} from '@prosopo/keyring'
 import {ApiParams} from '@prosopo/types'
 
 ...
-// analisar o corpo recebido do frontend
-const payload = JSON.parse(event.body)
+// analisar o corpo recebido do frontend. Um corpo malformado é erro do
+// cliente, então responda 400 em vez de deixar o JSON.parse lançar exceção.
+let payload
+try {
+    payload = JSON.parse(event.body)
+} catch {
+    return { statusCode: 400, body: 'Invalid JSON body' }
+}
 
 // analisar o token de resposta procaptcha
-const procaptchaResponse = payload[ApiParams.procaptchaResponse]
+const procaptchaResponse = payload?.[ApiParams.procaptchaResponse]
+if (typeof procaptchaResponse !== 'string') {
+    return { statusCode: 400, body: 'Missing procaptcha response' }
+}
 
 // inicializar a classe `ProsopoServer`
 const config = getServerConfig()
