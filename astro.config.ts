@@ -71,6 +71,7 @@ export default defineConfig({
 
 	],
 	trailingSlash: 'always',
+	build: { assets: '_assets' },
 	scopedStyleStrategy: 'where',
 	compressHTML: false,
 	markdown: {
