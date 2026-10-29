@@ -39,7 +39,7 @@ add_filter('prosopo/procaptcha/captcha_attributes', function (array $attributes)
 
 ## 4. Visitor IP matching
 
-When IP matching is on, the plugin sends the visitor's IP address with each verification request, and Procaptcha rejects a token solved from a different IP. It's **off by default**: most sites are behind Cloudflare or another proxy, and sending the proxy's address instead of the visitor's would reject real visitors.
+IP matching only applies to site keys with **IP validation** turned on in the Prosopo portal (Professional plan and above). Procaptcha then compares the IP that solved the captcha with the IP your server sends, using the rules you set in the portal (country, city, ISP and distance changes). The plugin has to send the visitor's real IP for that, so the setting is **off by default**: on sites behind Cloudflare or another proxy, the server sees the proxy's address, and sending it would make IP validation reject real visitors.
 
 To turn it on, go to **Settings > Prosopo Procaptcha > General** and pick where the visitor's IP comes from under **Visitor IP matching**:
 
@@ -57,7 +57,7 @@ add_filter('prosopo/procaptcha/visitor_ip', function (string $ip, string $remote
 }, 10, 2);
 ```
 
-Version 1.23.0 sent `REMOTE_ADDR` by default. Update to 1.24.0 or later if your site is behind a proxy.
+Version 1.23.0 sent `REMOTE_ADDR` by default. If your site key uses IP validation and your site is behind a proxy, update to 1.24.0 or later.
 
 ## 5. Verification result
 
