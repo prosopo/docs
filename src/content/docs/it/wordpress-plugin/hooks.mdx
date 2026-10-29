@@ -49,7 +49,42 @@ add_filter('prosopo/procaptcha/visitor_ip', function (string $ip): string {
 
 Fidati solo di un header inoltrato impostato dal tuo proxy. I valori che non sono un indirizzo IP valido non vengono inviati.
 
-## 5. Moduli con Procaptcha nei test
+## 5. Risultato della verifica
+
+Dalla versione 1.24.0, l'azione **prosopo/procaptcha/verification_result** viene eseguita dopo ogni richiesta di verifica con il risultato e la risposta dell'API, così puoi registrare il punteggio o il motivo per cui un invio è stato rifiutato. Quando `WP_DEBUG` è attivo, le verifiche non riuscite vengono scritte anche nel log di debug.
+
+```php
+add_action('prosopo/procaptcha/verification_result', function (bool $verified, array $response): void {
+    // $response: verified, status, score, reason, error, sessionId
+    if (! $verified) {
+        error_log('Procaptcha rejected a submission: ' . ($response['reason'] ?? 'unknown'));
+    }
+}, 10, 2);
+```
+
+## 6. Eventi JavaScript
+
+Dalla versione 1.24.0, il widget emette questi eventi, che risalgono fino al modulo e al documento:
+
+- `prosopo-procaptcha:filled`: il visitatore ha risolto il captcha. `event.detail.token` contiene il token.
+- `prosopo-procaptcha:cleared`: il token è scaduto, il widget ha dato un errore o è stato reimpostato.
+
+Un token può essere verificato una sola volta. Il plugin reimposta il captcha dopo gli invii AJAX dei plugin di moduli supportati. Per i tuoi moduli AJAX, emetti `prosopo-procaptcha:reset` sul modulo (o su qualsiasi elemento che contiene il captcha, oppure su `document` per reimpostarli tutti):
+
+```js
+document.addEventListener('prosopo-procaptcha:filled', (event) => {
+    console.log('Token received', event.detail.token);
+});
+
+document.addEventListener('prosopo-procaptcha:cleared', (event) => {
+    console.log('Token expired or the widget was reset', event.target);
+});
+
+// Reset the captcha in a form, e.g. after your own AJAX submission.
+form.dispatchEvent(new Event('prosopo-procaptcha:reset'));
+```
+
+## 7. Moduli con Procaptcha nei test
 
 Se i suoi test coinvolgono moduli con Procaptcha, può bypassare Procaptcha aggiungendo la seguente costante al file wp-config.php:
 
