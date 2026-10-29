@@ -32,12 +32,24 @@ Au-delà des préférences de style dans les paramètres du plugin, vous pouvez 
 
 ```php
 add_filter('prosopo/procaptcha/captcha_attributes', function (array $attributes): array {
-    $attributes['lang'] = 'de';
+    $attributes['language'] = 'de';
     return $attributes;
 });
 ```
 
-## 4. Formulaires avec Procaptcha dans les tests
+## 4. Adresse IP du visiteur
+
+Depuis la version 1.23.0, le plugin envoie l'adresse IP du visiteur avec chaque requête de vérification, ce qui améliore la détection des bots. Par défaut, il utilise `REMOTE_ADDR`. Si votre site est derrière un proxy ou un CDN comme Cloudflare, `REMOTE_ADDR` contient l'adresse du proxy : transmettez alors l'IP réelle du visiteur avec le filtre **prosopo/procaptcha/visitor_ip** :
+
+```php
+add_filter('prosopo/procaptcha/visitor_ip', function (string $ip): string {
+    return $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $ip;
+});
+```
+
+Ne faites confiance qu'à un en-tête transféré défini par votre proxy. Les valeurs qui ne sont pas une adresse IP valide ne sont pas envoyées.
+
+## 5. Formulaires avec Procaptcha dans les tests
 
 Si vos tests impliquent des formulaires avec Procaptcha, vous pouvez contourner le Procaptcha en ajoutant la constante suivante à votre fichier wp-config.php :
 
