@@ -37,17 +37,27 @@ add_filter('prosopo/procaptcha/captcha_attributes', function (array $attributes)
 });
 ```
 
-## 4. Visitor IP address
+## 4. Visitor IP matching
 
-From version 1.23.0, the plugin sends the visitor's IP address with each verification request, which improves bot detection. By default it uses `REMOTE_ADDR`. If your site is behind a proxy or CDN such as Cloudflare, `REMOTE_ADDR` is the proxy's address, so pass the real visitor IP with the **prosopo/procaptcha/visitor_ip** filter:
+When IP matching is on, the plugin sends the visitor's IP address with each verification request, and Procaptcha rejects a token solved from a different IP. It's **off by default**: most sites are behind Cloudflare or another proxy, and sending the proxy's address instead of the visitor's would reject real visitors.
+
+To turn it on, go to **Settings > Prosopo Procaptcha > General** and pick where the visitor's IP comes from under **Visitor IP matching**:
+
+- **On - site is behind Cloudflare**: the `CF-Connecting-IP` header.
+- **On - site is behind another proxy**: the first address in the `X-Forwarded-For` header.
+- **On - visitors connect directly**: `REMOTE_ADDR`.
+
+Only pick a header that your proxy sets, as visitors can send these headers themselves. If the header is missing or isn't a valid IP address, nothing is sent and the token is verified without IP matching.
+
+For other setups, the **prosopo/procaptcha/visitor_ip** filter receives the IP from the setting (empty when it's off) and `REMOTE_ADDR`. Return the IP to send, or an empty string to send none:
 
 ```php
-add_filter('prosopo/procaptcha/visitor_ip', function (string $ip): string {
-    return $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $ip;
-});
+add_filter('prosopo/procaptcha/visitor_ip', function (string $ip, string $remote_addr): string {
+    return $_SERVER['HTTP_TRUE_CLIENT_IP'] ?? $ip;
+}, 10, 2);
 ```
 
-Only trust a forwarded header that your proxy sets. Values that aren't a valid IP address aren't sent.
+Version 1.23.0 sent `REMOTE_ADDR` by default. Update to 1.24.0 or later if your site is behind a proxy.
 
 ## 5. Verification result
 
