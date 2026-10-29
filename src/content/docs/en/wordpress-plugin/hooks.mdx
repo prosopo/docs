@@ -49,7 +49,42 @@ add_filter('prosopo/procaptcha/visitor_ip', function (string $ip): string {
 
 Only trust a forwarded header that your proxy sets. Values that aren't a valid IP address aren't sent.
 
-## 5. Forms with Procaptcha in tests
+## 5. Verification result
+
+From version 1.24.0, the **prosopo/procaptcha/verification_result** action runs after each verification request with the result and the API response, so you can record the score or the reason a submission was rejected. When `WP_DEBUG` is on, failed verifications are also written to the debug log.
+
+```php
+add_action('prosopo/procaptcha/verification_result', function (bool $verified, array $response): void {
+    // $response: verified, status, score, reason, error, sessionId
+    if (! $verified) {
+        error_log('Procaptcha rejected a submission: ' . ($response['reason'] ?? 'unknown'));
+    }
+}, 10, 2);
+```
+
+## 6. JavaScript events
+
+From version 1.24.0, the widget dispatches these events, which bubble up to the form and the document:
+
+- `prosopo-procaptcha:filled`: the visitor solved the captcha. `event.detail.token` holds the token.
+- `prosopo-procaptcha:cleared`: the token expired, the widget errored or it was reset.
+
+A token can be verified only once. The plugin resets the captcha after AJAX submissions of the supported form plugins. For your own AJAX forms, dispatch `prosopo-procaptcha:reset` on the form (or any element that contains the captcha, or `document` to reset all of them):
+
+```js
+document.addEventListener('prosopo-procaptcha:filled', (event) => {
+    console.log('Token received', event.detail.token);
+});
+
+document.addEventListener('prosopo-procaptcha:cleared', (event) => {
+    console.log('Token expired or the widget was reset', event.target);
+});
+
+// Reset the captcha in a form, e.g. after your own AJAX submission.
+form.dispatchEvent(new Event('prosopo-procaptcha:reset'));
+```
+
+## 7. Forms with Procaptcha in tests
 
 If your tests involve forms with Procaptcha, you can bypass the Procaptcha by adding the following constant to your wp-config.php file:
 

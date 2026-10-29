@@ -49,7 +49,42 @@ add_filter('prosopo/procaptcha/visitor_ip', function (string $ip): string {
 
 Confie apenas em um cabeçalho encaminhado definido pelo seu proxy. Valores que não sejam um endereço IP válido não são enviados.
 
-## 5. Formulários com Procaptcha em Testes
+## 5. Resultado da verificação
+
+A partir da versão 1.24.0, a action **prosopo/procaptcha/verification_result** é executada após cada solicitação de verificação com o resultado e a resposta da API, para que você possa registrar a pontuação ou o motivo pelo qual um envio foi rejeitado. Quando `WP_DEBUG` está ativo, as verificações que falharam também são gravadas no log de depuração.
+
+```php
+add_action('prosopo/procaptcha/verification_result', function (bool $verified, array $response): void {
+    // $response: verified, status, score, reason, error, sessionId
+    if (! $verified) {
+        error_log('Procaptcha rejected a submission: ' . ($response['reason'] ?? 'unknown'));
+    }
+}, 10, 2);
+```
+
+## 6. Eventos JavaScript
+
+A partir da versão 1.24.0, o widget dispara estes eventos, que se propagam até o formulário e o documento:
+
+- `prosopo-procaptcha:filled`: o visitante resolveu o captcha. `event.detail.token` contém o token.
+- `prosopo-procaptcha:cleared`: o token expirou, o widget apresentou um erro ou foi redefinido.
+
+Um token só pode ser verificado uma vez. O plugin redefine o captcha após os envios AJAX dos plugins de formulário compatíveis. Nos seus próprios formulários AJAX, dispare `prosopo-procaptcha:reset` no formulário (ou em qualquer elemento que contenha o captcha, ou em `document` para redefinir todos):
+
+```js
+document.addEventListener('prosopo-procaptcha:filled', (event) => {
+    console.log('Token received', event.detail.token);
+});
+
+document.addEventListener('prosopo-procaptcha:cleared', (event) => {
+    console.log('Token expired or the widget was reset', event.target);
+});
+
+// Reset the captcha in a form, e.g. after your own AJAX submission.
+form.dispatchEvent(new Event('prosopo-procaptcha:reset'));
+```
+
+## 7. Formulários com Procaptcha em Testes
 
 Se seus testes envolvem formulários com Procaptcha, você pode ignorar o Procaptcha adicionando a seguinte constante ao seu arquivo wp-config.php:
 
