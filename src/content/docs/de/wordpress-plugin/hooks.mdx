@@ -39,7 +39,7 @@ add_filter('prosopo/procaptcha/captcha_attributes', function (array $attributes)
 
 ## 4. Abgleich der Besucher-IP
 
-Ist der IP-Abgleich aktiv, sendet das Plugin die IP-Adresse des Besuchers mit jeder Verifizierungsanfrage, und Procaptcha lehnt ein Token ab, das von einer anderen IP gelöst wurde. Er ist **standardmäßig aus**: Die meisten Websites laufen hinter Cloudflare oder einem anderen Proxy, und würde die Adresse des Proxys statt der des Besuchers gesendet, würden echte Besucher abgelehnt.
+Der IP-Abgleich gilt nur für Site Keys, bei denen die **IP-Validierung** im Prosopo-Portal aktiviert ist (ab dem Professional-Tarif). Procaptcha vergleicht dann die IP, von der das CAPTCHA gelöst wurde, mit der IP, die Ihr Server sendet – nach den Regeln, die Sie im Portal festlegen (Wechsel von Land, Stadt, Anbieter und Entfernung). Dafür muss das Plugin die echte IP des Besuchers senden, deshalb ist die Einstellung **standardmäßig aus**: Bei Websites hinter Cloudflare oder einem anderen Proxy sieht der Server die Adresse des Proxys, und würde diese gesendet, lehnte die IP-Validierung echte Besucher ab.
 
 Zum Einschalten öffnen Sie **Einstellungen > Prosopo Procaptcha > General** und wählen unter **Abgleich der Besucher-IP**, woher die IP des Besuchers stammt:
 
@@ -57,7 +57,7 @@ add_filter('prosopo/procaptcha/visitor_ip', function (string $ip, string $remote
 }, 10, 2);
 ```
 
-Version 1.23.0 hat standardmäßig `REMOTE_ADDR` gesendet. Aktualisieren Sie auf 1.24.0 oder neuer, wenn Ihre Website hinter einem Proxy läuft.
+Version 1.23.0 hat standardmäßig `REMOTE_ADDR` gesendet. Wenn Ihr Site Key die IP-Validierung nutzt und Ihre Website hinter einem Proxy läuft, aktualisieren Sie auf 1.24.0 oder neuer.
 
 ## 5. Verifizierungsergebnis
 

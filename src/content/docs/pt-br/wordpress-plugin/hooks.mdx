@@ -39,7 +39,7 @@ add_filter('prosopo/procaptcha/captcha_attributes', function (array $attributes)
 
 ## 4. Correspondência do IP do visitante
 
-Com a correspondência de IP ativada, o plugin envia o endereço IP do visitante em cada solicitação de verificação, e o Procaptcha rejeita um token resolvido a partir de outro IP. Ela fica **desativada por padrão**: a maioria dos sites está atrás do Cloudflare ou de outro proxy, e enviar o endereço do proxy em vez do visitante rejeitaria visitantes reais.
+A correspondência de IP só se aplica a chaves de site com a **validação de IP** ativada no portal Prosopo (plano Professional ou superior). O Procaptcha compara então o IP de onde o captcha foi resolvido com o IP que o seu servidor envia, segundo as regras definidas no portal (mudança de país, cidade, provedor e distância). Para isso o plugin precisa enviar o IP real do visitante, por isso a configuração fica **desativada por padrão**: em sites atrás do Cloudflare ou de outro proxy, o servidor vê o endereço do proxy, e enviá-lo faria a validação de IP rejeitar visitantes reais.
 
 Para ativá-la, vá em **Configurações > Prosopo Procaptcha > General** e escolha de onde vem o IP do visitante em **Correspondência do IP do visitante**:
 
@@ -57,7 +57,7 @@ add_filter('prosopo/procaptcha/visitor_ip', function (string $ip, string $remote
 }, 10, 2);
 ```
 
-A versão 1.23.0 enviava `REMOTE_ADDR` por padrão. Atualize para a 1.24.0 ou posterior se o seu site estiver atrás de um proxy.
+A versão 1.23.0 enviava `REMOTE_ADDR` por padrão. Se a sua chave de site usa validação de IP e o seu site está atrás de um proxy, atualize para a 1.24.0 ou posterior.
 
 ## 5. Resultado da verificação
 
