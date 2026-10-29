@@ -37,17 +37,27 @@ add_filter('prosopo/procaptcha/captcha_attributes', function (array $attributes)
 });
 ```
 
-## 4. Dirección IP del visitante
+## 4. Coincidencia de IP del visitante
 
-A partir de la versión 1.23.0, el plugin envía la dirección IP del visitante con cada solicitud de verificación, lo que mejora la detección de bots. Por defecto utiliza `REMOTE_ADDR`. Si su sitio está detrás de un proxy o CDN como Cloudflare, `REMOTE_ADDR` es la dirección del proxy, así que pase la IP real del visitante con el filtro **prosopo/procaptcha/visitor_ip**:
+Con la coincidencia de IP activada, el plugin envía la dirección IP del visitante en cada solicitud de verificación, y Procaptcha rechaza un token resuelto desde otra IP. Está **desactivada por defecto**: la mayoría de los sitios están detrás de Cloudflare u otro proxy, y enviar la dirección del proxy en lugar de la del visitante rechazaría a visitantes reales.
+
+Para activarla, vaya a **Ajustes > Prosopo Procaptcha > General** y elija de dónde procede la IP del visitante en **Coincidencia de IP del visitante**:
+
+- **Activado: el sitio está detrás de Cloudflare**: la cabecera `CF-Connecting-IP`.
+- **Activado: el sitio está detrás de otro proxy**: la primera dirección de la cabecera `X-Forwarded-For`.
+- **Activado: los visitantes se conectan directamente**: `REMOTE_ADDR`.
+
+Elija solo una cabecera que establezca su proxy, ya que los visitantes pueden enviar estas cabeceras ellos mismos. Si falta la cabecera o no es una dirección IP válida, no se envía nada y el token se verifica sin coincidencia de IP.
+
+Para otras configuraciones, el filtro **prosopo/procaptcha/visitor_ip** recibe la IP del ajuste (vacía si está desactivado) y `REMOTE_ADDR`. Devuelva la IP que desea enviar, o una cadena vacía para no enviar ninguna:
 
 ```php
-add_filter('prosopo/procaptcha/visitor_ip', function (string $ip): string {
-    return $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $ip;
-});
+add_filter('prosopo/procaptcha/visitor_ip', function (string $ip, string $remote_addr): string {
+    return $_SERVER['HTTP_TRUE_CLIENT_IP'] ?? $ip;
+}, 10, 2);
 ```
 
-Confíe solo en una cabecera reenviada que establezca su proxy. Los valores que no sean una dirección IP válida no se envían.
+La versión 1.23.0 enviaba `REMOTE_ADDR` por defecto. Actualice a la 1.24.0 o posterior si su sitio está detrás de un proxy.
 
 ## 5. Resultado de la verificación
 

@@ -37,17 +37,27 @@ add_filter('prosopo/procaptcha/captcha_attributes', function (array $attributes)
 });
 ```
 
-## 4. Adresse IP du visiteur
+## 4. Correspondance de l'IP du visiteur
 
-Depuis la version 1.23.0, le plugin envoie l'adresse IP du visiteur avec chaque requête de vérification, ce qui améliore la détection des bots. Par défaut, il utilise `REMOTE_ADDR`. Si votre site est derrière un proxy ou un CDN comme Cloudflare, `REMOTE_ADDR` contient l'adresse du proxy : transmettez alors l'IP réelle du visiteur avec le filtre **prosopo/procaptcha/visitor_ip** :
+Lorsque la correspondance d'IP est activée, le plugin envoie l'adresse IP du visiteur avec chaque requête de vérification, et Procaptcha rejette un jeton résolu depuis une autre IP. Elle est **désactivée par défaut** : la plupart des sites sont derrière Cloudflare ou un autre proxy, et envoyer l'adresse du proxy au lieu de celle du visiteur rejetterait de vrais visiteurs.
+
+Pour l'activer, allez dans **Réglages > Prosopo Procaptcha > General** et choisissez d'où vient l'IP du visiteur sous **Correspondance de l'IP du visiteur** :
+
+- **Activé – le site est derrière Cloudflare** : l'en-tête `CF-Connecting-IP`.
+- **Activé – le site est derrière un autre proxy** : la première adresse de l'en-tête `X-Forwarded-For`.
+- **Activé – les visiteurs se connectent directement** : `REMOTE_ADDR`.
+
+Ne choisissez qu'un en-tête défini par votre proxy, car les visiteurs peuvent envoyer ces en-têtes eux-mêmes. Si l'en-tête est absent ou n'est pas une adresse IP valide, rien n'est envoyé et le jeton est vérifié sans correspondance d'IP.
+
+Pour d'autres configurations, le filtre **prosopo/procaptcha/visitor_ip** reçoit l'IP issue du réglage (vide s'il est désactivé) et `REMOTE_ADDR`. Renvoyez l'IP à envoyer, ou une chaîne vide pour n'en envoyer aucune :
 
 ```php
-add_filter('prosopo/procaptcha/visitor_ip', function (string $ip): string {
-    return $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $ip;
-});
+add_filter('prosopo/procaptcha/visitor_ip', function (string $ip, string $remote_addr): string {
+    return $_SERVER['HTTP_TRUE_CLIENT_IP'] ?? $ip;
+}, 10, 2);
 ```
 
-Ne faites confiance qu'à un en-tête transféré défini par votre proxy. Les valeurs qui ne sont pas une adresse IP valide ne sont pas envoyées.
+La version 1.23.0 envoyait `REMOTE_ADDR` par défaut. Passez à la 1.24.0 ou plus récente si votre site est derrière un proxy.
 
 ## 5. Résultat de la vérification
 
