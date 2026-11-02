@@ -119,8 +119,9 @@ ARM host Docker runs them under emulation. That needs QEMU: Docker Desktop has i
 it with `docker run --privileged --rm tonistiigi/binfmt --install amd64`. Emulated containers run noticeably slower.
 
 `PROSOPO_PROVIDER_IMAGE_VERSION` in your `.env` is set to the release your checkout documents, so the image and these
-instructions stay in step. When you pull a newer checkout, change it to match. `CADDY_IMAGE_VERSION` pins Caddy the same
-way.
+instructions stay in step. When you pull a newer checkout, change it to match. Caddy's version is pinned in the compose
+file, so a newer checkout brings the Caddy its `docker/provider.Caddyfile` needs; set `CADDY_IMAGE_VERSION` in `.env`
+only to override it.
 
 Two lines in the startup log are expected on a fresh node:
 
@@ -290,7 +291,7 @@ agent and of `document.head`, a timestamp, and the encryption. Leave it as it is
 
 Your detector runs in the visitor's browser, and its public key ships inside the bundle, so anyone who reads the bundle
 can send whatever score they like. The provider checks that a report was made for this visitor, this browser and this
-page within the last ten minutes. It cannot check that the score is honest. That is true of every client-side detector;
+page, and counts a report older than ten minutes against the visitor. It cannot check that the score is honest. That is true of every client-side detector;
 ours resists it with obfuscation and per-bundle rotation, which the example does not attempt.
 
 So a detector like this one stops off-the-shelf automation — default headless browsers and frameworks that make no
@@ -332,19 +333,19 @@ points at them.
 Starting from a directory with one subdirectory per label:
 
 ```bash
-pnpm --filter @prosopo/datasets-fs run build
+pnpm --filter @prosopo/datasets-fs run build:tsc
 cd packages/datasets-fs
 
 # Collapse the tree into one image directory plus a label map.
-node dist/cli.js flatten --in ./data --out ./flat --overwrite
-node dist/cli.js labels --in ./flat/data.json --out ./labels.json --overwrite
+node dist/tsc/cli.js flatten --in ./data --out ./flat --overwrite
+node dist/tsc/cli.js labels --in ./flat/data.json --out ./labels.json --overwrite
 
 # Upload ./flat/images somewhere public, then rewrite the paths to match.
-node dist/cli.js relocate --in ./flat/data.json --out ./data-hosted.json \
-  --from /abs/path/flat/images --to https://img.example.com --overwrite
-node dist/cli.js get --in ./data-hosted.json      # confirms every URL resolves
+node dist/tsc/cli.js relocate --in ./flat/data.json --out ./data-hosted.json \
+  --from "$PWD/flat/images" --to https://img.example.com --overwrite
+node dist/tsc/cli.js get --in ./data-hosted.json      # logs "failed" for any URL that doesn't load
 
-node dist/cli.js generate-v2 --out ./captchas.json \
+node dist/tsc/cli.js generate-v2 --out ./captchas.json \
   --labelled ./data-hosted.json --unlabelled ./data-hosted.json \
   --labels ./labels.json --seed 0 --size 9 --count 100 \
   --minCorrect 1 --minIncorrect 1 --minLabelled 2 --maxLabelled 7 \
@@ -410,16 +411,17 @@ PROSOPO_PROVIDER_LIST={"one":{"address":"5Abc...","url":"https://captcha1.exampl
 Here the first node takes about three quarters of the traffic. The format is documented in full in the
 [`@prosopo/load-balancer` README](https://github.com/prosopo/captcha/tree/main/packages/load-balancer).
 
-Every node needs its own `CADDY_DOMAIN` and certificate, and they can share one Mongo and Redis or run their own —
-sessions are looked up by the node that created them, so a shared Redis is only needed if you want a session to survive
-being routed to a different node mid-challenge.
+Every node needs its own `CADDY_DOMAIN` and certificate. They can share one Mongo and Redis or each run their own: a
+token carries the URL of the node that issued it, and your verifier sends it back to that node.
 
 Rebuild the widget whenever the list changes, and update your verifier's copy too.
 
 ## Optional extras
 
-- **Database indexes.** Mongo creates these automatically, but you can force them with
-  `docker compose exec provider /nodejs/bin/node /usr/src/app/provider.cli.bundle.js ensure_indexes`.
+- **Database indexes.** The provider creates these automatically. You can force them with
+  `docker compose exec provider /nodejs/bin/node /usr/src/app/provider.cli.bundle.js ensure_indexes`, but up to
+  `prosopo/provider:3.10.3` that command stops with `mongoCaptchaUri not set in config` and does nothing
+  ([prosopo/captcha#3698](https://github.com/prosopo/captcha/pull/3698) fixes it).
 - **Upgrades.** Pull a newer checkout, set `PROSOPO_PROVIDER_IMAGE_VERSION` in `.env` to match, and run
   `docker compose up -d`. Rebuild the widget when you upgrade so
   the two stay on the same release.
