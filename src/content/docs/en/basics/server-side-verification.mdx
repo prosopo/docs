@@ -1,14 +1,13 @@
 ---
 title: Server-side verification
 description: Verify the Procaptcha response on your server to verify that the user is a real person.
-i18nReady: true
 ---
 
 By adding the client side code, you were able to render a Procaptcha widget that identified if users were real people or
 automated bots. When the captcha succeeded, the Procaptcha script inserted unique data into your form data, which is
 then sent to your server for verification. The are currently two options for verifying the user's response server side:
 
-## API Verification
+## API verification
 
 To verify that the token is indeed real and valid, you must now verify it at the API endpoint:
 
@@ -71,9 +70,9 @@ request. The closer the score is to 1, the more likely it is that the request is
 }
 ```
 
-### Optional Fields
+### Optional fields
 
-#### IP Address
+#### IP address
 
 [Professional and Enterprise Tier](https://prosopo.io/pricing/) can pass the user's IP address to the verification endpoint, which will allow Prosopo to perform additional checks
 on the request. This is optional, but recommended for better accuracy. To do this, include the `ip` field in your POST data:
@@ -126,7 +125,7 @@ verifies as normal.
 > Note: the field is `clientSessionId`, not `sessionId`. Verification *responses* may contain a `sessionId` field, which
 > is Prosopo's own frictionless session and is unrelated to yours.
 
-## Verification Code Examples
+## Verification code examples
 
 ### JavaScript
 
@@ -223,11 +222,11 @@ verifies as normal.
 </section>
 
 
-## Verification Package
+## Verification package
 
 We have a JavaScript implementation of the Procaptcha verification package [available on npm](https://www.npmjs.com/package/@prosopo/server).
 
-### JavaScript / TypeScript Verification
+### JavaScript / TypeScript verification
 
 The `@prosopo/server` package is available on NPM and can be installed using:
 
@@ -267,7 +266,7 @@ if (result.verified) {
 
 There is an example TypeScript server [NodeJS Server Side Example](/en/demos/client-example-server/) that you run locally.
 
-## Error Responses
+## Error responses
 
 All `/siteverify` responses use a uniform JSON envelope. For programmatic handling, branch on `error.key` (a stable,
 machine-readable identifier) rather than `error.message` (human-readable, and not guaranteed to stay word-for-word

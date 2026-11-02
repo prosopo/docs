@@ -1,7 +1,6 @@
 ---
-title: IP Validation Rules
+title: IP validation rules
 description: Configure IP validation rules to detect and respond to suspicious IP behavior during CAPTCHA verification.
-i18nReady: true
 ---
 import {Image} from 'astro:assets';
 import IPValidationRules from '~/assets/ip-validation-rules.png';
@@ -15,9 +14,9 @@ IP validation checks compare the IP address used during CAPTCHA solving with the
 <Image src={IPValidationRules} alt={'IP Validation Rules'} style="margin: 20px auto;"/>
 
 
-## Enabling IP Validation
+## Enabling IP validation
 
-To enable IP validation checks, you must pass the user's IP address when verifying the CAPTCHA response. See the [Server-side Verification](/en/basics/server-side-verification/#optional-ip-address) documentation for details on including the IP address in your verification request.
+To enable IP validation checks, you must pass the user's IP address when verifying the CAPTCHA response. See the [Server-side Verification](/en/basics/server-side-verification/#ip-address) documentation for details on including the IP address in your verification request.
 
 ```json
 {
@@ -29,27 +28,27 @@ To enable IP validation checks, you must pass the user's IP address when verifyi
 
 Without providing the IP address, IP validation rules will not be applied.
 
-## Validation Types
+## Validation types
 
-### Country Change Detection
+### Country change detection
 
 Detects when the user's country changes between solving the CAPTCHA and verification. This can indicate the use of VPNs, proxies, or other techniques to mask the true origin.
 
 **Use case:** Block requests where the country changes between CAPTCHA solving and verification.
 
-### City Change Detection
+### City change detection
 
 Detects when the user's city changes between requests. More granular than country detection, this can identify suspicious behavior within the same country.
 
 **Use case:** Flag or reject requests where users appear to rapidly change cities.
 
-### ISP Change Detection
+### ISP change detection
 
 Detects when the Internet Service Provider changes between requests. Legitimate users typically remain on the same ISP during a session.
 
 **Use case:** Identify potential bot networks or proxy usage by detecting ISP changes.
 
-### Distance Threshold
+### Distance threshold
 
 Calculates the geographic distance between IP addresses. If the distance exceeds your configured threshold, the action is triggered.
 
@@ -65,7 +64,7 @@ For each validation type, you can configure one of three actions:
 
 ## Configuration
 
-### Global Rules
+### Global rules
 
 Global IP validation rules apply to all requests unless overridden by country-specific rules.
 
@@ -83,7 +82,7 @@ Global IP validation rules apply to all requests unless overridden by country-sp
 }
 ```
 
-### Logic Modes
+### Logic modes
 
 **Any Condition (OR Logic)** - `requireAllConditions: false`
 - Any single validation that triggers will cause the configured action
@@ -95,7 +94,7 @@ Global IP validation rules apply to all requests unless overridden by country-sp
 - More permissive approach
 - Useful for reducing false positives
 
-### Country-Specific Overrides
+### Country-specific overrides
 
 You can override global rules for specific countries using ISO 3166-1 alpha-2 country codes.
 
@@ -130,7 +129,7 @@ You can override global rules for specific countries using ISO 3166-1 alpha-2 co
 
 Country overrides only need to specify the fields you want to change. Unspecified fields will use the global defaults.
 
-## Configuration via Portal
+## Configuration via portal
 
 IP Validation rules can be configured through the [Prosopo Portal](https://portal.prosopo.io) in the Site Settings under the IP Validation tab. The interface provides:
 
@@ -139,7 +138,7 @@ IP Validation rules can be configured through the [Prosopo Portal](https://porta
 - Logic mode selection (AND/OR)
 - Country-specific override management
 
-## Default Values
+## Default values
 
 If IP validation rules are not configured, the following defaults apply:
 
@@ -151,7 +150,7 @@ If IP validation rules are not configured, the following defaults apply:
 - **Logic Mode**: Any condition (OR)
 - **Force Consistent IP**: false
 
-## Verification Response
+## Verification response
 
 When IP validation rules are configured and an IP address is provided during verification, the validation results are evaluated according to your rules. If a validation fails and the action is set to "reject", the verification endpoint will return:
 
@@ -163,9 +162,9 @@ When IP validation rules are configured and an IP address is provided during ver
 
 The specific reason for rejection is logged server-side but not exposed in the API response for security purposes.
 
-## Use Cases
+## Use cases
 
-### High-Security Applications
+### High-security applications
 
 For applications requiring strict security (banking, healthcare):
 
@@ -182,7 +181,7 @@ For applications requiring strict security (banking, healthcare):
 }
 ```
 
-### Moderate Security with Monitoring
+### Moderate security with monitoring
 
 For applications wanting to monitor suspicious activity without blocking legitimate users:
 
@@ -199,7 +198,7 @@ For applications wanting to monitor suspicious activity without blocking legitim
 }
 ```
 
-### Regional Applications
+### Regional applications
 
 For applications serving specific geographic regions:
 
@@ -218,14 +217,14 @@ For applications serving specific geographic regions:
 
 ## Considerations
 
-### VPN and Proxy Usage
+### VPN and proxy usage
 
 Legitimate users may use VPNs or proxies, which can trigger IP validation rules. Consider:
 - Using "flag" actions instead of "reject" for less critical validations
 - Configuring country-specific overrides for regions with high VPN usage
 - Adjusting distance thresholds to be more permissive
 
-### Mobile Users
+### Mobile users
 
 Mobile users may legitimately change IP addresses, cities, or ISPs as they move. Consider:
 - Using higher distance thresholds

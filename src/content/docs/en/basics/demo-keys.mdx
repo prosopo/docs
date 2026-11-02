@@ -1,18 +1,17 @@
 ---
-title: Demo Keys
+title: Demo keys
 description: Learn how to use Prosopo demo keys for testing, development, and CI/CD environments without requiring production site keys.
-i18nReady: true
 ---
 
 Demo keys provide predictable CAPTCHA behavior for testing, development, and automated CI/CD pipelines. They enable you to test your integration and display a warning banner to prevent accidental production usage.
 
-## What are Demo Keys?
+## What are demo keys?
 
 Demo keys are special, hardcoded site keys that bypass normal CAPTCHA verification and return predictable results. They provide trivial challenges with predetermined outcomes.
 
 There are two demo keys available:
 
-### Always Pass Key
+### Always pass key
 
 **Site Key:** `5DAAnrj7VHTznn2AWBemMuyBwZWs6FNFjdyVXUeYum3PTXFy`
 
@@ -24,7 +23,7 @@ This key provides trivial CAPTCHA challenges that automatically verify successfu
 - `onCaptchaVerified` callback is triggered
 - Red warning banner displays on the widget
 
-### Always Fail Key
+### Always fail key
 
 **Site Key:** `5CiPPseXPECbkjWCa6MnjNokrgYjMqmKndv2rSnekmSK2DjL`
 
@@ -37,7 +36,7 @@ This key provides trivial CAPTCHA challenges that always fail verification. Use 
 - Red warning banner displays on the widget
 - User can retry the challenge
 
-## When to Use Demo Keys
+## When to use demo keys
 
 Demo keys are appropriate for:
 
@@ -47,7 +46,7 @@ Demo keys are appropriate for:
 - **Prototyping** - Quick integration testing during development
 - **Demo Environments** - Showcase integration without real CAPTCHA challenges
 
-## When NOT to Use Demo Keys
+## When NOT to use demo keys
 
 Demo keys should NEVER be used in:
 
@@ -56,7 +55,7 @@ Demo keys should NEVER be used in:
 - **User Acceptance Testing** - Real site keys ensure accurate testing of the user experience
 - **Load Testing** - Demo keys don't reflect real provider performance
 
-## Using Demo Keys
+## Using demo keys
 
 ### HTML/JavaScript
 

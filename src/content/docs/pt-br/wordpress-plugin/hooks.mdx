@@ -1,7 +1,6 @@
 ---
 title: 'Filters e Hooks'
 description: 'Filters e hooks.'
-i18nReady: true
 ---
 
 O plugin Procaptcha introduz novos filters e hooks do WordPress, permitindo que você personalize seu comportamento.
@@ -33,12 +32,69 @@ Além das preferências de estilo nas configurações do plugin, você pode pers
 
 ```php
 add_filter('prosopo/procaptcha/captcha_attributes', function (array $attributes): array {
-    $attributes['lang'] = 'de';
+    $attributes['language'] = 'de';
     return $attributes;
 });
 ```
 
-## 4. Formulários com Procaptcha em Testes
+## 4. Correspondência do IP do visitante
+
+A correspondência de IP só se aplica a chaves de site com a **validação de IP** ativada no portal Prosopo (plano Professional ou superior). O Procaptcha compara então o IP de onde o captcha foi resolvido com o IP que o seu servidor envia, segundo as regras definidas no portal (mudança de país, cidade, provedor e distância). Para isso o plugin precisa enviar o IP real do visitante, por isso a configuração fica **desativada por padrão**: em sites atrás do Cloudflare ou de outro proxy, o servidor vê o endereço do proxy, e enviá-lo faria a validação de IP rejeitar visitantes reais.
+
+Para ativá-la, vá em **Configurações > Prosopo Procaptcha > General** e escolha de onde vem o IP do visitante em **Correspondência do IP do visitante**:
+
+- **Ativado – o site está atrás do Cloudflare**: o cabeçalho `CF-Connecting-IP`.
+- **Ativado – o site está atrás de outro proxy**: o primeiro endereço do cabeçalho `X-Forwarded-For`.
+- **Ativado – os visitantes se conectam diretamente**: `REMOTE_ADDR`.
+
+Escolha apenas um cabeçalho definido pelo seu proxy, pois os visitantes podem enviar esses cabeçalhos por conta própria. Se o cabeçalho estiver ausente ou não for um endereço IP válido, nada é enviado e o token é verificado sem correspondência de IP.
+
+Para outras configurações, o filtro **prosopo/procaptcha/visitor_ip** recebe o IP da configuração (vazio quando desativada) e `REMOTE_ADDR`. Retorne o IP a enviar, ou uma string vazia para não enviar nenhum:
+
+```php
+add_filter('prosopo/procaptcha/visitor_ip', function (string $ip, string $remote_addr): string {
+    return $_SERVER['HTTP_TRUE_CLIENT_IP'] ?? $ip;
+}, 10, 2);
+```
+
+A versão 1.23.0 enviava `REMOTE_ADDR` por padrão. Se a sua chave de site usa validação de IP e o seu site está atrás de um proxy, atualize para a 1.24.0 ou posterior.
+
+## 5. Resultado da verificação
+
+A partir da versão 1.24.0, a action **prosopo/procaptcha/verification_result** é executada após cada solicitação de verificação com o resultado e a resposta da API, para que você possa registrar a pontuação ou o motivo pelo qual um envio foi rejeitado. Quando `WP_DEBUG` está ativo, as verificações que falharam também são gravadas no log de depuração.
+
+```php
+add_action('prosopo/procaptcha/verification_result', function (bool $verified, array $response): void {
+    // $response: verified, status, score, reason, error, sessionId
+    if (! $verified) {
+        error_log('Procaptcha rejected a submission: ' . ($response['reason'] ?? 'unknown'));
+    }
+}, 10, 2);
+```
+
+## 6. Eventos JavaScript
+
+A partir da versão 1.24.0, o widget dispara estes eventos, que se propagam até o formulário e o documento:
+
+- `prosopo-procaptcha:filled`: o visitante resolveu o captcha. `event.detail.token` contém o token.
+- `prosopo-procaptcha:cleared`: o token expirou ou o widget foi redefinido.
+
+Um token só pode ser verificado uma vez. O plugin redefine o captcha após os envios AJAX dos plugins de formulário compatíveis. Nos seus próprios formulários AJAX, dispare `prosopo-procaptcha:reset` no formulário (ou em qualquer elemento que contenha o captcha, ou em `document` para redefinir todos):
+
+```js
+document.addEventListener('prosopo-procaptcha:filled', (event) => {
+    console.log('Token received', event.detail.token);
+});
+
+document.addEventListener('prosopo-procaptcha:cleared', (event) => {
+    console.log('Token expired or the widget was reset', event.target);
+});
+
+// Reset the captcha in a form, e.g. after your own AJAX submission.
+form.dispatchEvent(new Event('prosopo-procaptcha:reset'));
+```
+
+## 7. Formulários com Procaptcha em Testes
 
 Se seus testes envolvem formulários com Procaptcha, você pode ignorar o Procaptcha adicionando a seguinte constante ao seu arquivo wp-config.php:
 

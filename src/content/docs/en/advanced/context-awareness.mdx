@@ -1,7 +1,6 @@
 ---
-title: Context Awareness
+title: Context awareness
 description: Protect CAPTCHA verification by applying environment-sensitive checks and configurable context thresholds to reduce fraudulent or unexpected origin usage.
-i18nReady: true
 ---
 import { Image } from 'astro:assets';
 import ContextAwarenessSettings from '~/assets/prosopo-context-settings.webp';
@@ -11,13 +10,13 @@ Context Awareness helps prevent your CAPTCHA from being used on forged or unexpe
 Context Awareness is not available on the Free tier. Please [upgrade](https://prosopo.io/pricing/) to access this functionality.
 
 
-## What is Context Awareness?
+## What is context awareness?
 
 Context Awareness compares runtime signals from incoming requests (origin, frame/embedding context, environment) to your expected site context. When discrepancies are detected, the system can raise verification difficulty or fail verification to reduce abuse from embedded or forged origins.
 
-## How Context Awareness Works
+## How context awareness works
 
-### Detection Flow
+### Detection flow
 
 1. **Request arrives** - The system gathers environment signals such as origin, embedding/frame status, and client indicators.
 2. **Context comparison** - Signals are compared against the configured expected site context.
@@ -39,7 +38,7 @@ Three-position slider controlling sensitivity. Medium is recommended; Low is per
 
 <Image src={ContextAwarenessSettings} alt={'prosopo context awareness settings'} />
 
-### Threshold Ranges
+### Threshold ranges
 
 | Range | Label | Description |
 |-------|-------|-------------|
@@ -47,17 +46,17 @@ Three-position slider controlling sensitivity. Medium is recommended; Low is per
 | Medium |  Balanced | Recommended default — good tradeoff between UX and security. |
 | High |  Strict | Blocks more suspicious contexts; may increase false positives. |
 
-## Permissions & Behavior
+## Permissions & behavior
 
 - Free tier users cannot enable `Disallow Webview` nor `Context Awareness`. Attempting to toggle will show the upgrade CTA.
 - Viewer mode renders controls read-only and displays an informational hint.
 
-## Real-World Examples
+## Real-world examples
 
 - E-commerce: Start with Medium. During promotions, monitor traffic before lowering sensitivity to reduce friction. If under attack, raise to High temporarily.
 - Embedded widget: If your site is intended to be embedded, avoid High sensitivity or explicitly whitelist integration contexts.
 
-## Configuring Context Awareness
+## Configuring context awareness
 
 1. Log in to the Prosopo portal.
 2. Navigate to your site settings.
@@ -65,7 +64,7 @@ Three-position slider controlling sensitivity. Medium is recommended; Low is per
 4. Toggle the feature and set the Threshold Slider to Low / Medium / High.
 5. Save changes and monitor analytics to validate behavior.
 
-## Getting Help
+## Getting help
 
 - Contact Prosopo support via [Discord](https://discord.com/invite/dwQx2w9Tgm).
 - Review analytics data with our team to fine-tune settings.
