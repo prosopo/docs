@@ -35,14 +35,17 @@ that is what the managed tiers are for.
 ## Before you start
 
 <aside>
-No server with a public IP? [Run it on Cloudflare's free plan](/en/self-hosting/cloudflare/) instead — any machine with
-Docker will do, and you don't need a domain.
+No server with a public IP? [Run it on Cloudflare's free plan](/en/self-hosting/cloudflare/) instead — a machine at
+home running Docker will do, and you don't need a domain.
 </aside>
 
-- A host with Docker and Docker Compose, and at least 4&nbsp;GB of RAM.
+- A host with Docker and Docker Compose, and at least 4&nbsp;GB of RAM. The `prosopo/provider` and `prosopo/caddy`
+  images are published for `linux/amd64` only, so an x86-64 host is best. An ARM host (Apple Silicon, Raspberry Pi,
+  AWS Graviton) runs them under emulation, which is slower — see [step 2](#2-start-the-stack).
 - A public domain name pointing at that host, with ports 80 and 443 reachable from the internet. The provider itself
   speaks plain HTTP on 9229 and obtains no certificates; the bundled Caddy container does that for it.
-- Node.js 24 and pnpm (via `corepack enable`), to generate accounts and build the widget.
+- Node.js 24 and pnpm (via `corepack enable`), to generate accounts and build the widget. You don't need Rust: the
+  provider's native code ships inside the image.
 
 You don't need to write a reverse-proxy config. The repository ships the one we run in production at
 [`docker/provider.Caddyfile`](https://github.com/prosopo/captcha/blob/main/docker/provider.Caddyfile), and it is driven
@@ -50,16 +53,16 @@ entirely by environment variables — the compose file below wires it up.
 
 ## 1. Clone and generate your environment file
 
-Clone with submodules, install, and build the workspace once — the env script and every later step use the built
-packages. Then one script writes the whole environment file: it generates the provider account, the site key account and
-strong random passwords for Mongo and Redis, and fills in every other value from the hostname you give it.
+Clone with submodules, install, and build the packages the env script and the widget use. Then one script writes the
+whole environment file: it generates the provider account, the site key account and strong random passwords for Mongo
+and Redis, and fills in every other value from the hostname you give it.
 
 ```bash
 git clone --recurse-submodules https://github.com/prosopo/captcha
 cd captcha
 corepack enable
 pnpm install --frozen-lockfile
-pnpm run build:all
+pnpm run build:self-hosted
 
 pnpm exec tsx ./dev/scripts/src/scripts/generateSelfHostedEnv.ts --host captcha.example.com
 ```
@@ -68,6 +71,9 @@ pnpm exec tsx ./dev/scripts/src/scripts/generateSelfHostedEnv.ts --host captcha.
 {"scope":"generateSelfHostedEnv","level":"info","data":{"siteKeyAddress":"5FpdLFe3Mhi1JSo3vyu1UheV7vG5kFYfiWfNvbLCA2a2W4Sz","providerAddress":"5GnjcGsBoGLrVMhmfnkdXcTtACSGWhxokSx71U3PaWLRg1ti"},"msg":"Accounts generated"}
 {"scope":"generateSelfHostedEnv","level":"info","data":{"outputPath":"/home/you/captcha/.env"},"msg":"Environment file written"}
 ```
+
+`build:self-hosted` builds only what this guide needs. `pnpm run build:all` builds the whole repository, including
+the provider's Rust addons, and fails without a Rust toolchain.
 
 Anything printed above those two lines, such as a `@polkadot/util has multiple versions` warning or
 `[AsyncFunction: makeDirectory]`, is noise from the build tooling — the script has not failed.
@@ -107,6 +113,10 @@ front of it. Redis must be `redis-stack` rather than stock Redis: the provider s
 index. Caddy is `prosopo/caddy` rather than upstream Caddy, because
 [`docker/provider.Caddyfile`](https://github.com/prosopo/captcha/blob/main/docker/provider.Caddyfile) — the config we
 run in production — needs four plugins compiled in (`caddy-l4`, `chaddy`, `caddy-ratelimit`, `caddy-requestid`).
+
+The provider and Caddy images are published for `linux/amd64` only. The compose file asks for that platform, so on an
+ARM host Docker runs them under emulation. That needs QEMU: Docker Desktop has it built in, and on Linux you can install
+it with `docker run --privileged --rm tonistiigi/binfmt --install amd64`. Emulated containers run noticeably slower.
 
 `PROSOPO_PROVIDER_IMAGE_VERSION` in your `.env` is set to the release your checkout documents, so the image and these
 instructions stay in step. When you pull a newer checkout, change it to match. `CADDY_IMAGE_VERSION` pins Caddy the same
@@ -218,7 +228,7 @@ This needs a provider image newer than 3.8.38. Check `PROSOPO_PROVIDER_IMAGE_VER
 provider.
 
 ```bash
-pnpm --filter @prosopo/detector-botd run build
+pnpm --filter @prosopo/detector-botd run bundle
 pnpm --filter @prosopo/detector-botd run pool --out detector-pool.json
 
 docker compose exec -T provider /nodejs/bin/node /usr/src/app/provider.cli.bundle.js detector_pool_set < detector-pool.json

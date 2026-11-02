@@ -1,10 +1,13 @@
 ---
 title: Self-hosting on Cloudflare's free plan
-description: Run your own Procaptcha provider on any machine with Docker, with Cloudflare in front of it. No domain, no public IP, no open ports and no certificates.
+description: Run your own Procaptcha provider on a machine at home, with Cloudflare in front of it. No domain, no public IP, no open ports and no certificates.
 ---
 
 The [main guide](/en/self-hosting/) assumes a server with a public IP and ports 80 and 443 open. If you don't have one,
-any machine that can run Docker will do — a spare PC, a home server, a laptop — with Cloudflare in front of it.
+a machine at home will do — a spare PC, a home server, a laptop — with Cloudflare in front of it. It needs Docker,
+at least 4&nbsp;GB of RAM, and to stay on while you want the CAPTCHA to work. The provider image is published for
+`linux/amd64` only, so an x86-64 machine is best; an ARM machine such as a Mac with Apple Silicon or a Raspberry Pi runs
+it under emulation, which is slower (see [step 2 of the main guide](/en/self-hosting/#2-start-the-stack)).
 
 All you need is a **free Cloudflare account**. No domain, no public IP, no open ports, no certificates.
 
@@ -27,8 +30,8 @@ so the Caddy container from the main guide is not used.
 ## 1. Clone and build
 
 Follow [step 1 of the main guide](/en/self-hosting/#1-clone-and-generate-your-environment-file) up to and including
-`pnpm run build:all`, but don't generate the environment file yet — you'll generate it below with the Worker's
-hostname.
+`pnpm run build:self-hosted`, but don't generate the environment file yet — you'll generate it below with the
+Worker's hostname.
 
 ## 2. Create the tunnel
 
