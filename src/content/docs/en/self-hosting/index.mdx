@@ -35,14 +35,17 @@ that is what the managed tiers are for.
 ## Before you start
 
 <aside>
-No server with a public IP? [Run it on Cloudflare's free plan](/en/self-hosting/cloudflare/) instead — any machine with
-Docker will do, and you don't need a domain.
+No server with a public IP? [Run it on Cloudflare's free plan](/en/self-hosting/cloudflare/) instead — a machine at
+home running Docker will do, and you don't need a domain.
 </aside>
 
-- A host with Docker and Docker Compose, and at least 4&nbsp;GB of RAM.
+- A host with Docker and Docker Compose, and at least 4&nbsp;GB of RAM. The `prosopo/provider` and `prosopo/caddy`
+  images are published for `linux/amd64` only, so an x86-64 host is best. An ARM host (Apple Silicon, Raspberry Pi,
+  AWS Graviton) runs them under emulation, which is slower — see [step 2](#2-start-the-stack).
 - A public domain name pointing at that host, with ports 80 and 443 reachable from the internet. The provider itself
   speaks plain HTTP on 9229 and obtains no certificates; the bundled Caddy container does that for it.
-- Node.js 24 and pnpm (via `corepack enable`), to generate accounts and build the widget.
+- Node.js 24 and pnpm (via `corepack enable`), to generate accounts and build the widget. You don't need Rust: the
+  provider's native code ships inside the image.
 
 You don't need to write a reverse-proxy config. The repository ships the one we run in production at
 [`docker/provider.Caddyfile`](https://github.com/prosopo/captcha/blob/main/docker/provider.Caddyfile), and it is driven
@@ -50,16 +53,16 @@ entirely by environment variables — the compose file below wires it up.
 
 ## 1. Clone and generate your environment file
 
-Clone with submodules, install, and build the workspace once — the env script and every later step use the built
-packages. Then one script writes the whole environment file: it generates the provider account, the site key account and
-strong random passwords for Mongo and Redis, and fills in every other value from the hostname you give it.
+Clone with submodules, install, and build the packages the env script and the widget use. Then one script writes the
+whole environment file: it generates the provider account, the site key account and strong random passwords for Mongo
+and Redis, and fills in every other value from the hostname you give it.
 
 ```bash
 git clone --recurse-submodules https://github.com/prosopo/captcha
 cd captcha
 corepack enable
 pnpm install --frozen-lockfile
-pnpm run build:all
+pnpm run build:self-hosted
 
 pnpm exec tsx ./dev/scripts/src/scripts/generateSelfHostedEnv.ts --host captcha.example.com
 ```
@@ -68,6 +71,9 @@ pnpm exec tsx ./dev/scripts/src/scripts/generateSelfHostedEnv.ts --host captcha.
 {"scope":"generateSelfHostedEnv","level":"info","data":{"siteKeyAddress":"5FpdLFe3Mhi1JSo3vyu1UheV7vG5kFYfiWfNvbLCA2a2W4Sz","providerAddress":"5GnjcGsBoGLrVMhmfnkdXcTtACSGWhxokSx71U3PaWLRg1ti"},"msg":"Accounts generated"}
 {"scope":"generateSelfHostedEnv","level":"info","data":{"outputPath":"/home/you/captcha/.env"},"msg":"Environment file written"}
 ```
+
+`build:self-hosted` builds only what this guide needs. `pnpm run build:all` builds the whole repository, including
+the provider's Rust addons, and fails without a Rust toolchain.
 
 Anything printed above those two lines, such as a `@polkadot/util has multiple versions` warning or
 `[AsyncFunction: makeDirectory]`, is noise from the build tooling — the script has not failed.
@@ -108,9 +114,14 @@ index. Caddy is `prosopo/caddy` rather than upstream Caddy, because
 [`docker/provider.Caddyfile`](https://github.com/prosopo/captcha/blob/main/docker/provider.Caddyfile) — the config we
 run in production — needs four plugins compiled in (`caddy-l4`, `chaddy`, `caddy-ratelimit`, `caddy-requestid`).
 
+The provider and Caddy images are published for `linux/amd64` only. The compose file asks for that platform, so on an
+ARM host Docker runs them under emulation. That needs QEMU: Docker Desktop has it built in, and on Linux you can install
+it with `docker run --privileged --rm tonistiigi/binfmt --install amd64`. Emulated containers run noticeably slower.
+
 `PROSOPO_PROVIDER_IMAGE_VERSION` in your `.env` is set to the release your checkout documents, so the image and these
-instructions stay in step. When you pull a newer checkout, change it to match. `CADDY_IMAGE_VERSION` pins Caddy the same
-way.
+instructions stay in step. When you pull a newer checkout, change it to match. Caddy's version is pinned in the compose
+file, so a newer checkout brings the Caddy its `docker/provider.Caddyfile` needs; set `CADDY_IMAGE_VERSION` in `.env`
+only to override it.
 
 Two lines in the startup log are expected on a fresh node:
 
@@ -218,7 +229,7 @@ This needs a provider image newer than 3.8.38. Check `PROSOPO_PROVIDER_IMAGE_VER
 provider.
 
 ```bash
-pnpm --filter @prosopo/detector-botd run build
+pnpm --filter @prosopo/detector-botd run bundle
 pnpm --filter @prosopo/detector-botd run pool --out detector-pool.json
 
 docker compose exec -T provider /nodejs/bin/node /usr/src/app/provider.cli.bundle.js detector_pool_set < detector-pool.json
@@ -280,7 +291,7 @@ agent and of `document.head`, a timestamp, and the encryption. Leave it as it is
 
 Your detector runs in the visitor's browser, and its public key ships inside the bundle, so anyone who reads the bundle
 can send whatever score they like. The provider checks that a report was made for this visitor, this browser and this
-page within the last ten minutes. It cannot check that the score is honest. That is true of every client-side detector;
+page, and counts a report older than ten minutes against the visitor. It cannot check that the score is honest. That is true of every client-side detector;
 ours resists it with obfuscation and per-bundle rotation, which the example does not attempt.
 
 So a detector like this one stops off-the-shelf automation — default headless browsers and frameworks that make no
@@ -322,19 +333,19 @@ points at them.
 Starting from a directory with one subdirectory per label:
 
 ```bash
-pnpm --filter @prosopo/datasets-fs run build
+pnpm --filter @prosopo/datasets-fs run build:tsc
 cd packages/datasets-fs
 
 # Collapse the tree into one image directory plus a label map.
-node dist/cli.js flatten --in ./data --out ./flat --overwrite
-node dist/cli.js labels --in ./flat/data.json --out ./labels.json --overwrite
+node dist/tsc/cli.js flatten --in ./data --out ./flat --overwrite
+node dist/tsc/cli.js labels --in ./flat/data.json --out ./labels.json --overwrite
 
 # Upload ./flat/images somewhere public, then rewrite the paths to match.
-node dist/cli.js relocate --in ./flat/data.json --out ./data-hosted.json \
-  --from /abs/path/flat/images --to https://img.example.com --overwrite
-node dist/cli.js get --in ./data-hosted.json      # confirms every URL resolves
+node dist/tsc/cli.js relocate --in ./flat/data.json --out ./data-hosted.json \
+  --from "$PWD/flat/images" --to https://img.example.com --overwrite
+node dist/tsc/cli.js get --in ./data-hosted.json      # logs "failed" for any URL that doesn't load
 
-node dist/cli.js generate-v2 --out ./captchas.json \
+node dist/tsc/cli.js generate-v2 --out ./captchas.json \
   --labelled ./data-hosted.json --unlabelled ./data-hosted.json \
   --labels ./labels.json --seed 0 --size 9 --count 100 \
   --minCorrect 1 --minIncorrect 1 --minLabelled 2 --maxLabelled 7 \
@@ -400,16 +411,17 @@ PROSOPO_PROVIDER_LIST={"one":{"address":"5Abc...","url":"https://captcha1.exampl
 Here the first node takes about three quarters of the traffic. The format is documented in full in the
 [`@prosopo/load-balancer` README](https://github.com/prosopo/captcha/tree/main/packages/load-balancer).
 
-Every node needs its own `CADDY_DOMAIN` and certificate, and they can share one Mongo and Redis or run their own —
-sessions are looked up by the node that created them, so a shared Redis is only needed if you want a session to survive
-being routed to a different node mid-challenge.
+Every node needs its own `CADDY_DOMAIN` and certificate. They can share one Mongo and Redis or each run their own: a
+token carries the URL of the node that issued it, and your verifier sends it back to that node.
 
 Rebuild the widget whenever the list changes, and update your verifier's copy too.
 
 ## Optional extras
 
-- **Database indexes.** Mongo creates these automatically, but you can force them with
-  `docker compose exec provider /nodejs/bin/node /usr/src/app/provider.cli.bundle.js ensure_indexes`.
+- **Database indexes.** The provider creates these automatically. You can force them with
+  `docker compose exec provider /nodejs/bin/node /usr/src/app/provider.cli.bundle.js ensure_indexes`, but up to
+  `prosopo/provider:3.10.3` that command stops with `mongoCaptchaUri not set in config` and does nothing
+  ([prosopo/captcha#3698](https://github.com/prosopo/captcha/pull/3698) fixes it).
 - **Upgrades.** Pull a newer checkout, set `PROSOPO_PROVIDER_IMAGE_VERSION` in `.env` to match, and run
   `docker compose up -d`. Rebuild the widget when you upgrade so
   the two stay on the same release.
