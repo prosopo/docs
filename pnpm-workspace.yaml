@@ -1,0 +1,11 @@
+allowBuilds:
+  "@biomejs/biome": true
+  esbuild: true
+  sharp: true
+
+savePrefix: ""
+maxSockets: 10
+fetchRetries: 100
+fetchRetryMintimeout: 1
+fetchRetryMaxtimeout: 10000
+fetchRetryFactor: 2

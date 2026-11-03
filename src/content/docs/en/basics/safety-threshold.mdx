@@ -1,7 +1,6 @@
 ---
-title: Safety Threshold
+title: Safety threshold
 description: Understanding and configuring the Safety Threshold in your Prosopo portal settings to balance security and user experience.
-i18nReady: true
 ---
 import { Image } from 'astro:assets';
 import CaptchaTypeSettings from '~/assets/captcha-type-settings.png';
@@ -13,7 +12,7 @@ The threshold lives on the **CAPTCHA Type** card in Site Settings, and only appl
 
 <Image src={CaptchaTypeSettings} alt="prosopo CAPTCHA type and safety threshold settings" style="margin: 20px auto;"/>
 
-## What is Safety Threshold?
+## What is safety threshold?
 
 The Safety Threshold is a numerical value between 0.2 and 0.8 that represents the confidence level required before a user is considered legitimate. When Prosopo's frictionless system analyzes a user's behavior, it generates a "bot score" - a number indicating how likely the user is to be a bot.
 
@@ -22,9 +21,9 @@ The Safety Threshold is a numerical value between 0.2 and 0.8 that represents th
 
 The Safety Threshold determines the cutoff point: users with bot scores above your threshold will be presented with a CAPTCHA challenge, while those below will pass through without interruption, simply completing a PoW CAPTCHA in the background.
 
-## How Safety Threshold Works
+## How safety threshold works
 
-### The Bot Detection Process
+### The bot detection process
 
 1. **User visits your site** - Prosopo's frictionless system begins analyzing browser behavior
 2. **Behavioral analysis** - The system examines factors like:
@@ -39,7 +38,7 @@ The Safety Threshold determines the cutoff point: users with bot scores above yo
    - **Score < Threshold**: User passes through (invisible PoW challenge)
    - **Score ≥ Threshold**: User receives CAPTCHA challenge
 
-### Threshold Ranges
+### Threshold ranges
 
 | Range | Label | Description | Use Case |
 |-------|-------|-------------|----------|
@@ -47,9 +46,9 @@ The Safety Threshold determines the cutoff point: users with bot scores above yo
 | 0.4 - 0.6 | **Medium** ⭐ | Balanced approach | **Recommended** for most websites |
 | 0.6 - 0.8 | **High** | Strict detection | Sites under attack or requiring high security |
 
-## Configuring Your Safety Threshold
+## Configuring your safety threshold
 
-### Accessing the Settings
+### Accessing the settings
 
 1. Log in to the [Prosopo portal](https://portal.prosopo.io/)
 2. Navigate to your site settings
@@ -57,35 +56,35 @@ The Safety Threshold determines the cutoff point: users with bot scores above yo
 4. Use the slider to adjust your threshold
 5. Click "Save" to apply changes
 
-### Choosing the Right Threshold
+### Choosing the right threshold
 
-#### Start with Medium (0.4 - 0.6)
+#### Start with medium (0.4 - 0.6)
 The medium setting is recommended for most websites as it provides a good balance between security and user experience.
 
-#### When to Use Low Threshold (0.2 - 0.4)
+#### When to use low threshold (0.2 - 0.4)
 - **High-traffic e-commerce sites** where user friction must be minimized
 - **Content sites** where occasional bot traffic is acceptable
 - **During promotional periods** when you expect high legitimate traffic
 
-#### When to Use High Threshold (0.6 - 0.8)
+#### When to use high threshold (0.6 - 0.8)
 - **Under active bot attack** - temporarily increase to block more suspicious traffic
 - **Financial or sensitive applications** requiring maximum security
 - **Form submissions** with high-value outcomes (registrations, purchases)
 
-## Real-World Examples
+## Real-world examples
 
-### E-commerce Site Example
+### E-commerce site example
 **Scenario**: Online store with 10,000 daily visitors
 - **Normal operations**: Medium threshold (0.5)
 - **During sales**: Lower the Safety Threshold to reduce friction
 - **Under attack**: Raise the Safety Threshold temporarily
 
-### Blog/Content Site Example
+### Blog/content site example
 **Scenario**: News website with comment system
 - **Article reading**: Low threshold (0.3) - minimal friction
 - **Comment posting**: Medium threshold (0.5) - prevent spam
 
-## Getting Help
+## Getting help
 
 If you need assistance with Safety Threshold configuration:
 - Contact Prosopo support through the portal

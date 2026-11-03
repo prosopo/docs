@@ -1,5 +1,5 @@
 ---
-title: Bypass Keys
+title: Bypass keys
 description: Let your own developers and automated tests skip the CAPTCHA on one site with a secret key you can revoke.
 i18nReady: true
 ---
@@ -31,8 +31,8 @@ out of the portal or the API later.
 
 ## Creating a key
 
-1. Open the **Access Control** page in the [portal](https://portal.prosopo.io) and select the site.
-2. Open the **Procaptcha Editor** tab and choose **Bypass Keys**.
+1. Open the **Access control** page in the [portal](https://portal.prosopo.io) and select the site.
+2. Choose **Procaptcha**, then **Add rules**, then the **Bypass keys** tab.
 3. Give the key a name you will recognise later, such as `QA team` or `GitHub Actions`, and choose when it expires:
    7, 30 or 90 days, or never.
 4. Click **Create key**, then copy the key before you close the panel. It is not shown again.
@@ -91,7 +91,7 @@ and can be verified once, which stops a copied token from being used anywhere el
 
 ## Revoking a key
 
-Click **Revoke** next to the key on the **Bypass Keys** tab. Within about a minute, browsers carrying that key see the
+Click **Revoke** next to the key on the **Bypass keys** tab. Within about a minute, browsers carrying that key see the
 CAPTCHA again. Keys with an expiry stop working on their own when they expire.
 
 ## Things worth knowing

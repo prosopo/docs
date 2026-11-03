@@ -14,28 +14,28 @@
  *
  * Copy the English `key` value unchanged and translate only the `text` into your language:
  *
- * `src/i18n/en/nav.ts`: `{ text: 'Getting Started', slug: 'getting-started', key: 'getting-started' },`
+ * `src/i18n/en/nav.ts`: `{ text: 'Getting started', slug: 'getting-started', key: 'getting-started' },`
  * `src/i18n/ja/nav.ts`: `'getting-started': 'はじめに',`
  */
 export default [
-    {text: 'Learn the Basics', header: true, type: 'learn', key: 'basics'},
+    {text: 'Learn the basics', header: true, type: 'learn', key: 'basics'},
     {
-        text: 'Get Started',
+        text: 'Get started',
         slug: 'basics/',
         key: 'basics/',
     },
     {
-        text: 'Client Side Rendering',
+        text: 'Client-side rendering',
         slug: 'basics/client-side-rendering',
         key: 'basics/client-side-rendering',
     },
     {
-        text: 'Server Side Verification',
+        text: 'Server-side verification',
         slug: 'basics/server-side-verification',
         key: 'basics/server-side-verification',
     },
     {
-        text: 'CAPTCHA Types',
+        text: 'CAPTCHA types',
         slug: 'basics/captcha-types',
         key: 'basics/captcha-types',
     },
@@ -45,65 +45,65 @@ export default [
         key: 'basics/invisible-captcha',
     },
     {
-        text: 'Safety Threshold',
+        text: 'Safety threshold',
         slug: 'basics/safety-threshold',
         key: 'basics/safety-threshold',
     },
 
     {
-        text: 'Test Site Keys',
+        text: 'Test site keys',
         slug: 'basics/test-keys',
         key: 'basics/test-keys',
     },
 
     {
-        text: 'Frequently Asked Questions',
+        text: 'Frequently asked questions',
         slug: 'basics/faq',
         key: 'basics/faq',
     },
     {
-        text: 'Error Reference',
+        text: 'Error reference',
         slug: 'basics/error-reference',
         key: 'basics/error-reference',
     },
     {
-        text: 'Demo Keys',
+        text: 'Demo keys',
         slug: 'basics/demo-keys',
         key: 'basics/demo-keys',
     },
-    {text: 'Advanced Usage', header: true, type: 'learn', key: 'advanced'},
+    {text: 'Advanced usage', header: true, type: 'learn', key: 'advanced'},
     {
-        text: 'Context Awareness',
+        text: 'Context awareness',
         slug: 'advanced/context-awareness',
         key: 'advanced/context-awareness',
     },
     {
-        text: 'IP Validation Rules',
+        text: 'IP validation rules',
         slug: 'advanced/ip-validation-rules',
         key: 'advanced/ip-validation-rules',
     },
     {
-        text: 'Access Control Rules',
+        text: 'Access control rules',
         slug: 'advanced/access-control-rules',
         key: 'advanced/access-control-rules',
     },
     {
-        text: 'Bypass Keys',
+        text: 'Bypass keys',
         slug: 'advanced/bypass-keys',
         key: 'advanced/bypass-keys',
     },
     {
-        text: 'Traffic Filter',
+        text: 'Traffic filter',
         slug: 'advanced/traffic-filter',
         key: 'advanced/traffic-filter',
     },
     {
-        text: 'Email Filter',
+        text: 'Email filter',
         slug: 'advanced/spam-filter',
         key: 'advanced/spam-filter',
     },
     {
-        text: 'Geo Blocking',
+        text: 'Geo blocking',
         slug: 'advanced/geo-blocking',
         key: 'advanced/geo-blocking',
     },
@@ -113,17 +113,17 @@ export default [
         key: 'advanced/honeypot',
     },
     {
-        text: 'CAPTCHA Timeouts',
+        text: 'CAPTCHA timeouts',
         slug: 'advanced/captcha-timeouts',
         key: 'advanced/captcha-timeouts',
     },
     {
-        text: 'Image Accuracy Threshold',
+        text: 'Image accuracy threshold',
         slug: 'advanced/image-threshold',
         key: 'advanced/image-threshold',
     },
     {
-        text: 'API Keys',
+        text: 'API keys',
         slug: 'advanced/api-keys',
         key: 'advanced/api-keys',
     },
@@ -136,6 +136,17 @@ export default [
         text: 'Audit',
         slug: 'advanced/audit',
         key: 'advanced/audit',
+    },
+    {text: 'Self-hosting', header: true, type: 'learn', key: 'self-hosting'},
+    {
+        text: 'Run your own provider',
+        slug: 'self-hosting/',
+        key: 'self-hosting/',
+    },
+    {
+        text: 'Run it on Cloudflare (free)',
+        slug: 'self-hosting/cloudflare/',
+        key: 'self-hosting/cloudflare/',
     },
     {text: 'Prosopo Protect (Edge)', header: true, type: 'learn', key: 'protect-edge'},
     {
@@ -160,39 +171,45 @@ export default [
     },
     {text: 'Framework integrations', header: true, type: 'learn', key: 'framework-integrations'},
     {
-        text: 'Angular Integration',
+        text: 'Angular',
         slug: 'framework-integrations/angular-integration',
         key: 'framework-integrations/angular-integration',
     },
     {
-        text: 'React Integration',
+        text: 'React',
         slug: 'framework-integrations/react-integration',
         key: 'framework-integrations/react-integration',
     },
     {
-        text: 'Svelte Integration',
+        text: 'Svelte',
         slug: 'framework-integrations/svelte-integration',
         key: 'framework-integrations/svelte-integration',
     },
     {
-        text: 'Vue Integration',
+        text: 'Vue',
         slug: 'framework-integrations/vue-integration',
         key: 'framework-integrations/vue-integration',
     },
+    {text: 'Platform integrations', header: true, type: 'learn', key: 'integrations'},
+    {
+        text: 'Qualtrics',
+        slug: 'integrations/qualtrics',
+        key: 'integrations/qualtrics',
+    },
     {text: 'Demos', header: true, type: 'learn', key: 'demos'},
     {
-        text: 'HTML Frontend Client Example',
+        text: 'HTML front-end client example',
         slug: 'demos/client-example-bundle',
         key: 'demos/client-example-bundle',
     },
     {
-        text: 'NodeJS Server Example',
+        text: 'Node.js server example',
         slug: 'demos/client-example-server',
         key: 'demos/client-example-server',
     },
-    {text: 'Wordpress Plugin', header: true, type: 'learn', key: 'wordpress-plugin'},
+    {text: 'WordPress plugin', header: true, type: 'learn', key: 'wordpress-plugin'},
     {
-        text: 'Get Started With Wordpress',
+        text: 'Get started with WordPress',
         slug: 'wordpress-plugin/',
         key: 'wordpress-plugin/',
     },
@@ -202,7 +219,7 @@ export default [
         key: 'wordpress-plugin/hooks',
     },
     {
-        text: 'Form Integration Guides',
+        text: 'Form integration guides',
         header: true,
         type: 'learn',
         key: 'form-integration-guides',
@@ -249,12 +266,12 @@ export default [
         key: 'wordpress-plugin/user-registration',
     },
     {
-        text: 'WP Forms',
+        text: 'WPForms',
         slug: 'wordpress-plugin/wpforms',
         key: 'wordpress-plugin/wpforms',
     },
     {
-        text: 'Other Integrations Guides',
+        text: 'Other integration guides',
         header: true,
         type: 'learn',
         key: 'other-integration-guides',
@@ -286,7 +303,7 @@ export default [
         key: 'wordpress-plugin/learndash',
     },
     {
-        text: 'Memberpress',
+        text: 'MemberPress',
         slug: 'wordpress-plugin/memberpress',
         key: 'wordpress-plugin/memberpress',
     },
@@ -301,7 +318,7 @@ export default [
         key: 'wordpress-plugin/elementor-pro',
     },
     {
-        text: 'JetPack',
+        text: 'Jetpack',
         slug: 'wordpress-plugin/jetpack',
         key: 'wordpress-plugin/jetpack',
     },

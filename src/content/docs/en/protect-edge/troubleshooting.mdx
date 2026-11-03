@@ -1,7 +1,6 @@
 ---
 title: Troubleshooting
 description: Distinguish Prosopo Protect 4xx responses from other bot-protection layers, recognise known-harmless browser console warnings, and diagnose the most common misconfigurations in an edge deployment.
-i18nReady: true
 ---
 
 Common failure modes when deploying Prosopo Protect at the edge, with the actual causes rather than the surface symptoms.
@@ -77,7 +76,7 @@ Common block sources:
 2. Filter for `protect.bundle.js`. If it's not there, the `<script>` tag isn't reaching your HTML. Check your header or footer template.
 3. Filter for `/api/protect/init`. It should be a `POST` to `https://protect.<your-domain>` returning 200 with `Set-Cookie: prosopo_session=…`.
 
-   - If it's going to `https://js.protect.prosopo.io/api/protect/init` instead and getting a 405, your snippet is missing the `window.prosopo_config` block. Add it above the `<script src=…>` line. See [the CF Worker install step](/protect-edge/cloudflare-worker#step-1-add-the-protect-js-bundle-to-every-html-page).
+   - If it's going to `https://js.protect.prosopo.io/api/protect/init` instead and getting a 405, your snippet is missing the `window.prosopo_config` block. Add it above the `<script src=…>` line. See [the CF Worker install step](/protect-edge/cloudflare-worker#2a-add-the-protect-script-to-your-pages).
    - If it's going to the right hostname but returning `4xx`, check the Portal settings and DNS.
 4. Filter for cookies. The `prosopo_session` cookie should be set with `Domain=.<your-domain>` after the init call.
 
@@ -96,6 +95,14 @@ Common block sources:
 **Cause:** The worker's forward to your origin succeeded, but the `X-Prosopo-Decision` on the response was `allow`. Those aren't logged in the same way as `block` or `challenge`. Successful passes are counted in the traffic summary, not the individual verdict log.
 
 Check the dashboard's traffic summary for your site to see request throughput broken down by verdict.
+
+## Some requests skip Protect entirely
+
+**Symptom:** Pages load for visitors who should be blocked or challenged, and those requests are missing from the dashboard's traffic summary.
+
+**Cause:** Workers Cache is enabled in `wrangler.toml` (`[cache] enabled = true`). Cloudflare then serves cached responses before the worker runs, so Protect never sees those requests. See [Cloudflare's Workers Cache docs](https://developers.cloudflare.com/workers/cache/).
+
+**Fix:** Remove the `[cache]` section from `wrangler.toml` and run `wrangler deploy`.
 
 ## Configuration drift
 
