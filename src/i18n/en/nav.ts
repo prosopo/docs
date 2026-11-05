@@ -88,6 +88,11 @@ export default [
         key: 'advanced/access-control-rules',
     },
     {
+        text: 'Bypass keys',
+        slug: 'advanced/bypass-keys',
+        key: 'advanced/bypass-keys',
+    },
+    {
         text: 'Traffic filter',
         slug: 'advanced/traffic-filter',
         key: 'advanced/traffic-filter',
