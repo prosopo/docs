@@ -73,11 +73,6 @@ export default [
     },
     {text: 'Advanced usage', header: true, type: 'learn', key: 'advanced'},
     {
-        text: 'Context awareness',
-        slug: 'advanced/context-awareness',
-        key: 'advanced/context-awareness',
-    },
-    {
         text: 'IP validation rules',
         slug: 'advanced/ip-validation-rules',
         key: 'advanced/ip-validation-rules',
@@ -86,6 +81,11 @@ export default [
         text: 'Access control rules',
         slug: 'advanced/access-control-rules',
         key: 'advanced/access-control-rules',
+    },
+    {
+        text: 'Bypass keys',
+        slug: 'advanced/bypass-keys',
+        key: 'advanced/bypass-keys',
     },
     {
         text: 'Traffic filter',
@@ -142,6 +142,82 @@ export default [
         text: 'Run it on Cloudflare (free)',
         slug: 'self-hosting/cloudflare/',
         key: 'self-hosting/cloudflare/',
+    },
+    {text: 'Portal', header: true, type: 'learn', key: 'portal'},
+    {
+        text: 'Overview',
+        slug: 'portal/',
+        key: 'portal/',
+    },
+    {
+        text: 'Get Started',
+        slug: 'portal/get-started',
+        key: 'portal/get-started',
+    },
+    {
+        text: 'Overview page',
+        slug: 'portal/overview',
+        key: 'portal/overview',
+    },
+    {
+        text: 'Traffic',
+        slug: 'portal/traffic',
+        key: 'portal/traffic',
+    },
+    {
+        text: 'Audit',
+        slug: 'portal/audit',
+        key: 'portal/audit',
+    },
+    {
+        text: 'Access Control',
+        slug: 'portal/access-control',
+        key: 'portal/access-control',
+    },
+    {
+        text: 'Settings',
+        slug: 'portal/settings',
+        key: 'portal/settings',
+    },
+    {
+        text: 'Site Management',
+        slug: 'portal/sites',
+        key: 'portal/sites',
+    },
+    {
+        text: 'User Management',
+        slug: 'portal/users',
+        key: 'portal/users',
+    },
+    {
+        text: 'Account and billing',
+        slug: 'portal/account-and-billing',
+        key: 'portal/account-and-billing',
+    },
+    {
+        text: 'API Keys',
+        slug: 'portal/api-keys',
+        key: 'portal/api-keys',
+    },
+    {
+        text: 'Protect',
+        slug: 'portal/protect',
+        key: 'portal/protect',
+    },
+    {
+        text: 'Protect traffic',
+        slug: 'portal/protect-traffic',
+        key: 'portal/protect-traffic',
+    },
+    {
+        text: 'Verdicts',
+        slug: 'portal/verdicts',
+        key: 'portal/verdicts',
+    },
+    {
+        text: 'Agent Trust',
+        slug: 'portal/agents',
+        key: 'portal/agents',
     },
     {text: 'Prosopo Protect (Edge)', header: true, type: 'learn', key: 'protect-edge'},
     {
