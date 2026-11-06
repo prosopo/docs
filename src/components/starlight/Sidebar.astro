@@ -1,33 +1,33 @@
 ---
-import { getEntry } from 'astro:content';
-import { stripLeadingAndTrailingSlashes } from '../../../node_modules/@astrojs/starlight/utils/path';
+import { getCollection } from 'astro:content';
 import MobileMenuFooter from 'virtual:starlight/components/MobileMenuFooter';
+import SidebarPersister from '@astrojs/starlight/components/SidebarPersister.astro';
 import SidebarSublist from '@astrojs/starlight/components/SidebarSublist.astro';
-import type { Props } from '@astrojs/starlight/props';
-import type { SidebarEntry } from '@astrojs/starlight/utils/navigation';
+import type { StarlightRouteData } from '@astrojs/starlight/route-data';
 
-let { sidebar } = Astro.props;
+type SidebarEntry = StarlightRouteData['sidebar'][number];
 
-async function remap(i: SidebarEntry) {
+const route = Astro.locals.starlightRoute;
+const docIds = new Set((await getCollection('docs')).map((entry) => entry.id));
+
+function remap(i: SidebarEntry): SidebarEntry {
 	if (i.type === 'group') {
-		i.entries = await Promise.all(i.entries.map(remap));
+		i.entries = i.entries.map(remap);
 		return i;
 	}
 
-	const itemSlug = stripLeadingAndTrailingSlashes(i.href);
-	const fallback = (await getEntry('docs', itemSlug)) ? undefined : true;
-
-	i.attrs.class = fallback ? 'fallback' : undefined;
+	const itemSlug = i.href.replace(/^\/+|\/+$/g, '');
+	i.attrs.class = docIds.has(itemSlug) ? undefined : 'fallback';
 	return i;
 }
 
-sidebar = await Promise.all(sidebar.map(remap));
+route.sidebar = route.sidebar.map(remap);
 ---
 
-<SidebarSublist sublist={sidebar} />
+<SidebarPersister><SidebarSublist sublist={route.sidebar} /></SidebarPersister>
 
 <div class="md:sl-hidden">
-	<MobileMenuFooter {...Astro.props} />
+	<MobileMenuFooter />
 </div>
 
 <style>
