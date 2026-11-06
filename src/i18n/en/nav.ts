@@ -73,11 +73,6 @@ export default [
     },
     {text: 'Advanced usage', header: true, type: 'learn', key: 'advanced'},
     {
-        text: 'Context awareness',
-        slug: 'advanced/context-awareness',
-        key: 'advanced/context-awareness',
-    },
-    {
         text: 'IP validation rules',
         slug: 'advanced/ip-validation-rules',
         key: 'advanced/ip-validation-rules',

@@ -7,3 +7,15 @@
   command = "NODE_OPTIONS=--max_old_space_size=4096 pnpm run build"
   ignore = "git diff --quiet $COMMIT_REF $CACHED_COMMIT_REF -- /"
 # No NODE_VERSION here: Netlify reads .nvmrc, the one Node pin CI also uses.
+
+# Context awareness was removed from the docs: the portal no longer has a
+# setting for it. Old links land on the settings the portal does have.
+[[redirects]]
+from = "/:lang/advanced/context-awareness/*"
+to = "/en/portal/settings/"
+status = 301
+
+[[redirects]]
+from = "/:lang/basics/context-awareness/*"
+to = "/en/portal/settings/"
+status = 301

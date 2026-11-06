@@ -11,7 +11,6 @@ export default NavDictionary({
 	'basics/faq': 'Questions fréquemment posées',
 
 	'advanced': 'Utilisation avancée',
-	'advanced/context-awareness': 'Sensibilité au contexte',
 	'advanced/ip-validation-rules': 'Règles de validation IP',
 	'advanced/access-control-rules': 'Règles de contrôle d\'accès',
 	'advanced/audit': 'Audit',
