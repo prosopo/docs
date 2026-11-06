@@ -56,9 +56,9 @@ jobs:
     if: ${{ github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.draft != true) }}
     permissions:
       contents: read
-    uses: prosopo/github_actions/.github/workflows/build.yml@37ba3c575fb9cb185f029e20b4551a7f6be595a1
+    uses: prosopo/github_actions/.github/workflows/build.yml@1b3257b005f4c59f97205f5e99c19d11e9d70a25
     with:
-      actions-ref: 37ba3c575fb9cb185f029e20b4551a7f6be595a1
+      actions-ref: 1b3257b005f4c59f97205f5e99c19d11e9d70a25
 
   # eslint plus the exact-version dependency check. Runs only when the change
   # touches JS/TS or package.json (detect-languages); content-only PRs skip it.
@@ -66,9 +66,9 @@ jobs:
     if: ${{ github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.draft != true) }}
     permissions:
       contents: read
-    uses: prosopo/github_actions/.github/workflows/static.yml@37ba3c575fb9cb185f029e20b4551a7f6be595a1
+    uses: prosopo/github_actions/.github/workflows/static.yml@1b3257b005f4c59f97205f5e99c19d11e9d70a25
     with:
-      actions-ref: 37ba3c575fb9cb185f029e20b4551a7f6be595a1
+      actions-ref: 1b3257b005f4c59f97205f5e99c19d11e9d70a25
       js-command: node .github/scripts/check-pinned-versions.mjs && pnpm run lint
 
   # Dependency audit by the pnpm lockfile, gitleaks and semgrep. On a PR both
@@ -77,17 +77,17 @@ jobs:
     if: ${{ github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.draft != true) }}
     permissions:
       contents: read
-    uses: prosopo/github_actions/.github/workflows/security.yml@37ba3c575fb9cb185f029e20b4551a7f6be595a1
+    uses: prosopo/github_actions/.github/workflows/security.yml@1b3257b005f4c59f97205f5e99c19d11e9d70a25
     with:
-      actions-ref: 37ba3c575fb9cb185f029e20b4551a7f6be595a1
+      actions-ref: 1b3257b005f4c59f97205f5e99c19d11e9d70a25
 
   housekeeping:
     if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.draft != true }}
     permissions:
       contents: read
-    uses: prosopo/github_actions/.github/workflows/pr-housekeeping.yml@37ba3c575fb9cb185f029e20b4551a7f6be595a1
+    uses: prosopo/github_actions/.github/workflows/pr-housekeeping.yml@1b3257b005f4c59f97205f5e99c19d11e9d70a25
     with:
-      actions-ref: 37ba3c575fb9cb185f029e20b4551a7f6be595a1
+      actions-ref: 1b3257b005f4c59f97205f5e99c19d11e9d70a25
 
   # Internal links only (--offline): the build's HTML is checked against the
   # files it actually produced, so a moved or renamed page fails here instead of
@@ -107,7 +107,7 @@ jobs:
         timeout-minutes: 5
         with:
           repository: prosopo/github_actions
-          ref: 37ba3c575fb9cb185f029e20b4551a7f6be595a1
+          ref: 1b3257b005f4c59f97205f5e99c19d11e9d70a25
           path: .shared-actions
       - uses: ./.shared-actions/.github/actions/print_contexts
         timeout-minutes: 2
@@ -155,7 +155,7 @@ jobs:
         timeout-minutes: 5
         with:
           repository: prosopo/github_actions
-          ref: 37ba3c575fb9cb185f029e20b4551a7f6be595a1
+          ref: 1b3257b005f4c59f97205f5e99c19d11e9d70a25
           path: .shared-actions
       - uses: ./.shared-actions/.github/actions/print_contexts
         timeout-minutes: 2
