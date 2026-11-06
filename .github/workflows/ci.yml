@@ -1,5 +1,5 @@
 # CI entry point. Structure: this ci.yml calls the shared stage workflows in
-# prosopo/github_actions (build, static, pr-housekeeping) and runs the two
+# prosopo/github_actions (build, static, security, pr-housekeeping) and runs the two
 # checks those stages cannot (links, workflow-lint) as local jobs. Deploying is
 # Netlify's git integration (netlify.toml), not a workflow. Follow the existing
 # layout and conventions; a new workflow, new stage or structural change needs a
@@ -56,9 +56,9 @@ jobs:
     if: ${{ github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.draft != true) }}
     permissions:
       contents: read
-    uses: prosopo/github_actions/.github/workflows/build.yml@7a52d4663836059f0c6cf1c7a29186cd4d8b49a4
+    uses: prosopo/github_actions/.github/workflows/build.yml@37ba3c575fb9cb185f029e20b4551a7f6be595a1
     with:
-      actions-ref: 7a52d4663836059f0c6cf1c7a29186cd4d8b49a4
+      actions-ref: 37ba3c575fb9cb185f029e20b4551a7f6be595a1
 
   # eslint plus the exact-version dependency check. Runs only when the change
   # touches JS/TS or package.json (detect-languages); content-only PRs skip it.
@@ -66,18 +66,28 @@ jobs:
     if: ${{ github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.draft != true) }}
     permissions:
       contents: read
-    uses: prosopo/github_actions/.github/workflows/static.yml@7a52d4663836059f0c6cf1c7a29186cd4d8b49a4
+    uses: prosopo/github_actions/.github/workflows/static.yml@37ba3c575fb9cb185f029e20b4551a7f6be595a1
     with:
-      actions-ref: 7a52d4663836059f0c6cf1c7a29186cd4d8b49a4
+      actions-ref: 37ba3c575fb9cb185f029e20b4551a7f6be595a1
       js-command: node .github/scripts/check-pinned-versions.mjs && pnpm run lint
+
+  # Dependency audit by the pnpm lockfile, gitleaks and semgrep. On a PR both
+  # scanners gate only what the PR adds; elsewhere they scan the whole tree.
+  security:
+    if: ${{ github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.draft != true) }}
+    permissions:
+      contents: read
+    uses: prosopo/github_actions/.github/workflows/security.yml@37ba3c575fb9cb185f029e20b4551a7f6be595a1
+    with:
+      actions-ref: 37ba3c575fb9cb185f029e20b4551a7f6be595a1
 
   housekeeping:
     if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.draft != true }}
     permissions:
       contents: read
-    uses: prosopo/github_actions/.github/workflows/pr-housekeeping.yml@7a52d4663836059f0c6cf1c7a29186cd4d8b49a4
+    uses: prosopo/github_actions/.github/workflows/pr-housekeeping.yml@37ba3c575fb9cb185f029e20b4551a7f6be595a1
     with:
-      actions-ref: 7a52d4663836059f0c6cf1c7a29186cd4d8b49a4
+      actions-ref: 37ba3c575fb9cb185f029e20b4551a7f6be595a1
 
   # Internal links only (--offline): the build's HTML is checked against the
   # files it actually produced, so a moved or renamed page fails here instead of
@@ -97,7 +107,7 @@ jobs:
         timeout-minutes: 5
         with:
           repository: prosopo/github_actions
-          ref: 7a52d4663836059f0c6cf1c7a29186cd4d8b49a4
+          ref: 37ba3c575fb9cb185f029e20b4551a7f6be595a1
           path: .shared-actions
       - uses: ./.shared-actions/.github/actions/print_contexts
         timeout-minutes: 2
@@ -145,7 +155,7 @@ jobs:
         timeout-minutes: 5
         with:
           repository: prosopo/github_actions
-          ref: 7a52d4663836059f0c6cf1c7a29186cd4d8b49a4
+          ref: 37ba3c575fb9cb185f029e20b4551a7f6be595a1
           path: .shared-actions
       - uses: ./.shared-actions/.github/actions/print_contexts
         timeout-minutes: 2
