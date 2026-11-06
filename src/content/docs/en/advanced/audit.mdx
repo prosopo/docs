@@ -4,6 +4,7 @@ description: Learn how to use the Audit page in the Prosopo portal to review and
 ---
 import { Image } from 'astro:assets';
 import AuditPageImage from '~/assets/prosopo-audit-page.webp';
+import AuditSearchResults from '~/assets/audit-search-results.png';
 
 The **Audit** page in the Prosopo portal allows administrators to search, review, and analyze individual CAPTCHA records. This feature is essential for ensuring security, monitoring user activity, and maintaining compliance.
 
@@ -30,15 +31,15 @@ The Audit page offers a variety of filters to narrow down your search:
 - **User Agent**: Analyze browser and device information.
 - **VPN Status**: Identify users accessing through VPNs.
 - **Geolocation**: Filter by country or region.
-- **CAPTCHA Type**: Choose between Proof of Work (PoW), Image, or both.
-- **Date Range**: Specify a start and end date for your search (7-day maximum range).
+- **CAPTCHA Type**: Proof of Work (PoW), Image, Puzzle, Icon Order or Audio, or all of them.
+- **Date Range**: Specify a start and end date for your search. Searches cover the last 7 days unless you choose otherwise, and can reach back 30 days.
 
 ### Results overview
 
 Search results include detailed information for each CAPTCHA record:
 
 - **Timestamp**: When the CAPTCHA was requested.
-- **Type**: CAPTCHA type (PoW or Image).
+- **Type**: CAPTCHA type (PoW, Image, Puzzle, Icon Order or Audio).
 - **IP Address**: The user's IP address.
 - **JA4**: Device fingerprint.
 - **User Agent**: Browser and device details.
@@ -49,6 +50,8 @@ Search results include detailed information for each CAPTCHA record:
 - **Base Score**: The base score used for evaluation.
 - **Threshold**: The configured threshold for the CAPTCHA.
 - **Captcha Type**: The type of CAPTCHA presented.
+
+<Image src={AuditSearchResults} alt={'prosopo audit search results'} />
 
 ### Pagination and load more
 
@@ -73,7 +76,7 @@ The results are paginated, and you can load more records as needed. This ensures
 ### Reviewing results
 
 - Use the table to review individual records.
-- Click on specific rows for more detailed information.
+- Click the icon at the start of a row to open its [audit record](/en/portal/audit/#audit-record), which shows the whole visit on one page.
 - Use the **Load More** button to view additional records.
 
 ## Best practices
