@@ -1,0 +1,42 @@
+---
+title: 'Divi'
+description: 'Suporte ao Divi.'
+---
+import {Image} from 'astro:assets';
+import CoreForms from '~/assets/wp-procaptcha-core-forms.png';
+
+O plugin Procaptcha estende os seguintes módulos do [Divi](https://www.elegantthemes.com/gallery/divi/). Ele é detectado tanto quando o Divi está instalado como tema, quanto como tema Extra ou como o plugin independente Divi Builder.
+
+## 1. Módulo Contact Form
+
+A chave nativa **Use Basic Captcha** do módulo funciona como o opt-in: quando está ligada, o Procaptcha substitui o captcha aritmético do Divi.
+
+1. Edite a página de destino no Divi Builder.
+2. Abra as configurações do módulo Contact Form.
+3. Na aba **Content**, coloque **Use Basic Captcha** em `Yes` (versões recentes do Divi agrupam essa opção em **Spam Protection**).
+4. Salve a página.
+
+No front-end a pergunta aritmética é removida e o widget do Procaptcha aparece no lugar dela, logo acima do botão de envio. Um envio com token ausente ou inválido é reprovado pelo próprio erro de captcha do Divi, então o visitante vê o estilo de erro habitual do Divi.
+
+:::note[O widget fica oculto dentro do Visual Builder]
+O Procaptcha não renderiza nada de propósito enquanto o Divi Visual Builder está aberto, para não atrapalhar a área de edição. Visualize a página (ou acesse-a deslogado) para ver o widget.
+:::
+
+## 2. Módulo Login
+
+> Importante: antes de usar esta integração, verifique se o formulário de login está ativado nas configurações do Procaptcha, na aba `Core forms`.
+
+O módulo Login do Divi envia para o fluxo nativo de login do WordPress, então a verificação é feita pela integração de login do WordPress:
+
+1. Abra as configurações do plugin Procaptcha
+2. Vá para a aba "Core forms"
+3. Ative a proteção do formulário de login
+4. Salve as configurações
+
+<Image src={CoreForms} alt={'A aba "Core Forms" das configurações do plugin Procaptcha, com a proteção de login ativada'} style="margin: 20px auto;"/>
+
+A partir daí o widget é adicionado automaticamente a todos os módulos Login do Divi — o módulo em si não tem nenhuma configuração do Procaptcha.
+
+**Artigos de blog relacionados**
+
+* [How to add CAPTCHA to Divi](https://prosopo.io/wordpress/how-to-add-captcha-to-divi/)

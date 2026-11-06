@@ -1,0 +1,34 @@
+---
+title: 'Bricks'
+description: 'Suporte ao Bricks.'
+---
+import {Image} from 'astro:assets';
+import ActiveIntegrations from '~/assets/wp-procaptcha-active-integrations.png';
+
+O plugin Procaptcha dá suporte ao elemento Form do construtor de temas [Bricks](https://bricksbuilder.io/).
+
+:::caution[É necessário o Bricks 2.0 ou superior]
+A integração usa o filtro `bricks/frontend/render_element`, a única forma de alcançar a marcação do formulário, e esse filtro foi introduzido no Bricks 2.0. Em versões anteriores o plugin deixa os formulários do Bricks intactos.
+:::
+
+## 1. Ativar o Procaptcha em um formulário
+
+Um campo **Hidden** com o rótulo `prosopo_procaptcha` marca o formulário como protegido. O widget então substitui o input desse campo, de modo que o token chega ao servidor como um campo comum de formulário do Bricks.
+
+1. Edite a página de destino no Bricks e selecione o elemento Form.
+2. Nas configurações do elemento, abra **Fields** e adicione um novo campo.
+3. Defina o **Type** dele como `Hidden`.
+4. Use `prosopo_procaptcha` como **Label** do campo (ou, se a sua versão do Bricks não mostrar rótulo para campos ocultos, como o **Value**).
+5. Salve a página.
+
+Pronto. Abra a página como visitante deslogado e o widget do Procaptcha aparecerá no lugar do campo oculto. Um envio com token ausente ou inválido é rejeitado com a mensagem de validação do Procaptcha, exibida na área de erros normal do formulário.
+
+## 2. Conferir se a integração está ativa
+
+O Bricks é um tema e não um plugin, então o plugin Procaptcha o detecta pelo template ativo. Para conferir, abra **Configurações** > **Procaptcha** > **Active Integrations** e verifique se `Bricks` aparece na lista.
+
+<Image src={ActiveIntegrations} alt={'A aba "Active Integrations" das configurações do plugin Procaptcha'} style="margin: 20px auto;"/>
+
+**Artigos de blog relacionados**
+
+* [How to add CAPTCHA to Bricks](https://prosopo.io/wordpress/how-to-add-captcha-to-bricks/)

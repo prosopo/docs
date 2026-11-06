@@ -5,15 +5,11 @@ import type { AstroIntegration } from 'astro';
 
 const langTags = Object.keys(languages);
 
-/** Set matching our `/[lang]/something.astro` redirect routes. */
-const blocklist = new Set([
-	...langTags.map((lang) => `/${lang}/`),
-	...langTags.map((lang) => `/${lang}/install/`),
-	...langTags.map((lang) => `/${lang}/tutorial/`),
-]);
+/** Matches the `/[lang]/` redirect routes. */
+const blocklist = new Set(langTags.map((lang) => `/${lang}/`));
 
-/** Match a pathname starting with “lighthouse” or one of our language tags. */
-const ValidRouteRE = new RegExp(`^/(lighthouse|${langTags.join('|')})/`);
+/** Match a pathname starting with one of our language tags. */
+const ValidRouteRE = new RegExp(`^/(${langTags.join('|')})/`);
 
 /** Test a pathname is not in our blocklist and starts with a valid prefix. */
 const isValidPath = (path: string) => !blocklist.has(path) && ValidRouteRE.test(path);

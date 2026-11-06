@@ -1,0 +1,41 @@
+---
+title: "Blocksy"
+description: "Blocksy-Unterstützung."
+---
+import {Image} from 'astro:assets';
+import NewsletterExtension from '~/assets/wp-blocksy-newsletter-extension.png';
+import NewsletterBlock from '~/assets/wp-blocksy-newsletter-block.png';
+
+Das Procaptcha-Plugin erweitert das Newsletter-Anmeldeformular des Themes [Blocksy](https://creativethemes.com/blocksy/) und deckt dessen Konto-Modalformulare über die Integration der WordPress-Core-Formulare ab.
+
+## 1. Newsletter-Anmeldeformular
+
+Das Anmeldeformular gehört zu [Blocksy Companion](https://wordpress.org/plugins/blocksy-companion/) als Erweiterung **Newsletter Subscribe**. Sowohl der Block als auch der Shortcode `[blocksy_newsletter_subscribe]` sind geschützt, und es ist kein Schalter pro Formular nötig: Das Widget wird eingefügt, sobald beide Plugins aktiv sind.
+
+1. Gehen Sie zu **Blocksy** > **Extensions** und aktivieren Sie **Newsletter Subscribe**.
+2. Verbinden Sie einen Newsletter-Anbieter (Mailchimp und die weiteren unterstützten Dienste) und speichern Sie die Einstellungen.
+
+<Image src={NewsletterExtension} alt={'Aktivieren der Erweiterung "Newsletter Subscribe" im Blocksy-Bereich "Extensions"'} style="margin: 20px auto;"/>
+
+3. Fügen Sie den **Newsletter**-Block auf einer Seite oder in einem Widget-Bereich ein, oder setzen Sie den Shortcode `[blocksy_newsletter_subscribe]` in Ihren Inhalt.
+
+<Image src={NewsletterBlock} alt={'Der Blocksy-Newsletter-Block im WordPress-Block-Editor'} style="margin: 20px auto;"/>
+
+Das Procaptcha-Widget wird direkt oberhalb des Meldungsbereichs des Formulars angezeigt. Eine Übermittlung mit fehlendem oder ungültigem Token wird abgelehnt, bevor der Blocksy-eigene Handler läuft, und die Validierungsmeldung erscheint im Meldungsbereich des Formulars.
+
+:::note[Das Formular erscheint erst mit verbundenem Anbieter]
+Blocksy gibt für Block und Shortcode nichts aus, solange unter **Blocksy** > **Extensions** > **Newsletter Subscribe** kein Newsletter-Anbieter konfiguriert ist. Fehlt das Anmeldeformular auf der Seite, prüfen Sie zuerst diese Einstellung – es liegt nicht an Procaptcha.
+:::
+
+## 2. Konto-Modalformulare
+
+Blocksy rendert seine Modale für Login, Registrierung und Passwort-Wiederherstellung mit den nativen WordPress-Konto-Hooks und verarbeitet sie über den nativen Ablauf. Sie werden daher von der Integration der WordPress-Core-Formulare abgedeckt und nicht von einer Blocksy-spezifischen:
+
+1. Öffnen Sie die Procaptcha-Plugin-Einstellungen
+2. Wechseln Sie zum Tab "Core forms"
+3. Aktivieren Sie den Schutz für Login-, Registrierungs- und "Passwort vergessen"-Formular nach Bedarf
+4. Speichern Sie die Einstellungen
+
+**Verwandte Blog-Artikel**
+
+* [How to add CAPTCHA to Blocksy](https://prosopo.io/wordpress/how-to-add-captcha-to-blocksy/)

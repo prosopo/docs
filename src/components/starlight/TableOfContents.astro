@@ -2,21 +2,12 @@
 import { Icon } from '@astrojs/starlight/components';
 import { useTranslations as useStarlightTranslations } from '@astrojs/starlight/internal';
 import { useTranslations } from '../../i18n/util';
-import FeedbackButton from '../tutorial/FeedbackButton.astro';
 import TableOfContentsList from '../../../node_modules/@astrojs/starlight/components/TableOfContents/TableOfContentsList.astro';
-import TutorialNav from '../tutorial/TutorialNav.astro';
 import type { Props } from '@astrojs/starlight/props';
 
-const isTutorial = Astro.props.entry.slug.split('/')[1] === 'tutorial';
-
-const { locale, toc, editUrl, entry, isFallback } = Astro.props;
+const { locale, toc, editUrl } = Astro.props;
 const t = useTranslations(Astro);
 const starlightTranslations = useStarlightTranslations(locale);
-
-const githubEditUrl =
-	entry.data.githubURL && (locale === 'en' || isFallback)
-		? `${entry.data.githubURL}${entry.data.hasREADME ? 'README.md' : ''}`
-		: editUrl;
 ---
 
 {
@@ -24,36 +15,22 @@ const githubEditUrl =
 		<starlight-toc data-min-h={toc.minHeadingLevel} data-max-h={toc.maxHeadingLevel}>
 			<nav aria-labelledby="starlight__on-this-page">
 				<h2 id="starlight__on-this-page">
-					{isTutorial
-						? t('tutorial.trackerLabel')
-						: starlightTranslations('tableOfContents.onThisPage')}
+					{starlightTranslations('tableOfContents.onThisPage')}
 				</h2>
-				{isTutorial ? (
-					<TutorialNav {...Astro.props} />
-				) : (
-					<>
-						<TableOfContentsList toc={toc.items} />
-						<h2 class="contribute">{t('rightSidebar.contribute')}</h2>
-						<ul>
-							<li>
-								<a href={`/${locale}/contribute/`}>
-									<Icon name="open-book" /> {t('rightSidebar.contribute')}
-								</a>
-							</li>
-							<li>
-								<a href={githubEditUrl}>
-									<Icon name="pencil" /> {t('rightSidebar.editPage')}
-								</a>
-							</li>
-							<li>
-								<a href="https://github.com/prosopo/docs/issues/new?assignees=&labels=add+new+content&projects=&template=REQUEST.yml">
-									<Icon name="translate" /> {t('rightSidebar.translatePage')}
-								</a>
-							</li>
-						</ul>
-						<FeedbackButton />
-					</>
-				)}
+				<TableOfContentsList toc={toc.items} />
+				<h2 class="contribute">{t('rightSidebar.contribute')}</h2>
+				<ul>
+					<li>
+						<a href={`/${locale}/contribute/`}>
+							<Icon name="open-book" /> {t('rightSidebar.contribute')}
+						</a>
+					</li>
+					<li>
+						<a href={editUrl}>
+							<Icon name="pencil" /> {t('rightSidebar.editPage')}
+						</a>
+					</li>
+				</ul>
 			</nav>
 		</starlight-toc>
 	)

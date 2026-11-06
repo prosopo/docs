@@ -1,0 +1,82 @@
+---
+title: "Tipi di CAPTCHA"
+description: "Scegli nel portale Prosopo quale sfida serve un sito: frictionless, Proof of Work, puzzle o immagine."
+---
+import {Image} from 'astro:assets';
+import ProcaptchaGIF from '~/assets/procaptcha-pow.gif';
+import ImageCaptcha from '~/assets/image-captcha.png';
+import PoWSettings from '~/assets/pow-settings.png';
+import PuzzleSettings from '~/assets/puzzle-settings.png';
+import CaptchaTypeSettings from '~/assets/captcha-type-settings.png';
+
+Procaptcha può servire quattro tipi di sfida: `frictionless`, `pow`, `puzzle` e `image`.
+
+Il tipo è una proprietà della chiave del sito e si sceglie nel [portale Prosopo](https://portal.prosopo.io). È il server
+a dire al widget quale sfida eseguire all'avvio della sessione, quindi non c'è nulla da impostare nel markup né nella
+chiamata a `render()`: lo stesso snippet serve il tipo per cui il sito è configurato.
+
+## CAPTCHA frictionless
+
+`frictionless` è il valore predefinito, e quello da usare salvo motivi contrari. Esamina l'ambiente del browser per
+capire se si tratta di un browser reale o automatizzato come [playwright](https://playwright.dev/) o
+[selenium](https://www.selenium.dev/), e sceglie una sfida in base al punteggio di rischio ottenuto:
+
+- **Rischio basso**: un Proof of Work invisibile. L'utente vede solo la casella.
+- **Rischio più alto**: un puzzle, con il pezzo da trascinare nello spazio vuoto.
+- **Rischio massimo**: un CAPTCHA con immagini.
+
+Frictionless non è quindi un quarto tipo di sfida: sono i tre qui sotto, scelti visitatore per visitatore. Dove cade il
+confine fra loro lo stabilisce la [soglia di sicurezza](/it/basics/safety-threshold/), ed è possibile escludere un sito
+dalla banda immagine o da quella puzzle (ma non da entrambe).
+
+Gli altri tre tipi servono sempre la stessa sfida a tutti e non esaminano affatto l'ambiente del browser. Sceglierne uno
+ha senso solo se si vuole espressamente un'unica sfida per tutti i visitatori.
+
+## CAPTCHA Proof of Work (PoW)
+
+Una sfida Proof of Work (`pow`) richiede al browser di risolvere un calcolo prima dell'invio del modulo. È rapida per un
+browser reale e costosa su larga scala, ed è questo a renderla onerosa per i bot.
+
+<Image src={ProcaptchaGIF} alt={'prosopo procaptcha pow captcha challenge'} style="margin: 20px auto;"/>
+
+Imposta un sito su `pow` quando vuoi **solo** Proof of Work: nessuna immagine e nessun puzzle, qualunque sia il
+punteggio di rischio.
+
+Quanto costa una soluzione è la difficoltà, impostata per sito nel portale. Ogni passo da 0,25 aggiunge un bit di lavoro
+e quindi raddoppia il costo, così un punto intero è un salto di 16×:
+
+<Image src={PoWSettings} alt="prosopo proof of work difficulty setting" style="margin: 20px auto;"/>
+
+## CAPTCHA puzzle
+
+Una sfida `puzzle` chiede all'utente di trascinare un pezzo nello spazio da cui è stato ritagliato. Si completa più in
+fretta di un CAPTCHA con immagini e funziona bene sui touchscreen.
+
+Quanto ci si può discostare dallo spazio e contare comunque come risolto è la **tolleranza**, impostabile per sito nel
+portale. Più bassa è, più è severa; troppo bassa e gli utenti con trackpad o schermi piccoli iniziano a faticare. Il
+portale mostra un'anteprima della sfida mentre la modifichi:
+
+<Image src={PuzzleSettings} alt="prosopo puzzle CAPTCHA settings and preview" style="margin: 20px auto;"/>
+
+## CAPTCHA con immagini
+
+Una sfida CAPTCHA con immagini chiede all'utente di selezionare le immagini che corrispondono alla richiesta.
+
+<Image
+    src={ImageCaptcha}
+    alt="prosopo procaptcha image captcha challenge"
+    style="margin: 0 auto;"
+/>
+
+Quante di quelle selezioni devono essere corrette lo stabilisce la
+soglia di accuratezza delle immagini, impostabile per sito nel portale.
+
+## Scegliere il tipo
+
+Apri il [portale Prosopo](https://portal.prosopo.io), vai su **Site Settings** e scegli il tipo nella scheda **CAPTCHA
+Type**. Con `frictionless` selezionato, la stessa scheda contiene la soglia di sicurezza che decide quale sfida riceve
+ciascun visitatore.
+
+<Image src={CaptchaTypeSettings} alt="prosopo portal CAPTCHA type and safety threshold settings" style="margin: 20px auto;"/>
+
+La modifica vale per le nuove sessioni di quella chiave di sito; non serve un nuovo deploy.

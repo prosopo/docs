@@ -1,0 +1,84 @@
+---
+title: "CAPTCHA-Typen"
+description: "Wählen Sie im Prosopo Portal, welche Herausforderung eine Website ausliefert — frictionless, Proof of Work, Puzzle oder Bild."
+---
+import {Image} from 'astro:assets';
+import ProcaptchaGIF from '~/assets/procaptcha-pow.gif';
+import ImageCaptcha from '~/assets/image-captcha.png';
+import PoWSettings from '~/assets/pow-settings.png';
+import PuzzleSettings from '~/assets/puzzle-settings.png';
+import CaptchaTypeSettings from '~/assets/captcha-type-settings.png';
+
+Procaptcha kann vier Arten von Herausforderungen ausliefern: `frictionless`, `pow`, `puzzle` und `image`.
+
+Der Typ ist eine Eigenschaft des Site Keys und wird im [Prosopo Portal](https://portal.prosopo.io) gewählt. Dem Widget
+wird beim Start der Sitzung vom Server mitgeteilt, welche Herausforderung es ausführen soll — in Ihrem Markup oder in
+Ihrem `render()`-Aufruf ist also nichts einzustellen. Dasselbe Snippet liefert immer den Typ aus, für den die Website
+konfiguriert ist.
+
+## Frictionless CAPTCHA
+
+`frictionless` ist die Voreinstellung und die richtige Wahl, solange nichts dagegen spricht. Es untersucht die
+Browser-Umgebung, um zu erkennen, ob es einen echten oder einen automatisierten Browser wie
+[playwright](https://playwright.dev/) oder [selenium](https://www.selenium.dev/) vor sich hat, und wählt anhand des
+Risiko-Scores eine passende Herausforderung:
+
+- **Geringes Risiko** — ein unsichtbarer Proof of Work. Der Nutzer sieht nur das Kontrollkästchen.
+- **Höheres Risiko** — ein Puzzle: das Teil in die Lücke ziehen.
+- **Höchstes Risiko** — ein Bild-CAPTCHA.
+
+`frictionless` ist also keine vierte Art von Herausforderung, sondern die drei unten — pro Besucher gewählt. Wo die
+Grenze zwischen ihnen liegt, ist die [Sicherheitsschwelle](/de/basics/safety-threshold/); eine Website kann aus dem
+Bild-Band oder dem Puzzle-Band ausgenommen werden (aber nicht aus beiden).
+
+Die übrigen drei Typen liefern jedem Besucher immer dieselbe Herausforderung und untersuchen die Browser-Umgebung gar
+nicht. Wählen Sie einen davon nur, wenn Sie genau das wollen.
+
+## Proof of Work (PoW) CAPTCHA
+
+Eine Proof-of-Work-Herausforderung (`pow`) verlangt vom Browser, vor dem Absenden des Formulars eine Rechenaufgabe zu
+lösen. Für einen echten Browser geht das schnell, in großem Maßstab wird es teuer — genau das macht es für Bots kostspielig.
+
+<Image src={ProcaptchaGIF} alt={'prosopo procaptcha pow captcha challenge'} style="margin: 20px auto;"/>
+
+Setzen Sie eine Website auf `pow`, wenn Sie **ausschließlich** Proof of Work wollen — unabhängig vom Risiko-Score kein
+Bild und kein Puzzle.
+
+Wie viel Arbeit eine Lösung kostet, ist die Schwierigkeit, die pro Website im Portal eingestellt wird. Jeder Schritt von
+0,25 fügt ein Bit hinzu und verdoppelt damit den Aufwand; ein ganzer Punkt ist ein Sprung um das 16-fache:
+
+<Image src={PoWSettings} alt="prosopo proof of work difficulty setting" style="margin: 20px auto;"/>
+
+## Puzzle-CAPTCHA
+
+Eine `puzzle`-Herausforderung verlangt, ein Teil in die Lücke zu ziehen, aus der es geschnitten wurde. Das geht
+schneller als ein Bild-CAPTCHA und funktioniert gut auf Touchscreens.
+
+Wie weit von der Lücke entfernt noch als gelöst gilt, ist die **Toleranz**, pro Website im Portal einstellbar. Niedriger
+ist strenger; zu niedrig, und Nutzer mit Trackpad oder kleinem Touchscreen tun sich schwer. Das Portal zeigt eine
+Vorschau, während Sie den Wert ändern:
+
+<Image src={PuzzleSettings} alt="prosopo puzzle CAPTCHA settings and preview" style="margin: 20px auto;"/>
+
+## Bild-CAPTCHA
+
+Eine Bild-CAPTCHA-Herausforderung verlangt, die Bilder auszuwählen, die zur Aufgabenstellung passen.
+
+<Image
+    src={ImageCaptcha}
+    alt="prosopo procaptcha image captcha challenge"
+    style="margin: 0 auto;"
+/>
+
+Wie viele dieser Auswahlen richtig sein müssen, ist die
+Bildgenauigkeitsschwelle, pro Website im Portal einstellbar.
+
+## Den Typ wählen
+
+Öffnen Sie das [Prosopo Portal](https://portal.prosopo.io), gehen Sie zu **Site Settings** und wählen Sie den Typ auf
+der Karte **CAPTCHA Type**. Ist `frictionless` gewählt, trägt dieselbe Karte die Sicherheitsschwelle, die entscheidet,
+welche Herausforderung ein Besucher bekommt.
+
+<Image src={CaptchaTypeSettings} alt="prosopo portal CAPTCHA type and safety threshold settings" style="margin: 20px auto;"/>
+
+Die Änderung gilt für neue Sitzungen dieses Site Keys; ein erneutes Deployment ist nicht nötig.

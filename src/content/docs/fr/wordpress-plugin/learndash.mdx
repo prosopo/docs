@@ -1,0 +1,40 @@
+---
+title: 'LearnDash LMS'
+description: 'Support de LearnDash LMS.'
+---
+import {Image} from 'astro:assets';
+import CoreForms from '~/assets/wp-procaptcha-core-forms.png';
+
+Le plugin Procaptcha étend les formulaires de compte de [LearnDash LMS](https://www.learndash.com/), précisément ceux que les bots visent pour s'inscrire en masse à des cours gratuits.
+
+## 1. Formulaire d'inscription
+
+Le [formulaire d'inscription LearnDash](https://www.learndash.com/support/docs/settings/registration-settings/) est protégé dès que les deux extensions sont actives : il n'y a pas de réglage par formulaire.
+
+Pour le vérifier, ouvrez **Réglages** > **Procaptcha** > **Active Integrations** et contrôlez que `LearnDash LMS` figure dans la liste.
+
+Une soumission rejetée est signalée via la liste d'erreurs propre à LearnDash, si bien que le visiteur voit l'échec au même endroit que n'importe quelle autre erreur d'inscription.
+
+## 2. Formulaire de connexion
+
+Le formulaire de connexion LearnDash passe par le flux de connexion natif de WordPress ; il se pilote donc depuis les réglages généraux de Procaptcha :
+
+1. Ouvrez les réglages du plugin Procaptcha
+2. Passez à l'onglet « Core forms »
+3. Activez la protection du formulaire de connexion
+4. Enregistrez les réglages
+
+<Image src={CoreForms} alt={'L\'onglet « Core Forms » des réglages du plugin Procaptcha, avec la protection de la connexion et du mot de passe oublié activée'} style="margin: 20px auto;"/>
+
+## 3. Formulaire de récupération de mot de passe
+
+Le formulaire de récupération de mot de passe passe lui aussi par le flux natif de WordPress :
+
+1. Ouvrez les réglages du plugin Procaptcha
+2. Passez à l'onglet « Core forms »
+3. Activez la protection du formulaire de mot de passe oublié
+4. Enregistrez les réglages
+
+**Articles de blog associés**
+
+* [How to add CAPTCHA to LearnDash](https://prosopo.io/wordpress/how-to-add-captcha-to-learndash/)

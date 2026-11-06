@@ -1,5 +1,4 @@
 ---
-import docs from '~/assets/docs.svg?raw';
 import logo from '~/assets/prosopo-logo.svg?raw';
 import type { Props } from '@astrojs/starlight/props';
 
@@ -8,44 +7,46 @@ const self = '/' + (Astro.props.locale || 'en') + '/welcome/';
 ---
 
 <span class="site-title sl-flex">
-	<a class="astro-logo" href={main} set:html={logo} aria-label="Astro" />
-	<a class="docs-logo" href={self} set:html={docs} aria-label="Docs" />
+	<a class="brand-logo" href={main} set:html={logo} aria-label="Prosopo" />
+	<a class="docs-label" href={self}>Docs</a>
 </span>
 
 <style>
 	.site-title {
-		gap: 1rem;
+		align-items: center;
+		gap: 0.875rem;
 	}
 	.site-title a {
 		display: flex;
+		align-items: center;
+		text-decoration: none;
 	}
-	.astro-logo {
+	.brand-logo {
 		color: var(--sl-color-white);
 	}
-	.docs-logo {
+	.docs-label {
+		padding-inline-start: 0.875rem;
+		border-inline-start: 1px solid var(--sl-color-hairline-light);
 		color: var(--sl-color-text-accent);
+		font-size: var(--sl-text-lg);
+		font-weight: 600;
+		line-height: 1.75rem;
 	}
-
-	/* On focus, outline <img> and <svg> rather than <a> */
+	.docs-label:hover {
+		color: var(--sl-color-white);
+	}
 	.site-title a:focus-visible {
 		outline: 0;
 	}
-	.site-title a:focus-visible > :global(*) {
+	.site-title a:focus-visible > :global(*),
+	.docs-label:focus-visible {
 		outline: auto;
 		outline-offset: 0.33rem;
 		border-radius: 1px;
 	}
-	/* Adjust svg sizes to full nav height */
 	.site-title :global(svg) {
-		--display-height: 1.75rem;
-		/* `auto` ensures the `<svg>` scales down on really narrow viewports */
 		width: auto;
-		height: auto;
-		margin-block: calc((var(--sl-nav-height) - var(--display-height)) / 2);
-		transition: transform 0.18s cubic-bezier(0.23, 1, 0.32, 1);
-	}
-	.site-title a:hover :global(svg) {
-		--hover-offset: 0.15rem;
-		transform: translateY(calc(var(--hover-offset) * -1));
+		height: 1.5rem;
+		margin-block: calc((var(--sl-nav-height) - 1.5rem) / 2);
 	}
 </style>

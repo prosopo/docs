@@ -1,10 +1,14 @@
 # build output
 dist
 .astro/
+.turbo/
+.turbo-cache/
+# prosopo/github_actions, checked out by CI jobs for its composite actions
+.shared-actions/
 
 # dependencies
 node_modules/
-package-lock.lock
+package-lock.json
 yarn.lock
 
 # logs

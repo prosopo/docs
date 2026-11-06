@@ -1,0 +1,29 @@
+---
+title: 'JetFormBuilder'
+description: 'JetFormBuilder support.'
+---
+import {Image} from 'astro:assets';
+import JetFormBuilderCaptchaProvider from '~/assets/wp-jetformbuilder-captcha-provider.png';
+
+The Procaptcha plugin registers itself as a captcha provider for [JetFormBuilder](https://wordpress.org/plugins/jetformbuilder/), so it appears in the form's own `Captcha Provider` dropdown alongside reCAPTCHA, hCaptcha, Turnstile and Friendly Captcha.
+
+Because JetFormBuilder verifies the captcha through its own request handler, no extra field or editor setup is needed: selecting the provider is all it takes.
+
+## 1. Enable Procaptcha on a form
+
+1. Open the target form under **JetFormBuilder** > **Forms**.
+2. In the **JetForm** sidebar tab, expand the **Captcha Settings** panel.
+3. Set **Captcha Provider** to `Prosopo Procaptcha`.
+4. Save the form.
+
+<Image src={JetFormBuilderCaptchaProvider} alt={'Selecting Prosopo Procaptcha as the Captcha Provider in the JetFormBuilder form editor'} style="margin: 20px auto;"/>
+
+The widget is rendered above the submit button on the front end, and a submission with a missing or invalid token is rejected with the form's own `Captcha failed` message.
+
+:::note[Keys live in the Procaptcha settings]
+Unlike the other JetFormBuilder captcha providers, Procaptcha does not ask for keys under **JetFormBuilder** > **Settings** > **Captcha Settings**. It reuses the site key and secret key from the Procaptcha plugin settings (**Settings** > **Procaptcha**), so there is nothing to fill in there.
+:::
+
+**Related blog articles**
+
+* [How to add CAPTCHA to JetFormBuilder](https://prosopo.io/wordpress/how-to-add-captcha-to-jetformbuilder/)
