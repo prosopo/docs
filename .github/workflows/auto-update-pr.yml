@@ -1,15 +1,18 @@
-# Flywheel: after a merge to the base branch, find one open PR that is
-# out-of-date (behind base) but otherwise passing + conflict-free, and press
+# Ops: after a merge to the default branch, finds one open PR that is
+# out-of-date (behind base) but otherwise passing + conflict-free, and presses
 # its "Update branch" button. Updating retriggers the PR's CI; if it goes green
 # and the PR has auto-merge enabled, it merges -> another push to base -> this
-# workflow runs again -> the next stale PR gets updated, and so on.
+# workflow runs again -> the next stale PR gets updated, and so on. CI is
+# ci.yml. Follow the existing layout and conventions; a new workflow, new stage
+# or structural change needs a written justification in the PR description and
+# review by the .github/ code owners.
 #
 # Only ONE PR is updated per run, on purpose: updating every stale PR at once
 # makes them all up-to-date simultaneously, the first merges, the rest are
 # instantly stale again, and a full CI run is burned on each for nothing.
 #
-# Uses PROSOPONATOR_PAT (not the default GITHUB_TOKEN) so the branch update is
-# attributed to a real user and therefore retriggers the PR's CI workflows.
+# Not the shared auto-update-pr.yml: that one updates PRs carrying a label,
+# this one updates PRs with auto-merge enabled.
 
 name: auto-update-pr
 
@@ -21,6 +24,11 @@ on:
   schedule:
     - cron: "*/30 * * * *"
   workflow_dispatch:
+    inputs:
+      concurrency-key:
+        description: "Concurrency group override; empty means the single repo-wide group."
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -28,27 +36,57 @@ permissions:
 
 # Single-flight: never let two runs race to update PRs and double-spend CI.
 concurrency:
-  group: auto-update-pr
+  group: ${{ inputs.concurrency-key || 'auto-update-pr' }}
   cancel-in-progress: false
 
 defaults:
   run:
-    shell: bash
+    shell: bash --noprofile --norc -euo pipefail {0}
+
+env:
+  NODE_OPTIONS: --max-old-space-size=4096
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  CARGO_NET_RETRY: 10
+  RUST_BACKTRACE: short
+  FORCE_COLOR: 1
+  TURBO_TELEMETRY_DISABLED: 1
+  DO_NOT_TRACK: 1
+  PYTHONUNBUFFERED: 1
+  PIP_DISABLE_PIP_VERSION_CHECK: 1
 
 jobs:
   update-stale-pr:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
+      # The bot, not GITHUB_TOKEN: a branch update made with GITHUB_TOKEN
+      # starts no workflows, so the PR's CI would never rerun.
       GH_TOKEN: ${{ secrets.PROSOPONATOR_PAT }}
       REPO: ${{ github.repository }}
-      BASE: main
+      BASE: ${{ github.event.repository.default_branch }}
       # how long to wait for GitHub to finish computing mergeability per PR
       POLL_ATTEMPTS: "6"
       POLL_SLEEP_SECONDS: "10"
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        timeout-minutes: 5
+        with:
+          repository: prosopo/github_actions
+          ref: 7a52d4663836059f0c6cf1c7a29186cd4d8b49a4
+          path: .shared-actions
+      - uses: ./.shared-actions/.github/actions/print_contexts
+        timeout-minutes: 2
+        with:
+          INPUTS_CONTEXT: ${{ toJson(inputs) }}
+          VARS_CONTEXT: ${{ toJson(vars) }}
+      # Under act (local runs) this lists candidates but updates no branch.
       - name: Update one stale-but-passing PR
+        timeout-minutes: 12
         run: |
-          set -euo pipefail
+          # Every gh call is a network call; bound each one.
+          gh() { timeout 60 command gh "$@"; }
+          gh api user --jq '"acting as " + .login'
 
           # Open, non-draft PRs targeting BASE that have auto-merge enabled,
           # oldest first (lowest number) for FIFO fairness.
@@ -127,6 +165,7 @@ jobs:
             # won't unblock them, and we should not flywheel a PR that still has
             # open feedback toward an auto-merge.
             owner="${REPO%/*}"; name="${REPO#*/}"
+            # shellcheck disable=SC2016 # $owner etc. are GraphQL variables, not shell ones
             if ! unresolved=$(
               gh api graphql \
                 -f owner="$owner" -f name="$name" -F number="$n" \
@@ -155,6 +194,11 @@ jobs:
             fi
 
             echo "PR #$n is behind, passing, and has no open conversations. Updating its branch..."
+            if [ -n "${ACT:-}" ]; then
+              echo "act: would update PR #$n"
+              echo "::endgroup::"
+              exit 0
+            fi
             if ! gh api \
               --method PUT \
               -H "Accept: application/vnd.github+json" \
