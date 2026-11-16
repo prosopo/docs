@@ -1,0 +1,161 @@
+# CI entry point. Structure: this ci.yml calls the shared stage workflows in
+# prosopo/github_actions (build, static, pr-housekeeping) and runs the two
+# checks those stages cannot (links, workflow-lint) as local jobs. Deploying is
+# Netlify's git integration (netlify.toml), not a workflow. Follow the existing
+# layout and conventions; a new workflow, new stage or structural change needs a
+# written justification in the PR description and review by the .github/ code
+# owners.
+#
+# Every stage is pinned to one prosopo/github_actions commit, passed again as
+# actions-ref so the stage checks out its composite actions at the same commit.
+# Bump both together.
+
+name: ci
+
+on:
+  pull_request:
+    branches: [main, dev, staging, release/*]
+    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      concurrency-key:
+        description: "Concurrency group override; empty means one run per PR or ref."
+        type: string
+        default: ""
+
+# converted_to_draft lands in the same group, so drafting a PR cancels its run.
+concurrency:
+  group: ${{ inputs.concurrency-key || format('ci-{0}', github.event.pull_request.number || github.ref) }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash --noprofile --norc -euo pipefail {0}
+
+env:
+  NODE_OPTIONS: --max-old-space-size=4096
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  CARGO_NET_RETRY: 10
+  RUST_BACKTRACE: short
+  FORCE_COLOR: 1
+  TURBO_TELEMETRY_DISABLED: 1
+  DO_NOT_TRACK: 1
+  PYTHONUNBUFFERED: 1
+  PIP_DISABLE_PIP_VERSION_CHECK: 1
+
+jobs:
+  # Builds the site with turbo (turbo.json: build -> dist/**) and uploads the
+  # turbo cache as the turbo-cache artifact, which the links job replays.
+  build:
+    if: ${{ github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.draft != true) }}
+    permissions:
+      contents: read
+    uses: prosopo/github_actions/.github/workflows/build.yml@7a52d4663836059f0c6cf1c7a29186cd4d8b49a4
+    with:
+      actions-ref: 7a52d4663836059f0c6cf1c7a29186cd4d8b49a4
+
+  # eslint plus the exact-version dependency check. Runs only when the change
+  # touches JS/TS or package.json (detect-languages); content-only PRs skip it.
+  static:
+    if: ${{ github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.draft != true) }}
+    permissions:
+      contents: read
+    uses: prosopo/github_actions/.github/workflows/static.yml@7a52d4663836059f0c6cf1c7a29186cd4d8b49a4
+    with:
+      actions-ref: 7a52d4663836059f0c6cf1c7a29186cd4d8b49a4
+      js-command: node .github/scripts/check-pinned-versions.mjs && pnpm run lint
+
+  housekeeping:
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.draft != true }}
+    permissions:
+      contents: read
+    uses: prosopo/github_actions/.github/workflows/pr-housekeeping.yml@7a52d4663836059f0c6cf1c7a29186cd4d8b49a4
+    with:
+      actions-ref: 7a52d4663836059f0c6cf1c7a29186cd4d8b49a4
+
+  # Internal links only (--offline): the build's HTML is checked against the
+  # files it actually produced, so a moved or renamed page fails here instead of
+  # 404ing on docs.prosopo.io. External URLs are not fetched: they would make CI
+  # depend on third-party uptime.
+  links:
+    needs: build
+    if: ${{ github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.draft != true) }}
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        timeout-minutes: 5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        timeout-minutes: 5
+        with:
+          repository: prosopo/github_actions
+          ref: 7a52d4663836059f0c6cf1c7a29186cd4d8b49a4
+          path: .shared-actions
+      - uses: ./.shared-actions/.github/actions/print_contexts
+        timeout-minutes: 2
+        with:
+          INPUTS_CONTEXT: ${{ toJson(inputs) }}
+          NEEDS_CONTEXT: ${{ toJson(needs) }}
+          VARS_CONTEXT: ${{ toJson(vars) }}
+      - uses: ./.shared-actions/.github/actions/setup-pnpm
+        timeout-minutes: 15
+        with:
+          node-version-file: .nvmrc
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        timeout-minutes: 10
+        with:
+          name: turbo-cache
+          path: .turbo-cache
+      # Same commit and inputs as the build job, so turbo replays dist/ from the
+      # cache; on a miss it rebuilds, which is slower but still correct.
+      - name: Restore dist from the turbo cache
+        timeout-minutes: 30
+        run: timeout 29m pnpm turbo run build --cache-dir=.turbo-cache
+      - name: Check internal links
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8  # v2.9.0
+        timeout-minutes: 10
+        with:
+          args: --offline --no-progress --root-dir ${{ github.workspace }}/dist dist
+          fail: true
+          failIfEmpty: true
+          jobSummary: true
+          format: markdown
+
+  # Cheap safety check, so it runs on drafts too: a broken workflow is caught
+  # before review rather than after the PR is marked ready.
+  workflow-lint:
+    # workflow-lint: allow pr-types -- cheap safety check that must run on drafts
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        timeout-minutes: 5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        timeout-minutes: 5
+        with:
+          repository: prosopo/github_actions
+          ref: 7a52d4663836059f0c6cf1c7a29186cd4d8b49a4
+          path: .shared-actions
+      - uses: ./.shared-actions/.github/actions/print_contexts
+        timeout-minutes: 2
+        with:
+          INPUTS_CONTEXT: ${{ toJson(inputs) }}
+          VARS_CONTEXT: ${{ toJson(vars) }}
+      - name: actionlint
+        timeout-minutes: 5
+        run: |
+          timeout 2m curl -fsSL https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz | tar xz actionlint
+          ./actionlint -color
+      - uses: ./.shared-actions/.github/actions/workflow-lint
+        timeout-minutes: 5

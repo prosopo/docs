@@ -1,5 +1,5 @@
 import { normalizeLangTag } from '../src/i18n/bcp-normalize';
-import languages, { rtlLanguages } from '../src/i18n/languages';
+import languages from '../src/i18n/languages';
 import type starlight from '@astrojs/starlight';
 
 type StarlightLocalesConfig = NonNullable<Parameters<typeof starlight>[0]['locales']>;
@@ -8,7 +8,7 @@ export function makeLocalesConfig(): StarlightLocalesConfig {
 	return Object.fromEntries(
 		Object.entries(languages).map(([locale, label]) => [
 			locale,
-			{ label, lang: normalizeLangTag(locale), dir: rtlLanguages.has(locale) ? 'rtl' : 'ltr' },
+			{ label, lang: normalizeLangTag(locale) },
 		])
 	);
 }

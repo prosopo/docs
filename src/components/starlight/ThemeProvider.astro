@@ -1,0 +1,9 @@
+{/* Inlined so the theme is set before first paint. Dark unless light was chosen, like the website. */}
+<script is:inline>
+	try {
+		document.documentElement.dataset.theme =
+			localStorage.getItem('starlight-theme') === 'light' ? 'light' : 'dark';
+	} catch {
+		document.documentElement.dataset.theme = 'dark';
+	}
+</script>

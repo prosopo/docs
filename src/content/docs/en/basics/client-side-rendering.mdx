@@ -1,7 +1,6 @@
 ---
 title: Client-side rendering
 description: Render the Procaptcha widget on your website using the Procaptcha JavaScript resource.
-i18nReady: true
 ---
 
 First, you must include the Procaptcha JavaScript resource somewhere in your HTML page. The `<script>` must be loaded
@@ -17,7 +16,7 @@ The `nomodule` fallback ensures the widget also loads in environments that do no
 
 Now, you can either render the Procaptcha widget implicitly or explicitly.
 
-## Implicit Rendering
+## Implicit rendering
 
 Add an empty DOM container where the Procaptcha widget will be inserted automatically. The container is
 typically a `<div>` (but can be any element) and must have class `procaptcha` and a `data-sitekey` attribute set to your
@@ -59,7 +58,7 @@ is solved.
 </html>
 ```
 
-## Explicit Rendering
+## Explicit rendering
 
 If you prefer to render the widget yourself, you can use the `Procaptcha.render()` method. The `Procaptcha.render()`
 must be called after the procaptcha.bundle.js script has loaded.
@@ -108,7 +107,7 @@ document.getElementById('procaptcha-script').addEventListener('load', function (
 })
 ```
 
-## Procaptcha Options
+## Procaptcha options
 
 The `Procaptcha.render()` function takes an options object as its second argument. The options object can contain the
 following fields:
@@ -131,7 +130,7 @@ following fields:
 | bind                 | string             | A CSS selector for a button on your page that triggers this widget's challenge, so the widget can sit in one place and be driven by your form's own submit button. See [Binding a button to the widget](#binding-a-button-to-the-widget). | ✗        |
 | startMode            | string             | When the widget starts working. The default is `auto`, which starts on page load. Set `manual` to render the checkbox immediately but defer all detection and network activity until you call `window.procaptcha.start()` or the user clicks the checkbox. See [Controlling when the widget starts](#controlling-when-the-widget-starts). | ✗        |
 
-### Data Attributes
+### Data attributes
 
 The same options can be passed to the implicit rendering method by adding them as data attributes to the `.procaptcha` container.
 For example, to set the theme to dark, you would add `data-theme="dark"` to the `.procaptcha` container.
@@ -312,7 +311,7 @@ There is no CAPTCHA type to set here. Which challenge a visitor gets is a proper
 [Prosopo portal](https://portal.prosopo.io), and the widget is told which one to run when the session starts. See
 [CAPTCHA Types](/en/basics/captcha-types/).
 
-### Framework Integrations
+### Framework integrations
 
 Various frameworks have been integrated with Procaptcha. You can find the documentation for each framework below:
 

@@ -55,11 +55,6 @@ export default [
         key: 'basics/faq',
     },
     {text: 'Advanced Usage', header: true, type: 'learn', key: 'advanced'},
-        {
-        text: 'Context Awareness',
-        slug: 'advanced/context-awareness',
-        key: 'advanced/context-awareness',
-    },
     {
         text: 'IP Validation Rules',
         slug: 'advanced/ip-validation-rules',

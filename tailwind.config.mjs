@@ -1,22 +1,29 @@
 import starlightPlugin from '@astrojs/starlight-tailwind';
 
-// Generated color palettes
-const accent = { 200: '#f1b6c3', 600: '#c30c5e', 900: '#5a132c', 950: '#3e1220' };
-const gray = { 100: '#f6f6f7', 200: '#edeeef', 300: '#c1c2c4', 400: '#8a8b8f', 500: '#56585b', 700: '#37383b', 800: '#25272a', 900: '#171819' };
+// Mirrors captcha-private packages/tailwind-preset/colors.js — keep in sync.
+const accent = { 200: '#f7b3cb', 600: '#eb427e', 900: '#5e1a32', 950: '#2f0d19' };
+const gray = {
+	100: '#f2f0fb',
+	200: '#e6e3f5',
+	300: '#b7b2d0',
+	400: '#8d87ad',
+	500: '#5a5280',
+	700: '#322c4a',
+	800: '#1c1930',
+	900: '#100d20',
+};
 
 /** @type {import('tailwindcss').Config} */
 export default {
-    content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
-    theme: {
-        extend: {
-            colors: { accent, gray },
-        },
-    },
-    fontFamily: {
-        // Your preferred text font. Starlight uses a system font stack by default.
-        sans: ['Open Sans', 'sans-serif'],
-        // Your preferred code font. Starlight uses system monospace fonts by default.
-        mono: ['"IBM Plex Mono"'],
-    },
-    plugins: [starlightPlugin()],
+	content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
+	theme: {
+		extend: {
+			colors: { accent, gray },
+			fontFamily: {
+				sans: ['"Open Sans"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+				mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
+			},
+		},
+	},
+	plugins: [starlightPlugin()],
 };

@@ -3,3 +3,5 @@ node_modules
 .github
 .changeset
 netlify.toml
+.turbo-cache
+.shared-actions

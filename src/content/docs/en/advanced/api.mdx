@@ -1,7 +1,6 @@
 ---
 title: API
 description: The Prosopo HTTP API — every endpoint you can call from outside the portal, what it is for, and what it expects.
-i18nReady: false
 ---
 
 Anything you can do on the portal you can also do over HTTP: provision site keys, write access control
@@ -40,7 +39,7 @@ A call succeeds only if all of the following hold:
 - The **API** feature is enabled on your account. It is off by default — contact support to have it turned on.
 - The feature the endpoint belongs to (Sites, Access Rules, Traffic, …) is enabled on your account.
 - The key carries the permission listed against that endpoint below.
-- The key has not expired.
+- The key has not expired, if it was created with an expiry.
 
 Two things follow from how the token is built:
 
@@ -52,8 +51,8 @@ Two things follow from how the token is built:
 
 ### Key expiry
 
-Every key expires. `expiresIn` (seconds) is set at creation and defaults to **30 days** if you omit it —
-there is no non-expiring key. An expired key returns `401`. Rotate by creating a new key and deleting the old one.
+`expiresIn` (seconds) is set at creation. Omit it, or send `0`, for a key that does not expire. An expired
+key returns `401`. Rotate by creating a new key and deleting the old one.
 
 ## Request and response format
 
@@ -128,6 +127,7 @@ Requires the **Access Rules** feature. The concepts (fields, operators, policies
 | `POST /access-control/create` | `createRule` | `{ rule }` | `{ status: "Added new rule" }` |
 | `POST /access-control/delete` | `deleteRule` | `{ userScopeHash }` | `{ status: "Deleted rule" }` |
 | `POST /access-control/group/delete` | `deleteRuleGroup` | `{ ruleGroupId }` | `{ status: "Group removal pending. Job ID: …" }` |
+| `POST /reports/create` | `createReport` | `{ ip?, userAccount?, comment?, score? }` | `{ id, kind }` |
 
 `sortBy` is one of `createdAt`, `description`, `expiry`, `userScopeHash`, `ruleGroupId`; `sortOrder` is `1`
 or `-1`; `limit` caps at 10000.
@@ -151,12 +151,16 @@ curl -X POST https://api.prosopo.io/access-control/create \
   }'
 ```
 
-- `type` is `block` (fail the request outright) or `restrict` (serve a harder or easier challenge). A
+- `type` is `block` (fail the request outright), `restrict` (serve a harder or easier challenge) or `allow`
+  (skip the challenge; see [Allow](/en/advanced/access-control-rules/#allow)). A
   `restrict` rule may also carry `captchaType`, `solvedImagesCount`, `imageThreshold`, `powDifficulty`,
   `unsolvedImagesCount`, `frictionlessScore` or `deferToVerify`. A `block` rule must not set `captchaType`
   or `solvedImagesCount` — those are rejected, because a block applies to every CAPTCHA type.
 - `conditions` are ANDed. `field` is one of `ip`, `ipMask`, `userId`, `ja4Hash`, `userAgent`, `countryCode`,
-  `asn`; `operator` must be `equals` — any other operator is dropped silently.
+  `asn`, `bypassKeyHash`; `operator` must be `equals` — any other operator is dropped silently.
+- `bypassKeyHash` is the lowercase hex SHA-256 of a [bypass key](/en/advanced/bypass-keys/). Send the hash, never
+  the key: a value that is not a 64-character hex string is rejected. Pair it with `type: "allow"` and a
+  `clientId` naming the site the key is for.
 - **`expiry` defaults to one hour from creation if you omit it.** Set it explicitly for anything long-lived.
 - `ruleGroupId` is a free-form string; group deletion removes every rule sharing it, asynchronously via a job.
 - Rules apply account-wide, across every site key, and are pushed to the providers asynchronously.
@@ -225,7 +229,7 @@ through the API, and the last remaining user cannot be deleted.
 
 ## API keys
 
-Rotate credentials on a schedule from CI, and grant permissions the portal's key editor does not offer.
+Rotate credentials on a schedule from CI.
 
 Requires the **API** feature.
 
@@ -257,9 +261,8 @@ full permission list.
 Configure and observe edge protection: manage instances, read the verdict log and maintain the edge access
 rules. See [Prosopo Protect](/en/protect-edge/) for what the product does.
 
-Requires the **Protect** feature, and every endpoint takes the single `updateProtectSettings` permission.
-The portal's key editor does not offer Protect permissions, so a key that can reach these must be created
-through `/api-keys/create`.
+Requires the **Protect** feature. Every endpoint in the first table takes the `updateProtectSettings`
+permission.
 
 | Endpoint | Body | Purpose |
 |---|---|---|
@@ -285,3 +288,20 @@ through `/api-keys/create`.
 - Edge rule `verdict` is `allow`, `challenge` or `block`, and `type` is one of the fields Protect matches on:
   `ip`, `ipMask`, `ja4Hash`, `userAgent`, `countryCode` or `asn`.
 - The read endpoints proxy the verdict-log service and return its payload unchanged.
+
+### Client events
+
+Report events from your own systems to Protect. These endpoints take only the `ingestClientEvents`
+permission, which is kept separate from `updateProtectSettings` so the credential a log shipper holds cannot
+change what Protect enforces.
+
+| Endpoint | Body | Returns |
+|---|---|---|
+| `POST /protect/client-events` | `{ protectInstanceId, entries }` (1–1000 entries) | `{ received, inserted, duplicates, outOfWindow }` |
+| `POST /protect/client-events/logs?token=…&instanceId=…&format=…` | Your logging system's webhook payload, unchanged | `{ received, parsed, skipped, inserted, duplicates, outOfWindow, truncated }` |
+
+- `/protect/client-events/logs` takes the API key in the `token` query parameter, for webhooks that cannot set
+  headers. Query strings end up in request logs, so give that key `ingestClientEvents` and nothing else.
+- `format` names the log feed and must be one Prosopo supports. The portal's client event feed setup builds the
+  full URL for you.
+- Resending a batch is safe: rows already stored are counted under `duplicates` rather than inserted twice.

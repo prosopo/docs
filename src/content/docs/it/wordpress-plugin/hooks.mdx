@@ -32,12 +32,69 @@ Oltre alle preferenze di stile nelle impostazioni del plugin, può personalizzar
 
 ```php
 add_filter('prosopo/procaptcha/captcha_attributes', function (array $attributes): array {
-    $attributes['lang'] = 'de';
+    $attributes['language'] = 'de';
     return $attributes;
 });
 ```
 
-## 4. Moduli con Procaptcha nei test
+## 4. Corrispondenza IP del visitatore
+
+La corrispondenza IP si applica solo alle chiavi del sito con la **convalida IP** attiva nel portale Prosopo (piano Professional e superiori). Procaptcha confronta quindi l'IP da cui è stato risolto il captcha con l'IP inviato dal tuo server, secondo le regole impostate nel portale (cambi di paese, città, provider e distanza). Per questo il plugin deve inviare l'IP reale del visitatore, perciò l'impostazione è **disattivata per impostazione predefinita**: sui siti dietro Cloudflare o un altro proxy il server vede l'indirizzo del proxy, e inviarlo farebbe rifiutare visitatori reali dalla convalida IP.
+
+Per attivarla, vai su **Impostazioni > Prosopo Procaptcha > General** e scegli da dove proviene l'IP del visitatore in **Corrispondenza IP del visitatore**:
+
+- **Attivato – il sito è dietro Cloudflare**: l'header `CF-Connecting-IP`.
+- **Attivato – il sito è dietro un altro proxy**: il primo indirizzo nell'header `X-Forwarded-For`.
+- **Attivato – i visitatori si connettono direttamente**: `REMOTE_ADDR`.
+
+Scegli solo un header impostato dal tuo proxy, perché i visitatori possono inviare questi header da soli. Se l'header manca o non è un indirizzo IP valido, non viene inviato nulla e il token viene verificato senza corrispondenza IP.
+
+Per altre configurazioni, il filtro **prosopo/procaptcha/visitor_ip** riceve l'IP dall'impostazione (vuoto quando è disattivata) e `REMOTE_ADDR`. Restituisci l'IP da inviare, o una stringa vuota per non inviarne nessuno:
+
+```php
+add_filter('prosopo/procaptcha/visitor_ip', function (string $ip, string $remote_addr): string {
+    return $_SERVER['HTTP_TRUE_CLIENT_IP'] ?? $ip;
+}, 10, 2);
+```
+
+La versione 1.23.0 inviava `REMOTE_ADDR` per impostazione predefinita. Se la tua chiave del sito usa la convalida IP e il sito è dietro un proxy, aggiorna alla 1.24.0 o successiva.
+
+## 5. Risultato della verifica
+
+Dalla versione 1.24.0, l'azione **prosopo/procaptcha/verification_result** viene eseguita dopo ogni richiesta di verifica con il risultato e la risposta dell'API, così puoi registrare il punteggio o il motivo per cui un invio è stato rifiutato. Quando `WP_DEBUG` è attivo, le verifiche non riuscite vengono scritte anche nel log di debug.
+
+```php
+add_action('prosopo/procaptcha/verification_result', function (bool $verified, array $response): void {
+    // $response: verified, status, score, reason, error, sessionId
+    if (! $verified) {
+        error_log('Procaptcha rejected a submission: ' . ($response['reason'] ?? 'unknown'));
+    }
+}, 10, 2);
+```
+
+## 6. Eventi JavaScript
+
+Dalla versione 1.24.0, il widget emette questi eventi, che risalgono fino al modulo e al documento:
+
+- `prosopo-procaptcha:filled`: il visitatore ha risolto il captcha. `event.detail.token` contiene il token.
+- `prosopo-procaptcha:cleared`: il token è scaduto o il widget è stato reimpostato.
+
+Un token può essere verificato una sola volta. Il plugin reimposta il captcha dopo gli invii AJAX dei plugin di moduli supportati. Per i tuoi moduli AJAX, emetti `prosopo-procaptcha:reset` sul modulo (o su qualsiasi elemento che contiene il captcha, oppure su `document` per reimpostarli tutti):
+
+```js
+document.addEventListener('prosopo-procaptcha:filled', (event) => {
+    console.log('Token received', event.detail.token);
+});
+
+document.addEventListener('prosopo-procaptcha:cleared', (event) => {
+    console.log('Token expired or the widget was reset', event.target);
+});
+
+// Reset the captcha in a form, e.g. after your own AJAX submission.
+form.dispatchEvent(new Event('prosopo-procaptcha:reset'));
+```
+
+## 7. Moduli con Procaptcha nei test
 
 Se i suoi test coinvolgono moduli con Procaptcha, può bypassare Procaptcha aggiungendo la seguente costante al file wp-config.php:
 

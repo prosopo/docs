@@ -1,7 +1,6 @@
 ---
-title: Email Filter
+title: Email filter
 description: Block CAPTCHA verification requests that use suspicious email addresses, including Gmail dot/plus-tag tricks and custom regex patterns.
-i18nReady: true
 ---
 import { Image } from 'astro:assets';
 import SpamFilter from '~/assets/spam-filter.png';
@@ -18,7 +17,7 @@ The card is on the **Email Filter** tab of Site Settings:
 
 When a dapp calls the Prosopo verification endpoint with an optional `email` field, the email address is evaluated against the configured rules before the CAPTCHA solution is checked. If any rule matches, verification is rejected immediately.
 
-## Providing the Email Address
+## Providing the email address
 
 Pass the email in the `email` field when calling the server-side verification endpoint:
 
@@ -32,9 +31,9 @@ Pass the email in the `email` field when calling the server-side verification en
 
 If no email is provided, email filter rules are skipped.
 
-## Filter Rules
+## Filter rules
 
-### Maximum Dots in Local Part
+### Maximum dots in local part
 
 Limits the number of dots allowed in the part of the email address before the `@` symbol. For example, with a limit of `2`:
 
@@ -47,7 +46,7 @@ This is effective against the Gmail dot trick, where `a.l.i.c.e@gmail.com` and `
 
 Leave blank to disable the dot limit.
 
-### Default Patterns
+### Default patterns
 
 A curated set of regex patterns targeting common evasion techniques:
 
@@ -56,7 +55,7 @@ A curated set of regex patterns targeting common evasion techniques:
 
 Enable with the **Apply curated default patterns** toggle.
 
-### Gmail Address Normalisation
+### Gmail address normalisation
 
 When enabled, Gmail and Googlemail addresses are normalised before evaluating custom regex patterns:
 
@@ -73,7 +72,7 @@ This means a single custom regex pattern like `^alice@gmail\.com$` will match al
 
 Normalisation only affects Gmail/Googlemail addresses. Other domains are evaluated as-is.
 
-### Custom Regex Blocklist
+### Custom regex blocklist
 
 Add your own JavaScript regular expressions to block specific email patterns. Patterns are evaluated case-insensitively against the (optionally normalised) email address.
 
@@ -92,7 +91,7 @@ Patterns are validated when saved:
 - Lookahead, lookbehind, and large quantifiers are rejected to prevent regex-based denial of service
 - Invalid regex syntax is rejected at save time
 
-### Spam Email Domain List
+### Spam email domain list
 
 Toggle **Spam email domain checking** (`spamEmailDomainCheckEnabled`) on to block signups from known disposable and throwaway email providers — `tempmail.*`, `guerrillamail.*`, `mailinator.*` and the thousands of recycled variants spammers cycle through.
 
@@ -100,7 +99,7 @@ The check goes beyond matching the address's domain directly: Prosopo also follo
 
 The blocklist is maintained and refreshed for you — there's nothing to configure beyond the toggle. Rejected requests come back with status `API.SPAM_EMAIL_DOMAIN`.
 
-#### Standalone Endpoint
+#### Standalone endpoint
 
 You can also check an address without running a full CAPTCHA verification:
 
@@ -123,7 +122,7 @@ Content-Type: application/json
 
 Available to sites with the domain check enabled, and rate-limited per site key.
 
-## Evaluation Order
+## Evaluation order
 
 When the email filter is enabled and an email is provided, the verification endpoint evaluates the email in this order:
 
@@ -135,7 +134,7 @@ When the email filter is enabled and an email is provided, the verification endp
 
 Evaluation stops at the first match. The rejection reason is recorded for audit purposes.
 
-## Configuration via Portal
+## Configuration via portal
 
 Email filter rules are configured in the [Prosopo Portal](https://portal.prosopo.io) under **Site Settings > Email Filter**:
 
@@ -148,7 +147,7 @@ Email filter rules are configured in the [Prosopo Portal](https://portal.prosopo
 
 All changes are saved together via the **Save All Changes** button.
 
-## Verification Response
+## Verification response
 
 When an email rule blocks a request, the verification endpoint returns:
 
@@ -166,9 +165,9 @@ Possible status codes:
 | `API.SPAM_EMAIL_RULE` | Email matched a custom regex pattern |
 | `API.SPAM_EMAIL_DOMAIN` | Email domain is on the known-spam list |
 
-## Use Cases
+## Use cases
 
-### Stopping Gmail Dot/Plus-Tag Abuse
+### Stopping Gmail dot/plus-tag abuse
 
 A single Gmail account can generate thousands of apparent email addresses using dots and plus tags. To block this:
 
@@ -177,7 +176,7 @@ A single Gmail account can generate thousands of apparent email addresses using 
 3. Set **Maximum dots** to `2`
 4. Enable **Normalise Gmail addresses** if you also use custom patterns
 
-### Blocking Disposable Email Domains
+### Blocking disposable email domains
 
 To block known throwaway email services:
 
@@ -187,7 +186,7 @@ To block known throwaway email services:
    @(tempmail|throwaway|guerrillamail)\.
    ```
 
-### Organisation-Specific Patterns
+### Organisation-specific patterns
 
 If you see abuse from specific patterns unique to your service:
 

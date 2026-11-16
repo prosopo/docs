@@ -1,7 +1,6 @@
 ---
 title: AWS Lambda@Edge
 description: Deploy the Prosopo Protect Lambda@Edge bundle in front of a CloudFront distribution so bots and abusive traffic are blocked before they reach your origin.
-i18nReady: true
 ---
 
 The Prosopo Protect Lambda@Edge bundle runs on Amazon CloudFront's viewer-request trigger. It executes Protect's decision on every request and either forwards to your origin (`allow`), blocks it with a branded interstitial (`block`), or serves a captcha challenge (`challenge`).

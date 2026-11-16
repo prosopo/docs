@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // Supply-chain guard: fail CI if any package.json declares a non-exact (floating)
-// version for a runtime dependency, or if package-lock.json is missing integrity
+// version for a runtime dependency, or if pnpm-lock.yaml is missing integrity
 // hashes for resolved registry packages.
 //
-// Floating ranges (^, ~, *, >=, "latest", ...) let `npm install` silently pull a
+// Floating ranges (^, ~, *, >=, "latest", ...) let `pnpm install` silently pull a
 // newer release than the one that was reviewed. When that newer release is
 // malicious, every fresh install / CI run is compromised before anyone notices.
 // Recent npm supply-chain attacks that worked exactly this way:
@@ -19,8 +19,9 @@
 //                password stealer on install.
 //   - Nov 2018  event-stream / flatmap-stream — transitive dep backdoored to steal
 //                bitcoin-wallet credentials.
-// Pinning exact versions + committing the lockfile + `npm ci` means a new malicious
-// release is NOT pulled until the version is explicitly bumped and reviewed.
+// Pinning exact versions + committing the lockfile + `pnpm install --frozen-lockfile`
+// means a new malicious release is NOT pulled until the version is explicitly
+// bumped and reviewed.
 //
 // peerDependencies are intentionally exempt: they express a compatibility *range*
 // against whatever the consumer installs, so pinning them would wrongly constrain
@@ -145,36 +146,59 @@ function checkPackageJson(file) {
 /**
  * Every resolved registry package in the lockfile must carry an integrity hash,
  * so a tampered tarball cannot be substituted for the reviewed one.
+ *
+ * pnpm-lock.yaml is parsed line by line so this check runs without installing
+ * a YAML parser. pnpm writes each `packages:` entry as a two-space-indented key
+ * followed by a four-space-indented flow-style `resolution: {...}` line.
  */
 function checkLockfile(file) {
-	let lock;
-	try {
-		lock = JSON.parse(readFileSync(file, "utf8"));
-	} catch (e) {
-		errors.push(`${relative(ROOT, file)}: invalid JSON (${e.message})`);
-		return;
-	}
 	const rel = relative(ROOT, file);
-	if ((lock.lockfileVersion ?? 0) < 2) {
+	const lines = readFileSync(file, "utf8").split("\n");
+
+	const rawVersion =
+		lines
+			.find((l) => l.startsWith("lockfileVersion:"))
+			?.replace(/^lockfileVersion:\s*/, "")
+			.replace(/['"]/g, "") ?? "(missing)";
+	if (!(Number.parseFloat(rawVersion) >= 9)) {
 		errors.push(
-			`${rel}: lockfileVersion ${lock.lockfileVersion} is too old; needs >= 2 for integrity hashes`,
+			`${rel}: lockfileVersion ${rawVersion} is not supported; needs pnpm lockfile v9+`,
 		);
 		return;
 	}
-	const packages = lock.packages || {};
-	for (const [key, entry] of Object.entries(packages)) {
-		// Root project and workspace members ("" and workspace dirs) and local
-		// links have no registry tarball / integrity — skip them.
-		if (key === "" || !key.includes("node_modules/")) continue;
-		if (entry.link === true) continue;
-		// Only registry-resolved deps must have integrity. git/file/url deps are
-		// pinned by their resolved field instead.
-		const resolved = entry.resolved || "";
-		const isRegistry =
-			resolved === "" || /^https?:\/\/[^/]*registry\./.test(resolved);
-		if (isRegistry && !entry.integrity) {
-			errors.push(`${rel}  ${key}: missing integrity hash`);
+
+	let inPackages = false;
+	let current = null;
+	const unresolved = new Set();
+	for (const line of lines) {
+		if (/^\S/.test(line)) {
+			inPackages = line === "packages:";
+			current = null;
+			continue;
 		}
+		if (!inPackages) continue;
+		const key = /^ {2}(\S.*):$/.exec(line);
+		if (key) {
+			current = key[1].replace(/^'(.*)'$/, "$1");
+			unresolved.add(current);
+			continue;
+		}
+		const res = /^ {4}resolution:\s*\{(.*)\}\s*$/.exec(line);
+		if (!res || current === null) continue;
+		unresolved.delete(current);
+		const fields = res[1];
+		// git and local directory deps are pinned by commit / path instead.
+		if (/\btype:\s*(git|directory)\b/.test(fields)) continue;
+		// A bare tarball URL outside the registry is pinned by the URL itself.
+		const tarball = /\btarball:\s*([^,\s}]+)/.exec(fields)?.[1] ?? "";
+		const isRegistry =
+			tarball === "" || /^https?:\/\/[^/]*registry\./.test(tarball);
+		if (isRegistry && !/\bintegrity:\s*\S/.test(fields)) {
+			errors.push(`${rel}  ${current}: missing integrity hash`);
+		}
+	}
+	for (const name of unresolved) {
+		errors.push(`${rel}  ${name}: no resolution entry`);
 	}
 }
 
@@ -184,7 +208,7 @@ for (const f of pkgFiles) checkPackageJson(f);
 // Lockfiles live next to each package.json that owns one.
 const seenLocks = new Set();
 for (const f of pkgFiles) {
-	const lock = join(dirname(f), "package-lock.json");
+	const lock = join(dirname(f), "pnpm-lock.yaml");
 	if (seenLocks.has(lock)) continue;
 	try {
 		statSync(lock);
@@ -203,7 +227,7 @@ if (errors.length > 0) {
 	console.error(
 		"\nDependencies in dependencies/devDependencies/optionalDependencies must use an" +
 			'\nexact version (e.g. "1.2.3", not "^1.2.3"). peerDependencies may use ranges.' +
-			"\nThis prevents `npm install` from silently pulling a malicious newer release." +
+			"\nThis prevents `pnpm install` from silently pulling a malicious newer release." +
 			"\nRun `node .github/scripts/check-pinned-versions.mjs` locally to reproduce.",
 	);
 	process.exit(1);

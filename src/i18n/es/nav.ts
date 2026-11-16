@@ -11,7 +11,6 @@ export default NavDictionary({
 	'basics/faq': 'Preguntas frecuentes',
 
 	'advanced': 'Uso avanzado',
-	'advanced/context-awareness': 'Conocimiento del contexto',
 	'advanced/ip-validation-rules': 'Reglas de validación de IP',
 	'advanced/access-control-rules': 'Reglas de control de acceso',
 	'advanced/audit': 'Auditoría',
@@ -44,7 +43,5 @@ export default NavDictionary({
 	'wordpress-plugin/jetpack': 'JetPack',
 	'wordpress-plugin/woocommerce': 'WooCommerce',
 	'wordpress-plugin/spectra': 'Spectra',
-
-	'contribute': 'Contribuir',
 });
 

@@ -1,0 +1,43 @@
+---
+title: Audit
+description: Search individual CAPTCHA records and open one to see the whole visit.
+i18nReady: true
+---
+import { Image } from 'astro:assets';
+import AuditSearchResults from '~/assets/audit-search-results.png';
+import AuditRecord from '~/assets/audit-record.png';
+
+**Audit** lets you search and review individual CAPTCHA records for the selected site.
+
+**Search Criteria** filter by request fingerprint (IP address, JA4 fingerprint, user agent), user account, domain, VPN status, WebView, framing, geolocation, device type, session type (Proof of Work, Image, Puzzle, Icon Order, Audio), blocked, outcome, status and a time range. **Clear all** resets them.
+
+## Search results
+
+Click **Search** to list the matching records, newest first. Each row is one visit: when it happened, its session ID, IP address and country, the CAPTCHA status, whether your server verified the token, the session score and the CAPTCHA type served.
+
+<Image src={AuditSearchResults} alt="Audit search results in the Prosopo portal" style="margin: 20px auto;"/>
+
+The table also includes sessions that never reached a CAPTCHA:
+
+- **Blocked** sessions were stopped before a challenge was served, for example by an access rule or the traffic filter.
+- **Not attempted** sessions (greyed out) were served a challenge, or let through by an allow rule, but nothing was ever submitted. Choose **Not attempted** under session type to see only these.
+
+**Search Results** can be filtered further, and **Columns** chooses which fields to show.
+
+## Audit record
+
+Click the icon at the start of a row to open that visit's **Audit record**. It collects everything Prosopo recorded about the visit on one page:
+
+- **Summary**: the CAPTCHA type and status, when it was requested, the site, device type, user agent, session ID and user account. If the visit came through [Prosopo Protect](/en/protect-edge/), it links to the [Protect session](/en/portal/verdicts/#protect-session).
+- **Interaction**: a replay of the pointer and touch movement during the challenge, when it was recorded.
+- **Visitor**: IP address, network, location, browser and device.
+- **Page and detection**: the page the CAPTCHA was on and the checks that applied, including any access rule that matched.
+- **Request headers**: the headers the visitor's browser sent.
+
+Earlier attempts by the same visitor are listed alongside, so a failed challenge that was retried can be read as one story.
+
+<Image src={AuditRecord} alt="An audit record in the Prosopo portal" style="margin: 20px auto;"/>
+
+Records are kept for 30 days. A link to an older record shows a message saying it could not be found.
+
+See [Audit](/en/advanced/audit/) for details on each field.

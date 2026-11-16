@@ -1,7 +1,6 @@
 ---
-title: CAPTCHA Types
+title: CAPTCHA types
 description: Choose which challenge a site serves — frictionless, Proof of Work, puzzle or image — in the Prosopo portal.
-i18nReady: true
 ---
 import {Image} from 'astro:assets';
 import ProcaptchaGIF from '~/assets/procaptcha-pow.gif';
@@ -34,7 +33,7 @@ band or the puzzle band (though not both).
 The remaining three types serve that one challenge to everybody, every time, and do not interrogate the browser
 environment at all. Pick one of them only if you specifically want a single challenge for all visitors.
 
-## Proof of Work (PoW) CAPTCHA
+## Proof of work (PoW) CAPTCHA
 
 A Proof of Work (`pow`) challenge requires the user's browser to solve a computational puzzle before submitting the
 form. It is quick for a real browser and expensive to do at scale, which is what makes it costly for bots.

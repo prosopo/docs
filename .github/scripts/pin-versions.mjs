@@ -1,16 +1,19 @@
 #!/usr/bin/env node
 // One-shot helper used to introduce exact pinning: rewrites every floating
 // (^, ~, range, *, latest) specifier in dependencies/devDependencies/
-// optionalDependencies to the exact version that package-lock.json already
-// resolved it to. Because the lockfile is the source of truth for `npm ci`,
-// this does NOT change what gets installed — it only makes package.json declare
-// the version explicitly. peerDependencies are left untouched.
+// optionalDependencies to the exact version pnpm-lock.yaml already resolved it
+// to. Because the lockfile is the source of truth for
+// `pnpm install --frozen-lockfile`, this does NOT change what gets installed —
+// it only makes package.json declare the version explicitly. peerDependencies
+// are left untouched.
 //
-// Resolution: for a workspace at dir D depending on N, the installed version is
-// the lockfile `packages` entry nearest to D walking up node_modules dirs, then
-// the hoisted root node_modules/N. This mirrors Node's module resolution.
+// Resolution: installed versions come from `pnpm list --recursive --json`, which
+// reports each workspace project's direct dependencies as pnpm resolved them.
+// Run `pnpm install` before this script, and again afterwards so the lockfile's
+// recorded specifiers match the rewritten package.json files.
 
-import { readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 
 const ROOT = process.cwd();
@@ -70,54 +73,27 @@ function findPackageJsons(dir, out = []) {
 	return out;
 }
 
-// Find the package-lock.json that governs a given package.json (nearest ancestor).
-function findLockFor(pkgFile) {
-	let dir = dirname(pkgFile);
-	for (;;) {
-		const lock = join(dir, "package-lock.json");
-		try {
-			statSync(lock);
-			return lock;
-		} catch {}
-		const parent = dirname(dir);
-		if (parent === dir || !dir.startsWith(ROOT)) return null;
-		dir = parent;
+// Map each workspace project's directory to section -> dep name -> version.
+function loadInstalledVersions() {
+	const out = execFileSync(
+		"pnpm",
+		["list", "--recursive", "--depth", "0", "--json"],
+		{ cwd: ROOT, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
+	);
+	const projects = new Map();
+	for (const project of JSON.parse(out)) {
+		const sections = {};
+		for (const section of ENFORCED_SECTIONS) {
+			sections[section] = {};
+			for (const [name, info] of Object.entries(project[section] || {})) {
+				if (info?.version) sections[section][name] = info.version;
+			}
+		}
+		projects.set(resolve(project.path), sections);
 	}
+	return projects;
 }
-
-// Detect a file's indentation (tab, or N spaces) so we re-serialise it the same
-// way npm did and keep the diff to just the changed lines.
-function detectIndent(text) {
-	const m = /\n(\t+|[ ]+)"/.exec(text);
-	if (!m) return "\t";
-	return m[1][0] === "\t" ? "\t" : " ".repeat(m[1].length);
-}
-const lockIndent = new Map();
-
-const lockCache = new Map();
-function loadLock(lockFile) {
-	if (!lockCache.has(lockFile)) {
-		const text = readFileSync(lockFile, "utf8");
-		lockIndent.set(lockFile, detectIndent(text));
-		lockCache.set(lockFile, JSON.parse(text));
-	}
-	return lockCache.get(lockFile);
-}
-
-// Resolve installed version of dep `name` for the workspace at `pkgDir`.
-function resolveVersion(lock, lockFile, pkgDir, name) {
-	const packages = lock.packages || {};
-	// workspace path relative to the lockfile root, using forward slashes
-	const relDir = relative(dirname(lockFile), pkgDir).split("\\").join("/");
-	const segments = relDir === "" ? [] : relDir.split("/");
-	// Walk up: <ws>/node_modules/name, then parents, then root node_modules/name
-	for (let i = segments.length; i >= 0; i--) {
-		const prefix = segments.slice(0, i).join("/");
-		const key = `${prefix ? `${prefix}/` : ""}node_modules/${name}`;
-		if (packages[key]?.version) return packages[key].version;
-	}
-	return null;
-}
+const installed = loadInstalledVersions();
 
 const pkgFiles = findPackageJsons(ROOT);
 let totalChanged = 0;
@@ -125,18 +101,9 @@ const unresolved = [];
 
 for (const file of pkgFiles) {
 	const pkg = JSON.parse(readFileSync(file, "utf8"));
-	const lockFile = findLockFor(file);
-	if (!lockFile) continue;
-	const lock = loadLock(lockFile);
-	const pkgDir = dirname(file);
-
-	// Only resolve a version from the lockfile when this package.json is an actual
-	// workspace tracked by that lockfile. For standalone dirs (not installed as
-	// workspaces), walking up node_modules would borrow an unrelated, hoisted
-	// version from another package — possibly a different major — so we must NOT
-	// resolve them from the lockfile; we floor-strip their range instead.
-	const relDir = relative(dirname(lockFile), pkgDir).split("\\").join("/");
-	const isWorkspace = relDir === "" || Boolean(lock.packages?.[relDir]);
+	// Standalone dirs that are not workspace projects have no resolved versions
+	// here, so their ranges are floor-stripped below instead.
+	const resolved = installed.get(resolve(dirname(file)));
 
 	// Collect replacements: section -> name -> newVersion
 	const targets = {};
@@ -145,7 +112,7 @@ for (const file of pkgFiles) {
 		if (!deps) continue;
 		for (const [name, spec] of Object.entries(deps)) {
 			if (isPinned(String(spec))) continue;
-			let v = isWorkspace ? resolveVersion(lock, lockFile, pkgDir, name) : null;
+			let v = resolved?.[section]?.[name] ?? null;
 			// Fallback for packages not resolvable from the lockfile (standalone
 			// dirs, or unlisted deps): pin a simple ^/~ range to its floor version,
 			// which is an exact pin that stays within the declared major.
@@ -208,40 +175,8 @@ if (unresolved.length) {
 	for (const u of unresolved) console.log(`  ${u}`);
 }
 
-// Sync the recorded ranges inside each lockfile's workspace entries so they
-// mirror the now-pinned package.json. We do NOT re-resolve the tree (which would
-// drop entries for any uninitialised submodule workspace) — we only rewrite the
-// declared ranges for workspace packages, keeping resolved versions/integrity
-// untouched. npm ci requires these recorded ranges to match package.json.
-for (const lockFile of lockCache.keys()) {
-	const lock = loadLock(lockFile);
-	const lockRoot = dirname(lockFile);
-	const packages = lock.packages || {};
-	let synced = 0;
-	for (const file of pkgFiles) {
-		if (findLockFor(file) !== lockFile) continue;
-		const key = relative(lockRoot, dirname(file)).split("\\").join("/");
-		const entry = packages[key];
-		if (!entry) continue; // standalone dir not tracked as a workspace
-		const pkg = JSON.parse(readFileSync(file, "utf8"));
-		for (const section of ENFORCED_SECTIONS) {
-			if (!pkg[section] || !entry[section]) continue;
-			for (const name of Object.keys(entry[section])) {
-				if (
-					pkg[section][name] !== undefined &&
-					entry[section][name] !== pkg[section][name]
-				) {
-					entry[section][name] = pkg[section][name];
-					synced++;
-				}
-			}
-		}
-	}
-	if (synced > 0) {
-		const indent = lockIndent.get(lockFile) || "\t";
-		writeFileSync(lockFile, `${JSON.stringify(lock, null, indent)}\n`);
-		console.log(
-			`Synced ${synced} recorded range(s) in ${relative(ROOT, lockFile)}`,
-		);
-	}
+if (totalChanged > 0) {
+	console.log(
+		"\nRun `pnpm install` to record the pinned specifiers in pnpm-lock.yaml.",
+	);
 }

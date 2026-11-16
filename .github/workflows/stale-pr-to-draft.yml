@@ -1,6 +1,7 @@
-name: stale-pr-to-draft
-
-# Converts inactive non-draft PRs back to draft.
+# Ops: converts inactive non-draft PRs back to draft. CI is ci.yml. Follow the
+# existing layout and conventions; a new workflow, new stage or structural
+# change needs a written justification in the PR description and review by the
+# .github/ code owners.
 #
 # The point is not tidiness, it is runner capacity. A non-draft PR keeps
 # reporting checks and, whenever its branch moves, launches a full CI run on a
@@ -8,6 +9,8 @@ name: stale-pr-to-draft
 # for a week stops that, and the `converted_to_draft` trigger added to the other
 # workflows makes the transition cancel whatever that PR still has in flight.
 # Marking it ready again with `gh pr ready` restores everything.
+
+name: stale-pr-to-draft
 
 on:
   schedule:
@@ -24,32 +27,72 @@ on:
         description: "Days without an update before a PR counts as stale"
         type: string
         default: "7"
+      concurrency-key:
+        description: "Concurrency group override; empty means the single repo-wide group."
+        type: string
+        default: ""
 
 permissions:
   contents: read
-  pull-requests: write
 
 concurrency:
-  group: ${{ github.workflow }}
+  group: ${{ inputs.concurrency-key || 'stale-pr-to-draft' }}
   cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash --noprofile --norc -euo pipefail {0}
+
+env:
+  NODE_OPTIONS: --max-old-space-size=4096
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  CARGO_NET_RETRY: 10
+  RUST_BACKTRACE: short
+  FORCE_COLOR: 1
+  TURBO_TELEMETRY_DISABLED: 1
+  DO_NOT_TRACK: 1
+  PYTHONUNBUFFERED: 1
+  PIP_DISABLE_PIP_VERSION_CHECK: 1
 
 jobs:
   draft-stale:
+    permissions:
+      contents: read
+      pull-requests: write
+    # Deliberately hosted, not the self-hosted fleet: this workflow exists to
+    # free fleet capacity, and it does nothing but call the API.
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      # Deliberately hosted, not the self-hosted fleet: this workflow exists to
-      # free fleet capacity, and it does nothing but call the API.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        timeout-minutes: 5
+        with:
+          repository: prosopo/github_actions
+          ref: 7a52d4663836059f0c6cf1c7a29186cd4d8b49a4
+          path: .shared-actions
+      - uses: ./.shared-actions/.github/actions/print_contexts
+        timeout-minutes: 2
+        with:
+          INPUTS_CONTEXT: ${{ toJson(inputs) }}
+          VARS_CONTEXT: ${{ toJson(vars) }}
       - name: Convert stale PRs to draft
+        timeout-minutes: 8
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # The bot, not GITHUB_TOKEN: GitHub refuses convertPullRequestToDraft
+          # to GITHUB_TOKEN ("Resource not accessible by integration"), and its
+          # converted_to_draft event must reach the PR's workflows to cancel
+          # their runs.
+          GH_TOKEN: ${{ secrets.PROSOPONATOR_PAT }}
           # A scheduled run has no inputs, so these fall back rather than being
           # empty. Scheduled runs are never dry — the manual path is the one for
-          # looking before leaping.
-          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run || 'false' }}
+          # looking before leaping. Under act (local runs) it is always dry.
+          DRY_RUN: ${{ (env.ACT && 'true') || (github.event_name == 'workflow_dispatch' && inputs.dry-run) || 'false' }}
           STALE_DAYS: ${{ inputs.stale-days || '7' }}
         run: |
-          set -euo pipefail
+          # Every gh call is a network call; bound each one.
+          gh() { timeout 60 command gh "$@"; }
+          gh api user --jq '"acting as " + .login'
 
           cutoff=$(date -u -d "-${STALE_DAYS} days" +%Y-%m-%dT%H:%M:%SZ)
           echo "Cutoff: $cutoff (updatedAt older than this is stale)"
@@ -90,7 +133,7 @@ jobs:
             exit 0
           fi
 
-          while IFS=$'\t' read -r number updated author title; do
+          while IFS=$'\t' read -r number updated _author _title; do
             [ -n "$number" ] || continue
             echo "Drafting #$number (last updated $updated)"
             # Comment first. A PR that goes draft with no explanation reads as a

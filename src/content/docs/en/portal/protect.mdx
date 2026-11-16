@@ -1,0 +1,32 @@
+---
+title: Protect
+description: Configure Prosopo Protect instances.
+i18nReady: true
+---
+
+**Protect** configures [Prosopo Protect](/en/protect-edge/), which screens traffic at your edge before it reaches your site.
+
+## Instances
+
+Click **Create New Instance** and give it an **Instance Name**, **CNAME**, **Global Site Key** and **JTI Expiry (seconds)**.
+
+## Setup
+
+For each instance, **Setup** shows:
+
+- **DNS Configuration**: the record to add at your DNS provider.
+- **Protect Script**: the script tag to add to your pages.
+- **Lambda@Edge Client JWT**: the `CLIENT_JWT` for [AWS Lambda@Edge](/en/protect-edge/lambda-edge/).
+- **Ingest format**: the API key, webhook URL and an example request body.
+
+## Settings
+
+- **Risk Thresholds**: the **Challenge Threshold** and **Block Threshold** risk scores.
+- **Enforcement Policy**: the default action per path type (Allow, Captcha or Block).
+- **IP Category Rules**: what to do with each IP category.
+- **Challenge**: challenge type (Proof of Work, Image Challenge, Puzzle or Frictionless), IP version, captcha grace period, bundle URL and verify URL.
+- **Android Apps**: signing certificate SHA-256 digests and an integrity grace period.
+- **Cookie Cycling Threshold** and **Window**: how many cookie resets are allowed before a client is treated as suspicious.
+- **Challenge Difficulty by Risk Score**.
+
+See [Troubleshooting](/en/protect-edge/troubleshooting/) if traffic isn't flowing.
