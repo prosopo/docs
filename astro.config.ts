@@ -1,3 +1,4 @@
+import { unified } from '@astrojs/markdown-remark';
 import { defineConfig, sharpImageService } from 'astro/config';
 import { makeLocalesConfig } from './config/locales';
 import { makeSidebar } from './config/sidebar';
@@ -8,8 +9,6 @@ import { sitemap } from './integrations/sitemap';
 import rehypeSlug from 'rehype-slug';
 import remarkSmartypants from 'remark-smartypants';
 import starlight from '@astrojs/starlight';
-import tailwind from '@astrojs/tailwind';
-import json5Plugin from 'vite-plugin-json5';
 import { builtinModules } from 'module';
 
 const site = 'https://docs.prosopo.io/';
@@ -45,10 +44,10 @@ export default defineConfig({
 			defaultLocale: 'en',
 			locales: makeLocalesConfig(),
 			sidebar: makeSidebar(),
-			social: {
-				github: 'https://github.com/prosopo/captcha',
-				discord: 'https://discord.gg/dwQx2w9Tgm',
-			},
+			social: [
+				{ icon: 'github', label: 'GitHub', href: 'https://github.com/prosopo/captcha' },
+				{ icon: 'discord', label: 'Discord', href: 'https://discord.gg/dwQx2w9Tgm' },
+			],
 			pagefind: false,
 			head: [
 				// Add ICO favicon fallback for Safari.
@@ -62,11 +61,6 @@ export default defineConfig({
 				},
 			],
 		}),
-		tailwind({
-			// Disable the default base styles:
-			applyBaseStyles: false,
-			configFiles: ['./tailwind.config.mjs'],
-		}),
 		sitemap(),
 
 	],
@@ -75,6 +69,7 @@ export default defineConfig({
 	scopedStyleStrategy: 'where',
 	compressHTML: false,
 	markdown: {
+		processor: unified({
 		// Override with our own config
 		smartypants: false,
 		remarkPlugins: [
@@ -89,17 +84,13 @@ export default defineConfig({
 			// Tweak GFM task list syntax
 			rehypeTasklistEnhancer(),
 		],
+		}),
 	},
 	image: {
 		service: sharpImageService(),
 	},
-	experimental: {
-		contentCollectionCache: false,
-		directRenderScript: true,
-	},
 	vite: {
 		plugins: [
-			json5Plugin(),
 			{
 				name: 'raw-jsonc-loader',
 				transform(code, id) {
@@ -118,8 +109,8 @@ export default defineConfig({
 			}
 		],
 		optimizeDeps: {
-			esbuildOptions: {
-				loader: {
+			rolldownOptions: {
+				moduleTypes: {
 					'.jsonc': 'text',
 				},
 			},

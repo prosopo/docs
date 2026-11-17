@@ -1,38 +1,30 @@
 ---
 import { Icon } from '@astrojs/starlight/components';
-import { useTranslations as useStarlightTranslations } from '@astrojs/starlight/internal';
+import Default from '@astrojs/starlight/components/TableOfContents.astro';
 import { useTranslations } from '../../i18n/util';
-import TableOfContentsList from '../../../node_modules/@astrojs/starlight/components/TableOfContents/TableOfContentsList.astro';
-import type { Props } from '@astrojs/starlight/props';
 
-const { locale, toc, editUrl } = Astro.props;
+const { locale, toc, editUrl } = Astro.locals.starlightRoute;
 const t = useTranslations(Astro);
-const starlightTranslations = useStarlightTranslations(locale);
 ---
 
 {
 	toc && (
-		<starlight-toc data-min-h={toc.minHeadingLevel} data-max-h={toc.maxHeadingLevel}>
-			<nav aria-labelledby="starlight__on-this-page">
-				<h2 id="starlight__on-this-page">
-					{starlightTranslations('tableOfContents.onThisPage')}
-				</h2>
-				<TableOfContentsList toc={toc.items} />
-				<h2 class="contribute">{t('rightSidebar.contribute')}</h2>
-				<ul>
-					<li>
-						<a href={`/${locale}/contribute/`}>
-							<Icon name="open-book" /> {t('rightSidebar.contribute')}
-						</a>
-					</li>
-					<li>
-						<a href={editUrl}>
-							<Icon name="pencil" /> {t('rightSidebar.editPage')}
-						</a>
-					</li>
-				</ul>
-			</nav>
-		</starlight-toc>
+		<>
+			<Default />
+			<h2 class="contribute">{t('rightSidebar.contribute')}</h2>
+			<ul>
+				<li>
+					<a href={`/${locale}/contribute/`}>
+						<Icon name="open-book" /> {t('rightSidebar.contribute')}
+					</a>
+				</li>
+				<li>
+					<a href={editUrl}>
+						<Icon name="pencil" /> {t('rightSidebar.editPage')}
+					</a>
+				</li>
+			</ul>
+		</>
 	)
 }
 
@@ -46,5 +38,3 @@ const starlightTranslations = useStarlightTranslations(locale);
 		margin-top: 1rem;
 	}
 </style>
-
-<script src="@astrojs/starlight"></script>

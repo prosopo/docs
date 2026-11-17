@@ -9,3 +9,17 @@ fetchRetries: 100
 fetchRetryMintimeout: 1
 fetchRetryMaxtimeout: 10000
 fetchRetryFactor: 2
+
+# Patched floors for high/critical advisories in transitive dependencies, each
+# kept inside the major its parent asks for.
+overrides:
+  brace-expansion@<1.1.20: ^1.1.20
+  brace-expansion@>=2.0.0 <2.1.6: ^2.1.6
+  flatted@<3.4.2: ^3.4.2
+  lodash@<4.18.1: ^4.18.1
+  minimatch@<3.1.4: ^3.1.4
+  minimatch@>=5.0.0 <5.1.8: ^5.1.8
+  minimatch@>=7.0.0 <7.4.8: ^7.4.8
+  picomatch@<2.3.2: ^2.3.2
+  rollup@>=4.0.0 <4.59.0: ^4.59.0
+  source-map-js@>=1.0.0 <1.2.2: ^1.2.2
