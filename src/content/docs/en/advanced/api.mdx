@@ -127,6 +127,7 @@ Requires the **Access Rules** feature. The concepts (fields, operators, policies
 | `POST /access-control/create` | `createRule` | `{ rule }` | `{ status: "Added new rule" }` |
 | `POST /access-control/delete` | `deleteRule` | `{ userScopeHash }` | `{ status: "Deleted rule" }` |
 | `POST /access-control/group/delete` | `deleteRuleGroup` | `{ ruleGroupId }` | `{ status: "Group removal pending. Job ID: …" }` |
+| `POST /reports/create` | `createReport` | `{ ip?, userAccount?, comment?, score? }` | `{ id, kind }` |
 
 `sortBy` is one of `createdAt`, `description`, `expiry`, `userScopeHash`, `ruleGroupId`; `sortOrder` is `1`
 or `-1`; `limit` caps at 10000.
