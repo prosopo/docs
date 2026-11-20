@@ -34,7 +34,8 @@
     "deps:dupe": "pnpm run deps:ls | awk -F': ' 'NF {count[$1]++; lines[$1] = lines[$1] $0 \"\\n\"} END {for (pkg in count) if (count[pkg] > 1) printf \"%s\", lines[pkg]}' | sort",
     "audit:fix": "pnpm audit --fix",
     "deps:status": "npm-check-updates --deep",
-    "deps:upgrade": "npm-check-updates --deep --interactive --format group"
+    "deps:upgrade": "npm-check-updates --deep --interactive --format group",
+    "test:deploy": "node --test scripts/deploy-bunny/sync.test.mjs"
   },
   "devDependencies": {
     "@astrojs/tailwind": "5.1.0",

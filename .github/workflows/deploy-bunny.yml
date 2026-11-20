@@ -1,0 +1,58 @@
+# Deploys the built docs to the docs-production Bunny storage zone, served at
+# docs2.prosopo.io while it is reviewed. docs.prosopo.io stays on Netlify until
+# the DNS cutover. Redirects and cache headers that netlify.toml sets live as
+# edge rules on the docs-production pull zone.
+
+name: deploy-bunny
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Never run two deploys at once: the second would delete files the first just uploaded.
+concurrency:
+  group: deploy-bunny
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash --noprofile --norc -euo pipefail {0}
+
+env:
+  NODE_OPTIONS: --max-old-space-size=4096
+  FORCE_COLOR: 1
+  DO_NOT_TRACK: 1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        timeout-minutes: 5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        timeout-minutes: 5
+        with:
+          repository: prosopo/github_actions
+          ref: 7a52d4663836059f0c6cf1c7a29186cd4d8b49a4
+          path: .shared-actions
+      - uses: ./.shared-actions/.github/actions/setup-pnpm
+        timeout-minutes: 15
+        with:
+          node-version-file: .nvmrc
+      - name: Test the deploy script
+        timeout-minutes: 2
+        run: node --test scripts/deploy-bunny/sync.test.mjs
+      - name: Build
+        timeout-minutes: 15
+        run: timeout 14m pnpm run build
+      - name: Sync dist to Bunny storage
+        timeout-minutes: 10
+        env:
+          BUNNY_STORAGE_ZONE: ${{ vars.BUNNY_DOCS_STORAGE_ZONE }}
+          BUNNY_STORAGE_PASSWORD: ${{ secrets.BUNNY_DOCS_STORAGE_PASSWORD }}
+        run: timeout 9m node scripts/deploy-bunny/main.mjs --dir dist
