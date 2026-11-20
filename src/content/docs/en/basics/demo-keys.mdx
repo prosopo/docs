@@ -1,0 +1,112 @@
+---
+title: Demo keys
+description: Learn how to use Prosopo demo keys for testing, development, and CI/CD environments without requiring production site keys.
+---
+
+Demo keys provide predictable CAPTCHA behavior for testing, development, and automated CI/CD pipelines. They enable you to test your integration and display a warning banner to prevent accidental production usage.
+
+## What are demo keys?
+
+Demo keys are special, hardcoded site keys that bypass normal CAPTCHA verification and return predictable results. They provide trivial challenges with predetermined outcomes.
+
+There are two demo keys available:
+
+### Always pass key
+
+**Site Key:** `5DAAnrj7VHTznn2AWBemMuyBwZWs6FNFjdyVXUeYum3PTXFy`
+
+This key provides trivial CAPTCHA challenges that automatically verify successfully. Use this for testing success flows, UI states, and happy path scenarios.
+
+**Behavior:**
+- Presents a trivial PoW challenge with difficulty 1
+- Verification always succeeds
+- `onCaptchaVerified` callback is triggered
+- Red warning banner displays on the widget
+
+### Always fail key
+
+**Site Key:** `5CiPPseXPECbkjWCa6MnjNokrgYjMqmKndv2rSnekmSK2DjL`
+
+This key provides trivial CAPTCHA challenges that always fail verification. Use this for testing error handling, failure flows, and UI error states.
+
+**Behavior:**
+- Presents a trivial PoW challenge with difficulty 1
+- Verification always fails
+- `onCaptchaFailed` callback is triggered
+- Red warning banner displays on the widget
+- User can retry the challenge
+
+## When to use demo keys
+
+Demo keys are appropriate for:
+
+- **Local Development** - Test your integration without a production site key
+- **CI/CD Pipelines** - Automated testing where you need predictable CAPTCHA behavior
+- **Unit and Integration Tests** - Test both success and failure code paths
+- **Prototyping** - Quick integration testing during development
+- **Demo Environments** - Showcase integration without real CAPTCHA challenges
+
+## When NOT to use demo keys
+
+Demo keys should NEVER be used in:
+
+- **Production Environments** - Demo keys are automatically disabled when `NODE_ENV=production`
+- **Staging Environments** - Use real site keys to test actual CAPTCHA behavior
+- **User Acceptance Testing** - Real site keys ensure accurate testing of the user experience
+- **Load Testing** - Demo keys don't reflect real provider performance
+
+## Using demo keys
+
+### HTML/JavaScript
+
+```html
+<div class="procaptcha"
+     data-sitekey="5DAAnrj7VHTznn2AWBemMuyBwZWs6FNFjdyVXUeYum3PTXFy"
+     data-callback="onSuccess"
+     data-failed-callback="onFailure">
+</div>
+```
+
+### React
+
+```jsx
+import { Procaptcha } from '@prosopo/procaptcha-react';
+
+function MyComponent() {
+  return (
+    <Procaptcha
+      siteKey="5DAAnrj7VHTznn2AWBemMuyBwZWs6FNFjdyVXUeYum3PTXFy"
+      onVerified={(output) => console.log('Verified:', output)}
+      onFailed={() => console.log('Failed')}
+    />
+  );
+}
+```
+
+### Vue
+
+```vue
+<template>
+  <Procaptcha
+    site-key="5DAAnrj7VHTznn2AWBemMuyBwZWs6FNFjdyVXUeYum3PTXFy"
+    @verified="onVerified"
+    @failed="onFailed"
+  />
+</template>
+
+<script>
+import { Procaptcha } from '@prosopo/procaptcha-vue';
+
+export default {
+  components: { Procaptcha },
+  methods: {
+    onVerified(output) {
+      console.log('Verified:', output);
+    },
+    onFailed() {
+      console.log('Failed');
+    }
+  }
+};
+</script>
+```

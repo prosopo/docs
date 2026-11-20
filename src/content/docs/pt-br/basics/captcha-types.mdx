@@ -1,0 +1,82 @@
+---
+title: "Tipos de CAPTCHA"
+description: "Escolha no portal da Prosopo qual desafio um site serve: frictionless, Proof of Work, quebra-cabeça ou imagem."
+---
+import {Image} from 'astro:assets';
+import ProcaptchaGIF from '~/assets/procaptcha-pow.gif';
+import ImageCaptcha from '~/assets/image-captcha.png';
+import PoWSettings from '~/assets/pow-settings.png';
+import PuzzleSettings from '~/assets/puzzle-settings.png';
+import CaptchaTypeSettings from '~/assets/captcha-type-settings.png';
+
+O Procaptcha pode servir quatro tipos de desafio: `frictionless`, `pow`, `puzzle` e `image`.
+
+O tipo é uma propriedade da chave do site e é escolhido no [portal da Prosopo](https://portal.prosopo.io). O servidor
+informa ao widget qual desafio executar quando a sessão começa, então não há nada a definir no seu markup nem na sua
+chamada a `render()`: o mesmo trecho serve o tipo para o qual o site está configurado.
+
+## CAPTCHA frictionless
+
+`frictionless` é o padrão e o que se deve usar salvo motivo em contrário. Ele examina o ambiente do navegador para saber
+se está diante de um navegador real ou de um automatizado como [playwright](https://playwright.dev/) ou
+[selenium](https://www.selenium.dev/), e escolhe um desafio conforme a pontuação de risco obtida:
+
+- **Risco baixo**: um Proof of Work invisível. O usuário vê apenas a caixa de seleção.
+- **Risco maior**: um quebra-cabeça, arrastando a peça até o encaixe.
+- **Risco máximo**: um CAPTCHA de imagem.
+
+Ou seja, frictionless não é um quarto tipo de desafio: são os três abaixo, escolhidos visitante a visitante. Onde fica a
+fronteira entre eles é o [limiar de segurança](/pt-br/basics/safety-threshold/), e você pode excluir um site da faixa de
+imagem ou da de quebra-cabeça (mas não de ambas).
+
+Os outros três tipos servem sempre o mesmo desafio a todos e não examinam o ambiente do navegador. Escolha um deles
+apenas se quiser mesmo um único desafio para todos os visitantes.
+
+## CAPTCHA de Proof of Work (PoW)
+
+Um desafio de Proof of Work (`pow`) exige que o navegador resolva um cálculo antes do envio do formulário. É rápido para
+um navegador real e caro em escala, e é isso que o torna custoso para bots.
+
+<Image src={ProcaptchaGIF} alt={'prosopo procaptcha pow captcha challenge'} style="margin: 20px auto;"/>
+
+Defina um site como `pow` quando quiser **apenas** Proof of Work: sem imagem e sem quebra-cabeça, qualquer que seja a
+pontuação de risco.
+
+Quanto custa resolver é a dificuldade, ajustada por site no portal. Cada passo de 0,25 acrescenta um bit de trabalho e
+portanto dobra o custo, de modo que um ponto inteiro é um salto de 16×:
+
+<Image src={PoWSettings} alt="prosopo proof of work difficulty setting" style="margin: 20px auto;"/>
+
+## CAPTCHA de quebra-cabeça
+
+Um desafio `puzzle` pede ao usuário que arraste uma peça até o vão de onde ela foi recortada. É mais rápido de concluir
+que um CAPTCHA de imagem e funciona bem em telas de toque.
+
+O quanto se pode desviar do vão e ainda contar como acerto é a **tolerância**, ajustável por site no portal. Mais baixa é
+mais rigorosa; baixa demais e usuários de trackpad ou telas pequenas passam a ter dificuldade. O portal mostra uma
+prévia do desafio enquanto você a altera:
+
+<Image src={PuzzleSettings} alt="prosopo puzzle CAPTCHA settings and preview" style="margin: 20px auto;"/>
+
+## CAPTCHA de imagem
+
+Um desafio de CAPTCHA de imagem pede ao usuário que selecione as imagens correspondentes ao enunciado.
+
+<Image
+    src={ImageCaptcha}
+    alt="prosopo procaptcha image captcha challenge"
+    style="margin: 0 auto;"
+/>
+
+Quantas dessas seleções precisam estar corretas é definido pelo
+limiar de precisão de imagem, ajustável por site no portal.
+
+## Escolhendo o tipo
+
+Abra o [portal da Prosopo](https://portal.prosopo.io), vá em **Site Settings** e escolha o tipo no cartão **CAPTCHA
+Type**. Com `frictionless` selecionado, esse mesmo cartão traz o limiar de segurança que decide qual desafio cada
+visitante recebe.
+
+<Image src={CaptchaTypeSettings} alt="prosopo portal CAPTCHA type and safety threshold settings" style="margin: 20px auto;"/>
+
+A alteração vale para novas sessões dessa chave de site; não é preciso reimplantar.

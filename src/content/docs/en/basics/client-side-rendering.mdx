@@ -1,7 +1,6 @@
 ---
 title: Client-side rendering
 description: Render the Procaptcha widget on your website using the Procaptcha JavaScript resource.
-i18nReady: true
 ---
 
 First, you must include the Procaptcha JavaScript resource somewhere in your HTML page. The `<script>` must be loaded
@@ -10,11 +9,14 @@ are both fine.
 
 ```html
 <script type="module" src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+<script nomodule src="https://js.prosopo.io/js/procaptcha.bundle.iife.js" async defer></script>
 ```
+
+The `nomodule` fallback ensures the widget also loads in environments that do not execute ES module scripts (older browsers, some crawlers).
 
 Now, you can either render the Procaptcha widget implicitly or explicitly.
 
-## Implicit Rendering
+## Implicit rendering
 
 Add an empty DOM container where the Procaptcha widget will be inserted automatically. The container is
 typically a `<div>` (but can be any element) and must have class `procaptcha` and a `data-sitekey` attribute set to your
@@ -42,6 +44,7 @@ is solved.
     <head>
         <title>Procaptcha Demo</title>
         <script type="module" src="https://js.prosopo.io/js/procaptcha.bundle.js" async defer></script>
+        <script nomodule src="https://js.prosopo.io/js/procaptcha.bundle.iife.js" async defer></script>
     </head>
     <body>
         <form action="" method="POST">
@@ -55,7 +58,7 @@ is solved.
 </html>
 ```
 
-## Explicit Rendering
+## Explicit rendering
 
 If you prefer to render the widget yourself, you can use the `Procaptcha.render()` method. The `Procaptcha.render()`
 must be called after the procaptcha.bundle.js script has loaded.
@@ -75,6 +78,7 @@ id `procaptcha-container` where the widget will be rendered.
             async
             defer
         ></script>
+        <script nomodule src="https://js.prosopo.io/js/procaptcha.bundle.iife.js" async defer></script>
     </head>
     <body>
         <div id="procaptcha-container"></div>
@@ -103,28 +107,30 @@ document.getElementById('procaptcha-script').addEventListener('load', function (
 })
 ```
 
-## Procaptcha Options
+## Procaptcha options
 
 The `Procaptcha.render()` function takes an options object as its second argument. The options object can contain the
 following fields:
 
-| Key                    | Type               | Description                                                                                              | Required |
-|------------------------|--------------------|----------------------------------------------------------------------------------------------------------|----------|
-| siteKey                | string             | The site key of your application / website. This is required.                                            | ✓        |
-| callback               | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is verified.        | ✗        |
-| theme                  | string             | The theme of the CAPTCHA widget. The default is `light`. The other option is `dark`.                     | ✗        |
-| captchaType            | string             | The type of CAPTCHA to render. The default is `frictionless`. Other options are `image`, `pow`.          | ✗        |
-| chalexpired-callback   | string or function | The name of the window function, or a function, that will be called when the CAPTCHA challenge expires.  | ✗        |
-| error-callback         | string or function | The name of the window function, or a function, that will be called when an error occurs.                | ✗        |
-| close-callback         | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is closed.          | ✗        |
-| open-callback          | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is opened.          | ✗        |
-| expired-callback       | string or function | The name of the window function, or a function, that will be called when the CAPTCHA solution expires.   | ✗        |
-| failed-callback        | string or function | The name of the window function, or a function, that will be called when the CAPTCHA challenge fails.    | ✗        |
-| reset-callback         | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is reset.           | ✗        |
-| challenge-valid-length | number             | The amount of time, in milliseconds, a successful CAPTCHA challenge is valid for. Defaults to 2 minutes. | ✗        |
-| language               | string             | The language of the CAPTCHA widget. The default is `en`.                                                 | ✗        |
+| Key                  | Type               | Description                                                                                                                                                          | Required |
+|----------------------|--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
+| siteKey              | string             | The site key of your application / website. This is required.                                                                                                        | ✓        |
+| callback             | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is verified.                                                                    | ✗        |
+| theme                | string             | The theme of the CAPTCHA widget. The default is `light`. The other option is `dark`.                                                                                 | ✗        |
+| chalexpired-callback | string or function | The name of the window function, or a function, that will be called when the CAPTCHA challenge expires.                                                              | ✗        |
+| error-callback       | string or function | The name of the window function, or a function, that will be called when an error occurs.                                                                            | ✗        |
+| close-callback       | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is closed.                                                                      | ✗        |
+| open-callback        | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is opened.                                                                      | ✗        |
+| expired-callback     | string or function | The name of the window function, or a function, that will be called when the CAPTCHA solution expires.                                                               | ✗        |
+| failed-callback      | string or function | The name of the window function, or a function, that will be called when the CAPTCHA challenge fails.                                                                | ✗        |
+| reset-callback       | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is reset.                                                                       | ✗        |
+| language             | string             | The language of the CAPTCHA widget. The default is `en`. All languages can be found [here](https://github.com/prosopo/captcha/tree/main/packages/locale/src/locales). | ✗        |
+| sessionId            | string             | Your own session identifier for this user. Pass the same value to your server-side verification call and the token will only verify if it was earned in that session. See [Session correlation](#session-correlation). | ✗        |
+| placement            | string             | Where a challenge opens. The default is `popup`, centred over the page. Set `float` to anchor the challenge to the widget and leave the page usable behind it. See [Choosing where the challenge opens](#choosing-where-the-challenge-opens). | ✗        |
+| bind                 | string             | A CSS selector for a button on your page that triggers this widget's challenge, so the widget can sit in one place and be driven by your form's own submit button. See [Binding a button to the widget](#binding-a-button-to-the-widget). | ✗        |
+| startMode            | string             | When the widget starts working. The default is `auto`, which starts on page load. Set `manual` to render the checkbox immediately but defer all detection and network activity until you call `window.procaptcha.start()` or the user clicks the checkbox. See [Controlling when the widget starts](#controlling-when-the-widget-starts). | ✗        |
 
-### Data Attributes
+### Data attributes
 
 The same options can be passed to the implicit rendering method by adding them as data attributes to the `.procaptcha` container.
 For example, to set the theme to dark, you would add `data-theme="dark"` to the `.procaptcha` container.
@@ -140,38 +146,178 @@ and define the callback function on the window object.
 <div class="procaptcha" data-sitekey="your_site_key" data-callback="yourCallbackFunction"></div>
 ```
 
-### `captchaType`
+### Session correlation
 
-You can choose to implement any of the following types of captcha when rendering the Procaptcha component:
+By default a Procaptcha token proves that *somebody* solved a captcha for your site. It does not prove that the person
+submitting the token is the person who solved it. A token solved in one browser can be lifted and posted from another —
+which is how token-farming and captcha-solving services work.
 
-| Type           | Description                                                                                                                                                                                                                                                                           |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `frictionless` | The default CAPTCHA type is `frictionless`. This type of CAPTCHA is invisible to the user, only requiring them to complete an invisible [Proof of Work challenge](https://en.wikipedia.org/wiki/Proof_of_work) (`pow`). Suspected bots are served image captcha challenges (`image`). |
-| `pow`          | The `pow` CAPTCHA type requires the user to solve a cryptographic puzzle. This puzzle simply requires a small amount of computational work to solve, and slows down bots significantly, making it difficult for them to scrape in high volumes.                                       |
-| `image`        | The `image` CAPTCHA type requires the user to solve a simple image CAPTCHA. This is CAPTCHA type most people are familiar with, created by Google reCAPTCHA.                                                                                                                          |
+If your application already has a per-user session identifier, you can close that gap. Render the widget with it, pass
+the same value to your [server-side verification](/en/basics/server-side-verification/#session-id) call, and the token
+will only verify if the two agree.
 
-Please note, the client side CAPTCHA type must be set to the same value as in the portal, or a more secure version. For example, if your portal CAPTCHA Type is `frictionless`, you may only set the client side CAPTCHA Type to `frictionless` or `image`. If your portal CAPTCHA Type is `pow`, you may only set the client side CAPTCHA Type to `pow`.
-
-## React Component
-
-To use the Procaptcha React Component, import Procaptcha, define a config with `ProcaptchaConfigSchema`, optionally define callbacks, and render via the Procaptcha component. A minimal example would be as follows:
-
-```javascript
-import { Procaptcha } from '@prosopo/procaptcha-react'
-import { ProcaptchaConfigSchema } from '@prosopo/types'
-
-const MyApp = () => {
-    const config = ProcaptchaConfigSchema.parse({
-        account: {
-            address: 'YOUR_SITEKEY',
-        },
-        // Other config options, see demos/client-example for more details
-    })
-
-    return <Procaptcha config={config} />
-}
-
-export default MyApp
+```html
+<div class="procaptcha" data-sitekey="your_site_key" data-sessionid="your_session_id"></div>
 ```
 
-Further example usage can be seen in [demos/client-example](https://github.com/prosopo/captcha/blob/main/demos/client-example/src/App.tsx#L220C1-L223C43)
+Or explicitly:
+
+```javascript
+window.procaptcha.render(captchaContainer, {
+    siteKey: 'YOUR_SITE_KEY',
+    sessionId: 'your_session_id',
+})
+```
+
+The widget attaches the value to the solution when it is submitted. At verification time, a token whose solution carries
+a different session id — or no session id at all, which is what a token minted outside your session looks like — is
+rejected with `API.CLIENT_SESSION_MISMATCH`.
+
+A few things worth knowing:
+
+- **It is opt-in.** Leave it out and nothing changes; no correlation is performed.
+- **It only works if you supply it in both places.** Rendering with a session id but omitting it at verification means
+  no check is made, and vice versa.
+- **The value must be one the user cannot choose.** The protection comes from your server knowing which session it
+  issued. An id read back from a request the client controls proves nothing.
+- **Use a value that survives the solve.** If your session identifier rotates between the widget rendering and the form
+  being submitted, verification will fail for legitimate users.
+- **It is not a secret.** It appears in the page HTML, so use a session identifier rather than a session token, and do
+  not put anything in it you would not show the user.
+- **Maximum length is 256 characters.** Longer values are dropped by the widget with an error logged to the console.
+
+Prosopo Protect uses this mechanism internally: it renders the challenge widget with its own session JTI, and asserts
+the same JTI when verifying, so a token solved against one session cannot be replayed against another.
+
+### Choosing where the challenge opens
+
+When the provider decides a user should see a challenge, the widget opens it in one of two places. The default, `popup`,
+centres the challenge over the page, which is what every widget did before this option existed. Set `placement` to
+`float` and the challenge opens next to the widget instead: it is anchored directly above the checkbox, stays pinned
+there as the page scrolls, and leaves the rest of the page usable behind it.
+
+```html
+<div class="procaptcha" data-sitekey="your_site_key" data-placement="float"></div>
+```
+
+Or explicitly:
+
+```javascript
+window.procaptcha.render(captchaContainer, {
+    siteKey: 'YOUR_SITE_KEY',
+    placement: 'float',
+})
+```
+
+A few things worth knowing:
+
+- **Escape closes the challenge in either placement.** A floating challenge also closes when the user clicks anywhere
+  outside it. Closing returns the widget to its checkbox; it does not count as a failed attempt.
+- **Invisible widgets always use `popup`.** There is no checkbox on the page for a floating challenge to attach to, so a
+  `float` request from an [invisible widget](/en/basics/invisible-captcha/) is treated as `popup`.
+- **The challenge is rendered at the end of `<body>`,** not inside your container, so an ancestor with
+  `overflow: hidden` cannot clip it. If you style the challenge with your own CSS, target it from the document rather
+  than from inside the widget's container.
+
+### Binding a button to the widget
+
+By default the user starts a challenge by clicking the checkbox. If you would rather your form's own submit button did
+that, pass `bind` with a CSS selector for the button. Clicking it triggers that one widget's challenge, the checkbox is
+left alone, and the button's default action is prevented so the form is not posted before a token exists. Submit the
+form from your `callback` instead.
+
+```html
+<form id="signup">
+    <input type="email" name="email" placeholder="Email" />
+    <div class="procaptcha" data-sitekey="your_site_key" data-bind="#signup-submit"></div>
+    <button id="signup-submit" type="submit">Sign up</button>
+</form>
+```
+
+Or explicitly:
+
+```javascript
+window.procaptcha.render(captchaContainer, {
+    siteKey: 'YOUR_SITE_KEY',
+    bind: '#signup-submit',
+    callback: () => document.getElementById('signup').submit(),
+})
+```
+
+The selector is resolved once, when the widget renders, so the button has to be in the page by then. If nothing matches,
+the widget still renders and an error is logged to the console.
+
+Binding works for visible and [invisible](/en/basics/invisible-captcha/) widgets alike, and combines with `placement`.
+Underneath it calls `window.procaptcha.execute(widgetId)` with the id `render()` returned, which you can also call
+yourself. Called with no argument, `execute()` triggers every widget on the page, as it always has; called with an id it
+triggers only that widget, which is what lets two bound buttons on one page drive two widgets independently.
+
+### Controlling when the widget starts
+
+By default the widget starts working as soon as it is rendered: it runs bot detection, starts collecting behavioural
+signals and contacts a Procaptcha provider to decide which challenge, if any, the user should see. For most sites that
+is what you want, because the work is finished by the time the user reaches the checkbox.
+
+If you would rather nothing happens until your page decides — to keep the page load quiet, to wait for consent, or to
+start only once the user reaches the form — render the widget with `startMode` set to `manual`.
+
+```html
+<div class="procaptcha" data-sitekey="your_site_key" data-start-mode="manual"></div>
+```
+
+Or explicitly:
+
+```javascript
+const widgetId = await window.procaptcha.render(captchaContainer, {
+    siteKey: 'YOUR_SITE_KEY',
+    startMode: 'manual',
+})
+```
+
+The checkbox still appears straight away, at its final size, so your layout does not shift. The widget just does
+nothing else until one of two things happens:
+
+- **Your page starts it.** Call `window.procaptcha.start()` to start every widget on the page, or
+  `window.procaptcha.start(widgetId)` with the id returned by `render()` to start one. The widget then behaves exactly
+  as it would have on page load, and waits for the user to click the checkbox.
+
+  ```javascript
+  document.getElementById('email').addEventListener('focus', () => {
+      window.procaptcha.start(widgetId)
+  })
+  ```
+
+- **The user clicks the checkbox.** If your page never calls `start()`, the user's click starts the widget, and
+  whichever challenge the provider picks opens straight away. The user is never asked to click the checkbox twice.
+
+Whichever happens first wins; the other is ignored. Calling `start()` on a widget that has already started, or on one
+rendered in the default `auto` mode, does nothing.
+
+If you are not using the bundle's `window.procaptcha` object — for example in a framework integration that mounts the
+React component directly — dispatch a `procaptcha:start` event on `document` instead. It is what `start()` sends.
+
+```javascript
+document.dispatchEvent(new CustomEvent('procaptcha:start'))
+```
+
+In [invisible mode](/en/basics/invisible-captcha/), `execute()` also starts a manual widget, and opens its challenge
+immediately if the provider asks for one.
+
+
+
+### CAPTCHA type
+
+There is no CAPTCHA type to set here. Which challenge a visitor gets is a property of the site key, chosen in the
+[Prosopo portal](https://portal.prosopo.io), and the widget is told which one to run when the session starts. See
+[CAPTCHA Types](/en/basics/captcha-types/).
+
+### Framework integrations
+
+Various frameworks have been integrated with Procaptcha. You can find the documentation for each framework below:
+
+- [React Integration](/en/framework-integrations/react-integration/)
+- [Vue Integration](/en/framework-integrations/vue-integration/)
+- [Angular Integration](/en/framework-integrations/angular-integration/)
+- [Svelte Integration](/en/framework-integrations/svelte-integration/)
+
+
