@@ -1,7 +1,9 @@
 export const ELEMENT_ATTRIBUTE = 'data-el';
 
-const SCRIPT_BLOCK = /(<script\b[\s\S]*?<\/script>)/gi;
-const CLICKABLE_OPEN = /<(a|button)\b[^>]*>/gi;
+const SCRIPT_BLOCK = /(<script\b[\s\S]*?<\/script>|<style\b[\s\S]*?<\/style>)/gi;
+// Whole tags with quoted values consumed, so markup quoted inside an attribute (code-copy buttons) is never taken for a real tag.
+const OPEN_TAG = /<([a-zA-Z][\w-]*)(?:\s+[^\s=>"'/]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>"']+))?)*\s*\/?>/g;
+const isClickable = (tagName: string): boolean => /^(a|button)$/i.test(tagName);
 const EXPLICIT = /\sdata-el="([^"]*)"/;
 const VALID = /^[a-z0-9][a-z0-9_.:/-]{0,127}$/;
 const MAX_SLUG = 40;
@@ -50,7 +52,8 @@ export const assignElementIds = (html: string, url: string): string => {
 	const parts = html.split(SCRIPT_BLOCK);
 	for (const [i, part] of parts.entries()) {
 		if (i % 2 === 1) continue;
-		for (const match of part.matchAll(CLICKABLE_OPEN)) {
+		for (const match of part.matchAll(OPEN_TAG)) {
+			if (!isClickable(match[1] ?? '')) continue;
 			const explicit = match[0].match(EXPLICIT)?.[1];
 			if (explicit === undefined) continue;
 			if (!VALID.test(explicit) || used.has(explicit)) {
@@ -69,8 +72,8 @@ export const assignElementIds = (html: string, url: string): string => {
 		.map((part: string, i: number): string =>
 			i % 2 === 1
 				? part
-				: part.replace(CLICKABLE_OPEN, (tag: string, tagName: string, offset: number): string => {
-						if (EXPLICIT.test(tag)) return tag;
+				: part.replace(OPEN_TAG, (tag: string, tagName: string, offset: number): string => {
+						if (!isClickable(tagName) || EXPLICIT.test(tag)) return tag;
 						const rest = part.slice(offset + tag.length);
 						const id = unique(`${page}.${labelOf(tag, rest, tagName)}`.slice(0, MAX_ID));
 						const at = 1 + tagName.length;

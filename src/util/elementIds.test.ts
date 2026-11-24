@@ -32,6 +32,14 @@ describe('assignElementIds', () => {
 		assert.equal(assignElementIds(html, '/'), html);
 	});
 
+	it('ignores markup quoted inside an attribute value', () => {
+		const html = '<button data-code="<a href=\'/section-a/\'>A</a>">Copy</button>';
+		assert.equal(
+			assignElementIds(html, '/x/'),
+			'<button data-el="x.copy" data-code="<a href=\'/section-a/\'>A</a>">Copy</button>'
+		);
+	});
+
 	it('throws on a repeated or invalid hand-written id', () => {
 		assert.throws(
 			() => assignElementIds('<a data-el="x">a</a><button data-el="x">b</button>', '/'),
