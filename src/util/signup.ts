@@ -30,12 +30,19 @@ export const showsSiteKeyCta = (pathname: string): boolean => {
 export const signupSource = (pathname: string): string =>
 	matchesPrefix(docsPath(pathname), '/wordpress-plugin') ? 'docs-wordpress' : 'docs';
 
-/** Sign-up link that tells Plausible and the signup record which docs page and placement sent the visitor. */
+/**
+ * Sign-up link naming the docs page and placement in `cta`. No UTM tags: docs
+ * shares the prosopo.io analytics, where a tagged link replaces the visit's
+ * real source.
+ */
 export const signupHref = (pathname: string, placement: SignupPlacement): string => {
+	const page = docsPath(pathname)
+		.replace(/[^a-z0-9]+/gi, '-')
+		.replace(/^-+|-+$/g, '')
+		.toLowerCase();
 	const url = new URL(SIGNUP_URL);
 	url.searchParams.set('source', signupSource(pathname));
-	url.searchParams.set('utm_campaign', docsPath(pathname).replace(/^\//, '') || 'home');
-	url.searchParams.set('utm_content', placement);
+	url.searchParams.set('cta', `docs-${placement}-${page}`);
 	return url.toString();
 };
 

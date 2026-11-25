@@ -45,14 +45,21 @@ describe('signupHref', () => {
 		const url = new URL(signupHref('/de/basics/client-side-rendering/', 'inline'));
 		assert.equal(`${url.origin}${url.pathname}`, 'https://prosopo.io/register/');
 		assert.equal(url.searchParams.get('source'), 'docs');
-		assert.equal(url.searchParams.get('utm_campaign'), 'basics/client-side-rendering');
-		assert.equal(url.searchParams.get('utm_content'), 'inline');
+		assert.equal(url.searchParams.get('cta'), 'docs-inline-basics-client-side-rendering');
 	});
 
 	it('sends WordPress readers with source=docs-wordpress', () => {
 		const url = new URL(signupHref('/en/wordpress-plugin/divi/', 'sidebar'));
 		assert.equal(url.searchParams.get('source'), 'docs-wordpress');
-		assert.equal(url.searchParams.get('utm_campaign'), 'wordpress-plugin/divi');
+		assert.equal(url.searchParams.get('cta'), 'docs-sidebar-wordpress-plugin-divi');
+	});
+
+	it('never carries UTM tags, which would replace the visit source', () => {
+		const url = new URL(signupHref('/en/basics/demo-keys/', 'production'));
+		assert.deepEqual(
+			[...url.searchParams.keys()].filter((key: string): boolean => key.startsWith('utm_')),
+			[]
+		);
 	});
 
 	it('is tagged as a signup link', () => {
