@@ -1,0 +1,78 @@
+---
+import { useTranslations } from '~/i18n/util';
+import { botTestEventClasses, botTestHref, type BotTestPlacement } from '~/util/botTest';
+import { pageKey } from '~/util/elementIds';
+import { linkIntent } from '~/util/intent';
+
+interface Props {
+	placement?: BotTestPlacement;
+}
+
+const { placement = 'inline' } = Astro.props;
+const t = useTranslations(Astro);
+const href = botTestHref(Astro.url.pathname, placement);
+const copy = {
+	inline: {
+		title: t('botTestCta.inline.title'),
+		body: t('botTestCta.inline.body'),
+	},
+	sidebar: {
+		title: t('botTestCta.sidebar.title'),
+		body: t('botTestCta.sidebar.body'),
+	},
+}[placement];
+---
+
+<aside class:list={['bot-test-cta not-content', placement]}>
+	<p class="title">{copy.title}</p>
+	<p class="body">{copy.body}</p>
+	<a
+		class:list={['button', botTestEventClasses(placement)]}
+		href={href}
+		data-el={`${pageKey(Astro.url.pathname)}.bot-test-${placement}`}
+		data-intent={linkIntent(href)}
+	>
+		{t('botTestCta.button')}
+	</a>
+</aside>
+
+<style>
+	.bot-test-cta {
+		margin-block: 1.5rem;
+		padding: 1rem 1.25rem;
+		border: 1px solid var(--sl-color-text-accent);
+		border-radius: 0.5rem;
+		background: var(--sl-color-accent-low);
+	}
+	.bot-test-cta.sidebar {
+		margin-block: 1rem 0;
+		padding: 0.75rem 1rem;
+	}
+	.title {
+		margin: 0;
+		color: var(--sl-color-white);
+		font-weight: 600;
+	}
+	.body {
+		margin: 0.25rem 0 0.75rem;
+		color: var(--sl-color-gray-2);
+		font-size: var(--sl-text-sm);
+	}
+	.button {
+		display: inline-block;
+		border-radius: 999rem;
+		padding: 0.5rem 1.125rem;
+		background: var(--sl-color-text-accent);
+		color: var(--sl-color-black);
+		font-size: var(--sl-text-sm);
+		font-weight: 600;
+		text-decoration: none;
+	}
+	.button:hover {
+		background: var(--sl-color-white);
+	}
+	.bot-test-cta.sidebar .button {
+		display: block;
+		text-align: center;
+	}
+</style>

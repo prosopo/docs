@@ -2,7 +2,9 @@
 import MobileTableOfContents from 'virtual:starlight/components/MobileTableOfContents';
 import TableOfContents from 'virtual:starlight/components/TableOfContents';
 import type { Props } from '@astrojs/starlight/props';
+import BotTestCta from '~/components/BotTestCta.astro';
 import GetSiteKey from '~/components/GetSiteKey.astro';
+import { showsBotTestCta } from '~/util/botTest';
 import { showsSiteKeyCta } from '~/util/signup';
 ---
 
@@ -19,6 +21,11 @@ import { showsSiteKeyCta } from '~/util/signup';
 				{showsSiteKeyCta(Astro.url.pathname) && (
 					<div class="sl-container">
 						<GetSiteKey placement="sidebar" />
+					</div>
+				)}
+				{showsBotTestCta(Astro.url.pathname) && (
+					<div class="sl-container">
+						<BotTestCta placement="sidebar" />
 					</div>
 				)}
 			</div>

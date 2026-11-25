@@ -17,7 +17,7 @@ const SITE_KEY_PAGES: ReadonlyArray<string> = [
 	'/demos',
 ];
 
-const docsPath = (pathname: string): string => {
+export const docsPath = (pathname: string): string => {
 	const path = stripLocale(pathname).replace(/\/+$/, '');
 	return path === '/basics' ? '/basics/index' : path;
 };
@@ -30,19 +30,23 @@ export const showsSiteKeyCta = (pathname: string): boolean => {
 export const signupSource = (pathname: string): string =>
 	matchesPrefix(docsPath(pathname), '/wordpress-plugin') ? 'docs-wordpress' : 'docs';
 
+export const ctaTag = (pathname: string, placement: string): string => {
+	const page = docsPath(pathname)
+		.replace(/[^a-z0-9]+/gi, '-')
+		.replace(/^-+|-+$/g, '')
+		.toLowerCase();
+	return `docs-${placement}-${page}`;
+};
+
 /**
  * Sign-up link naming the docs page and placement in `cta`. No UTM tags: docs
  * shares the prosopo.io analytics, where a tagged link replaces the visit's
  * real source.
  */
 export const signupHref = (pathname: string, placement: SignupPlacement): string => {
-	const page = docsPath(pathname)
-		.replace(/[^a-z0-9]+/gi, '-')
-		.replace(/^-+|-+$/g, '')
-		.toLowerCase();
 	const url = new URL(SIGNUP_URL);
 	url.searchParams.set('source', signupSource(pathname));
-	url.searchParams.set('cta', `docs-${placement}-${page}`);
+	url.searchParams.set('cta', ctaTag(pathname, placement));
 	return url.toString();
 };
 
