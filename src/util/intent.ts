@@ -66,6 +66,11 @@ export const docsIntent = (path: string, pageIntent?: IntentTags): string =>
 const LINK_TARGETS: ReadonlyArray<{ host: string; path: string; intent: IntentTags }> = [
 	{ host: 'prosopo.io', path: '/pricing', intent: { buying: 1, pricing: 1 } },
 	{ host: 'prosopo.io', path: '/register', intent: { signup: 1 } },
+	{
+		host: 'prosopo.io',
+		path: '/tools/bot-vulnerability-test',
+		intent: { protect: 1, 'bot-detection-tech': 0.6, 'security-team': 0.6, considering: 0.5 },
+	},
 	{ host: 'prosopo.io', path: '/contact', intent: { 'contact-sales': 1 } },
 	{ host: 'prosopo.io', path: '/enterprise-form', intent: { enterprise: 1, 'contact-sales': 1 } },
 	{ host: 'portal.prosopo.io', path: '/', intent: { signup: 0.9, onboarding: 0.8 } },

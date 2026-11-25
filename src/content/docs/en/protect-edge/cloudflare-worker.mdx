@@ -2,8 +2,11 @@
 title: Cloudflare Worker
 description: Deploy the Prosopo Protect Cloudflare Worker in front of your origin so proxy, VPN, datacenter and Tor traffic is blocked at Cloudflare's edge.
 ---
+import BotTestCta from '~/components/BotTestCta.astro';
 
 The Prosopo Protect Cloudflare Worker sits in front of your origin and runs Protect's decision on every request. On `allow` it forwards to your origin. On `block` or `challenge` it returns immediately with a branded interstitial (or JSON error for API calls) without touching your origin.
+
+<BotTestCta />
 
 ## Two-part install: read this first
 
