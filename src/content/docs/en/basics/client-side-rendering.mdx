@@ -3,6 +3,12 @@ title: Client-side rendering
 description: Render the Procaptcha widget on your website using the Procaptcha JavaScript resource.
 ---
 import GetSiteKey from '~/components/GetSiteKey.astro';
+import {Image} from 'astro:assets';
+import ThemeDefault from '~/assets/widget-theme-default.png';
+import ThemePrimarySquare from '~/assets/widget-theme-primary-square.png';
+import ThemeDarkFont from '~/assets/widget-theme-dark-font.png';
+import ThemeFullPalette from '~/assets/widget-theme-full-palette.png';
+import ThemeDarkSurface from '~/assets/widget-theme-dark-surface.png';
 
 First, you must include the Procaptcha JavaScript resource somewhere in your HTML page. The `<script>` must be loaded
 via HTTPS and can be placed anywhere on the page. Inside the `<head>` tag or immediately after the `.procaptcha` container
@@ -120,6 +126,9 @@ following fields:
 | siteKey              | string             | The site key of your application / website. This is required.                                                                                                        | ✓        |
 | callback             | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is verified.                                                                    | ✗        |
 | theme                | string             | The theme of the CAPTCHA widget. The default is `light`. The other option is `dark`.                                                                                 | ✗        |
+| palette              | object             | Your own colours for the widget, as hex codes. See [Customising the look](#customising-the-look). | ✗        |
+| shape                | string             | `rounded` (the default) or `square` corners. See [Customising the look](#customising-the-look). | ✗        |
+| font                 | string             | A CSS font list, such as `"Inter", sans-serif`. The font must already be loaded on your page. See [Customising the look](#customising-the-look). | ✗        |
 | chalexpired-callback | string or function | The name of the window function, or a function, that will be called when the CAPTCHA challenge expires.                                                              | ✗        |
 | error-callback       | string or function | The name of the window function, or a function, that will be called when an error occurs.                                                                            | ✗        |
 | close-callback       | string or function | The name of the window function, or a function, that will be called when the CAPTCHA is closed.                                                                      | ✗        |
@@ -307,6 +316,101 @@ In [invisible mode](/en/basics/invisible-captcha/), `execute()` also starts a ma
 immediately if the provider asks for one.
 
 
+
+### Customising the look
+
+You can match the widget to your site with your own colours, square or rounded corners, and your own font. The
+[Prosopo portal](https://portal.prosopo.io) has an **Appearance** tab in each site's **Settings**. Pick your
+options there, check the live preview, and copy the code it writes for you.
+
+<Image src={ThemeDefault} alt="The default light widget, unticked and ticked" style="margin: 20px auto;"/>
+
+#### Colours
+
+Every colour is optional. Any colour you leave out keeps the default for the theme you chose (`light` or `dark`).
+
+| Key           | Data attribute                | What it colours                                            |
+|---------------|-------------------------------|------------------------------------------------------------|
+| primary       | `data-palette-primary`        | The ticked checkbox, buttons, focus rings, selected images |
+| surface       | `data-palette-surface`        | The widget and the challenge panels                        |
+| background    | `data-palette-background`     | The challenge dialog                                       |
+| text          | `data-palette-text`           | Labels and headings                                        |
+| textSecondary | `data-palette-text-secondary` | Hints under the challenge prompt                           |
+| border        | `data-palette-border`         | The widget outline and image tiles                         |
+| error         | `data-palette-error`          | Error messages                                             |
+
+Colours must be hex codes, like `#0a7d3b` or `#fff`. Anything else is ignored and the default is used.
+
+Setting only `primary` is usually enough. The widget works out the lighter and darker shades it needs from it, and
+picks black or white text for the buttons, whichever is easier to read. The Prosopo logo changes colour by itself so
+that it always stands out against your `surface` colour.
+
+#### Corners and font
+
+Set `shape` to `square` for square corners. The default is `rounded`.
+
+Set `font` to a CSS font list, such as `"Inter", Arial, sans-serif`. The widget does not download fonts, so use a font
+your page already loads. If the font is missing, the widget falls back to its normal font. Font names may only contain
+letters, numbers, spaces, commas, quotes and hyphens.
+
+#### Examples
+
+A green primary colour with square corners:
+
+<Image src={ThemePrimarySquare} alt="A widget with a green checkbox and square corners" style="margin: 20px auto;"/>
+
+```html
+<div class="procaptcha"
+     data-sitekey="your_site_key"
+     data-palette-primary="#0a7d3b"
+     data-shape="square">
+</div>
+```
+
+The dark theme with an orange primary colour and the Georgia font:
+
+<Image src={ThemeDarkFont} alt="A dark widget with an orange checkbox and a serif font" style="margin: 20px auto;"/>
+
+```html
+<div class="procaptcha"
+     data-sitekey="your_site_key"
+     data-theme="dark"
+     data-palette-primary="#f97316"
+     data-font="Georgia, serif">
+</div>
+```
+
+Several colours at once, to sit on a pink page:
+
+<Image src={ThemeFullPalette} alt="A pink widget with a rose checkbox and border" style="margin: 20px auto;"/>
+
+```html
+<div class="procaptcha"
+     data-sitekey="your_site_key"
+     data-palette-primary="#e11d48"
+     data-palette-surface="#ffe4e6"
+     data-palette-border="#fda4af"
+     data-palette-text="#4c0519">
+</div>
+```
+
+The same options work with explicit rendering. This gives a dark widget on an otherwise light page:
+
+<Image src={ThemeDarkSurface} alt="A dark navy widget with a blue checkbox and a light logo" style="margin: 20px auto;"/>
+
+```javascript
+window.procaptcha.render(document.getElementById('procaptcha-container'), {
+    siteKey: 'your_site_key',
+    palette: {
+        primary: '#60a5fa',
+        surface: '#111827',
+        text: '#f9fafb',
+        border: '#374151',
+    },
+})
+```
+
+If you set the same colour in both `palette` and a `data-palette-*` attribute, the `palette` value wins.
 
 ### CAPTCHA type
 
