@@ -141,5 +141,12 @@
   "end-user",
   "legal-reader",
   "open-source",
-  "follower"
+  "follower",
+  "signup-start",
+  "signup-email-submitted",
+  "signup-link-clicked",
+  "signup-account-created",
+  "first-site-key",
+  "first-real-verify",
+  "signup-failed"
 ]
