@@ -1,0 +1,109 @@
+---
+title: iOS SDK
+description: Add the Prosopo Protect iOS SDK to your app. It signs URLSession and WKWebView requests with an Apple App Attest key so Protect can refuse scripts and non-Apple devices.
+---
+
+The Prosopo Protect iOS SDK, `ProsopoAttestIOS`, signs your app's requests with an [Apple App Attest](https://developer.apple.com/documentation/devicecheck/establishing-your-app-s-integrity) key held in the phone's Secure Enclave, so the [Protect edge](/en/protect-edge/) can tell a real iPhone from a script. Read [Protect for mobile apps](/en/protect-mobile/) first for how the pieces fit together.
+
+- **Package:** [`github.com/prosopo/protect-ios`](https://github.com/prosopo/protect-ios), a Swift package
+- **Requires:** iOS 17 or later
+
+## Install
+
+In Xcode, choose **File → Add Package Dependencies**, enter `https://github.com/prosopo/protect-ios` and add the `ProsopoAttestIOS` library to your app target. Or, in `Package.swift`:
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/prosopo/protect-ios", from: "0.1.8"),
+],
+targets: [
+    .target(name: "YourApp", dependencies: [
+        .product(name: "ProsopoAttestIOS", package: "protect-ios"),
+    ]),
+]
+```
+
+Then add the **App Attest** capability to your app target under **Signing & Capabilities**, and set its environment to `production` for App Store and TestFlight builds.
+
+## Configure
+
+Call `configure` once, as early as you can, for example in your `App` initialiser or `application(_:didFinishLaunchingWithOptions:)`:
+
+```swift
+import ProsopoAttestIOS
+
+ProsopoAttestIOS.configure(
+    siteKey: "your-site-key",
+    serverURL: "https://protect.example.com",
+    protectedDomains: ["api.example.com"]
+)
+```
+
+| Parameter | Required | Description |
+|--|--|--|
+| `siteKey` | Yes | Your Prosopo site key. |
+| `serverURL` | Yes | Your Protect endpoint, e.g. `https://protect.example.com`. |
+| `protectedDomains` | No | The hosts whose requests are signed. Leave it empty to sign requests to every host; set it so third-party services don't receive Prosopo headers. |
+| `protectedRoutes` | No | Path prefixes Protect guards, e.g. `["/api/checkout"]`. Leave it out to sign every path on `protectedDomains`. When set, the SDK also learns new protected paths from the edge, so the list doesn't have to be complete and doesn't need a new app release when you protect another route. |
+
+The SDK attests in the background. Requests made in the first moments after launch wait up to 4 seconds for it, so the first requests your app makes go out signed.
+
+## Sign your requests
+
+### URLSession
+
+After `configure`, every request through `URLSession.shared`, or through a session built from `URLSessionConfiguration.default`, is signed automatically. Your networking code doesn't change.
+
+If you build your own session configuration, including through a library such as Alamofire, add the protocol class before you create the session:
+
+```swift
+import ProsopoAttestIOS
+
+let config = URLSessionConfiguration.default
+config.protocolClasses = [ProsopoURLProtocol.self] + (config.protocolClasses ?? [])
+let session = Session(configuration: config) // Alamofire
+```
+
+If a protected request goes out unsigned and the edge answers `401` with `X-Prosopo-Status: no-session`, the SDK attests and sends the request again, the same way the Protect script does in a browser.
+
+### WKWebView
+
+`WKWebView` doesn't use `URLSession`, so use the protected WebView:
+
+```swift
+import ProsopoAttestIOS
+
+let protected = ProsopoProtectWebview()
+view.addSubview(protected.webView)
+protected.load(URL(string: "https://example.com/account")!)
+```
+
+Or install protection into your own configuration before you create the WebView:
+
+```swift
+let config = WKWebViewConfiguration()
+ProsopoProtectWebview.install(into: config)
+let webView = WKWebView(frame: .zero, configuration: config)
+```
+
+Page `fetch` and `XMLHttpRequest` calls carry the same headers as your native requests, and the WebView's `prosopo_session` cookie is shared with native requests, so both are one session.
+
+## Handle a block
+
+A blocked request comes back as HTTP `403` with the header `x-prosopo-decision: block`. Show your own message rather than retrying.
+
+## Devices without App Attest
+
+The simulator and a few older devices don't support App Attest. On those, and in the rare case Apple's DeviceCheck framework fails, the SDK sends requests unsigned rather than crashing or holding them, and the edge treats them like any other request without a session.
+
+## Debugging
+
+`ProsopoAttestIOS.shared` exposes read-only state for a debug screen:
+
+- `isSupported`: whether this device supports App Attest.
+- `isAttested`: whether the device has a registered key.
+- `attestationState` and `attestationPhase`: where the attestation flow is.
+- `lastError`: the last attestation or signing error.
+- `forceReset()`: throw the key away and attest again, for a device stuck in a bad state.
+
+The SDK writes to the unified log under the subsystem `io.prosopo.protect`, including its version when `configure` runs. Filter on `subsystem == "io.prosopo.protect"` in Console.

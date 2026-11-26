@@ -1,0 +1,123 @@
+---
+title: Android SDK
+description: Add the Prosopo Protect Android SDK to your app. It signs requests from OkHttp, HttpURLConnection and WebView with a hardware-attested key so Protect can refuse emulators, rooted devices and scripts.
+---
+
+The Prosopo Protect Android SDK signs your app's requests with a key held in the phone's secure hardware, so the [Protect edge](/en/protect-edge/) can tell your real app on a real phone from a script, an emulator or a rooted device. Read [Protect for mobile apps](/en/protect-mobile/) first for how the pieces fit together.
+
+- **Package:** [`io.prosopo:android-sdk`](https://central.sonatype.com/artifact/io.prosopo/android-sdk) on Maven Central
+- **Requires:** Android 7.0 (API 24) or later
+
+## Install
+
+Add the dependency to your app module:
+
+```kotlin
+dependencies {
+    implementation("io.prosopo:android-sdk:1.0.3")
+}
+```
+
+The SDK declares the `ACCESS_NETWORK_STATE` permission itself.
+
+## Initialise
+
+Create one `ProsopoProtect` instance for your app, for example in your `Application` class:
+
+```kotlin
+import io.prosopo.protect.ProsopoProtect
+import io.prosopo.protect.ProsopoProtectConfig
+
+val config = ProsopoProtectConfig.Builder(siteKey = "your-site-key")
+    .protectUrl("https://protect.example.com")
+    .build()
+
+val sdk = ProsopoProtect(application, config)
+```
+
+The SDK starts its work on the first protected request, not at startup.
+
+### Options
+
+| Option | Required | Default | Description |
+|--|--|--|--|
+| `siteKey` | Yes | | Your Prosopo site key. |
+| `protectUrl` | Yes | | Your Protect endpoint, e.g. `https://protect.example.com`. |
+| `baseDomain` | No | `protectUrl` host without its first label | The site you are protecting. Prosopo headers, the session cookie and signatures are only sent to this domain and its subdomains, over HTTPS. Requests to any other host are left alone. |
+| `gcloudProjectNumber` | No | | Your app's Google Cloud project number. Turns on Google Play Integrity as well as key attestation. See [Play Integrity](#play-integrity). |
+| `integrityIntervalMs` | No | `86400000` (24 hours) | How old a cached Play Integrity token may get before it is renewed. |
+| `attestationPolicy` | No | `STRONGBOX_PREFERRED` | Which secure hardware holds the key: `STRONGBOX_PREFERRED`, `TEE_MINIMUM` or `REQUIRE_STRONGBOX`. |
+
+`build()` throws `IllegalArgumentException` if `siteKey` is blank or `protectUrl` is not set.
+
+## Sign your requests
+
+### OkHttp
+
+Add the SDK as a **network** interceptor:
+
+```kotlin
+import io.prosopo.protect.ProsopoProtectOkHttp
+import okhttp3.OkHttpClient
+
+val client = OkHttpClient.Builder()
+    .addNetworkInterceptor(ProsopoProtectOkHttp(sdk))
+    .build()
+```
+
+As a network interceptor it runs after OkHttp adds your `CookieJar`'s cookies, so the `prosopo_session` cookie is merged into that header. It also runs once per redirect, so a redirect to another host gets no Prosopo credentials. `addInterceptor` works too, but only if your client has no `CookieJar` returning cookies for the protected site, because OkHttp would replace the `Cookie` header after the SDK set it.
+
+### HttpURLConnection
+
+```kotlin
+import io.prosopo.protect.ProsopoProtectHttpUrlConnection
+import java.net.URL
+
+val connection = ProsopoProtectHttpUrlConnection.open(URL("https://api.example.com/listings"), sdk)
+val status = connection.responseCode
+if (connection.isBlocked()) {
+    // Protect blocked this request
+}
+connection.disconnect()
+```
+
+### WebView
+
+Wrap your `WebView` so pages on the protected site, and the `fetch` and `XMLHttpRequest` calls they make, carry the same headers and session as your native requests:
+
+```kotlin
+import io.prosopo.protect.ProsopoProtectWebview
+
+val protectedWebView = ProsopoProtectWebview.wrap(myWebView, sdk)
+protectedWebView.loadUrl("https://example.com/account")
+```
+
+Pages from other origins get nothing.
+
+## Handle a block
+
+A blocked request comes back as HTTP `403` with the header `x-prosopo-decision: block`. Show your own message rather than retrying.
+
+## Play Integrity
+
+Without `gcloudProjectNumber`, the SDK uses Android hardware key attestation only: the phone's secure hardware signs a certificate chain, rooted at Google, that proves the key lives in that hardware and records whether the bootloader is locked.
+
+With `gcloudProjectNumber`, the SDK also fetches a Google Play Integrity token, which adds Google's verdict on the device, and on whether the app binary is the one Google Play distributes. Protect decodes the token through your Google Cloud project, so ask your Prosopo account manager to connect the project before you ship a build with it turned on.
+
+## Portal settings
+
+Under **Android Apps** in your [Protect settings](/en/portal/protect/), add one entry per app that uses this site key, for example a production and a staging build:
+
+- **Package**: the app's `applicationId`, e.g. `com.example.app`.
+- **Google Cloud project** (optional): the project the app's Play Integrity tokens belong to.
+- **Allow VM / emulator**: accept Google-signed emulators. Leave this off for production; turn it on for a staging build that runs in CI.
+- **Allow rooted devices**: accept devices below Google's device integrity bar and phones with an unlocked bootloader.
+- **Require strong integrity**: only accept phones with a recent security update and hardware-backed keys. This refuses real phones that are behind on updates, so use it when abuse outweighs that cost.
+- **Allow sideloaded builds**: accept app builds Google Play doesn't recognise, such as debug builds installed over adb. On by default.
+- **Allow revoked keyboxes**: accept devices whose attestation keys Google has revoked.
+- **Signing cert SHA-256 digests**: your app's signing certificate digests, comma-separated. Repackaged copies of your app signed with another certificate are refused.
+- **Integrity grace (seconds)**: how long a newly registered device may make requests before it needs a Play Integrity verdict.
+
+## Recovery
+
+If one phone keeps getting blocked while others work, clearing the app's data or reinstalling the app registers a new key.
