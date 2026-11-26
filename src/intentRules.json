@@ -326,6 +326,16 @@
     }
   },
   {
+    "prefix": "/protect-mobile",
+    "intent": {
+      "protect": 1,
+      "api-protection": 1,
+      "developer": 0.8,
+      "implementing": 0.8,
+      "procaptcha": 0
+    }
+  },
+  {
     "prefix": "/protect-edge/cloudflare-worker",
     "intent": {
       "cloudflare": 1

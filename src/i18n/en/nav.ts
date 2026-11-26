@@ -240,6 +240,22 @@ export default [
         slug: 'protect-edge/troubleshooting',
         key: 'protect-edge/troubleshooting',
     },
+    {text: 'Prosopo Protect (Mobile)', header: true, type: 'learn', key: 'protect-mobile'},
+    {
+        text: 'Overview',
+        slug: 'protect-mobile/',
+        key: 'protect-mobile/',
+    },
+    {
+        text: 'Android SDK',
+        slug: 'protect-mobile/android',
+        key: 'protect-mobile/android',
+    },
+    {
+        text: 'iOS SDK',
+        slug: 'protect-mobile/ios',
+        key: 'protect-mobile/ios',
+    },
     {text: 'Framework integrations', header: true, type: 'learn', key: 'framework-integrations'},
     {
         text: 'Angular',

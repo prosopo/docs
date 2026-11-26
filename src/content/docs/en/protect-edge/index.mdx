@@ -54,7 +54,7 @@ This closes the "spoof `Accept: text/html` on an API endpoint" bypass. Bots can 
 | Single-page app with a heavy API surface | `json` | `/`, `/index.html` → `html` |
 | Pure JSON API service (no HTML at all) | `json` | (none) |
 
-For a pure-API deployment, consumers must obtain a session through a separate app that loads the Protect script, or through your own headless-friendly flow. The edge won't let a cookie-less browser reach a JSON endpoint.
+For a pure-API deployment, callers get a session through a page that loads the Protect script, or, for native Android and iOS apps, through the [Protect mobile SDKs](/en/protect-mobile/), which sign each request with a hardware-attested key instead of a cookie. The edge won't let a cookie-less, unsigned request reach a JSON endpoint.
 
 ## Correlation
 
@@ -75,6 +75,7 @@ Pick your platform:
 
 - **[Cloudflare Worker](/protect-edge/cloudflare-worker)**: install, configure, deploy, verify.
 - **[AWS Lambda@Edge](/protect-edge/lambda-edge)**: same policy, deployed in front of CloudFront.
+- **[Mobile apps](/en/protect-mobile/)**: protect native Android and iOS apps calling your API.
 - **[Troubleshooting](/protect-edge/troubleshooting)**: distinguish Prosopo 4xx from your other bot-protection layers, recognise known-benign console warnings, diagnose the common misconfigurations.
 
 Before you deploy, your Prosopo site must be registered with the Protect service. Site registration is handled from your [Prosopo dashboard](https://portal.prosopo.io/) or by your Prosopo account manager. You will need the site's SS58 key (e.g. `5HSuC1s…`) and a `CLIENT_JWT` signed by the site's key to authenticate the edge to the Protect API.
