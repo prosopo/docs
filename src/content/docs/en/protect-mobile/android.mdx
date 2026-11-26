@@ -10,11 +10,11 @@ The Prosopo Protect Android SDK signs your app's requests with a key held in the
 
 ## Install
 
-Add the dependency to your app module, using the newest version listed on [Maven Central](https://central.sonatype.com/artifact/io.prosopo/android-sdk/versions) (1.0.3 at the time of writing):
+Add the dependency to your app module, using the newest version listed on [Maven Central](https://central.sonatype.com/artifact/io.prosopo/android-sdk/versions) (1.0.4 at the time of writing):
 
 ```kotlin
 dependencies {
-    implementation("io.prosopo:android-sdk:1.0.3")
+    implementation("io.prosopo:android-sdk:1.0.4")
 }
 ```
 
@@ -122,4 +122,4 @@ Under **Android Apps** in your [Protect settings](/en/portal/protect/), add one 
 
 ## Recovery
 
-If one phone keeps getting blocked while others work, clearing the app's data or reinstalling the app registers a new key.
+From 1.0.4, a phone whose key failed to register replaces it on the next app start. On older versions, clearing the app's data or reinstalling the app registers a new key.
