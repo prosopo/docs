@@ -10,13 +10,15 @@ The Prosopo Protect Android SDK signs your app's requests with a key held in the
 
 ## Install
 
-Add the dependency to your app module:
+Add the dependency to your app module, using the newest version listed on [Maven Central](https://central.sonatype.com/artifact/io.prosopo/android-sdk/versions) (1.0.3 at the time of writing):
 
 ```kotlin
 dependencies {
     implementation("io.prosopo:android-sdk:1.0.3")
 }
 ```
+
+Keep the SDK up to date: newer releases fix device-attestation problems that would otherwise block real users.
 
 The SDK declares the `ACCESS_NETWORK_STATE` permission itself.
 

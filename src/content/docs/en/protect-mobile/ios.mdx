@@ -10,7 +10,7 @@ The Prosopo Protect iOS SDK, `ProsopoAttestIOS`, signs your app's requests with 
 
 ## Install
 
-In Xcode, choose **File → Add Package Dependencies**, enter `https://github.com/prosopo/protect-ios` and add the `ProsopoAttestIOS` library to your app target. Or, in `Package.swift`:
+In Xcode, choose **File → Add Package Dependencies**, enter `https://github.com/prosopo/protect-ios`, choose **Up to Next Major Version** from the newest [release tag](https://github.com/prosopo/protect-ios/tags) (v0.1.8 at the time of writing) and add the `ProsopoAttestIOS` library to your app target. Or, in `Package.swift`:
 
 ```swift
 dependencies: [
@@ -86,7 +86,7 @@ ProsopoProtectWebview.install(into: config)
 let webView = WKWebView(frame: .zero, configuration: config)
 ```
 
-Page `fetch` and `XMLHttpRequest` calls carry the same headers as your native requests, and the WebView's `prosopo_session` cookie is shared with native requests, so both are one session.
+Page `fetch` and `XMLHttpRequest` calls carry the same App Attest headers as your native requests, so both come from one attested device.
 
 ## Handle a block
 
