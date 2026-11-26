@@ -28,7 +28,7 @@ A script calling your API directly has no registered key, so it gets the same `4
 
 ## Apps with a WebView
 
-Both SDKs include a protected WebView. Pages loaded in it, and the requests those pages make, carry the same Prosopo headers as your native requests. On Android the WebView and native code also share one `prosopo_session`, so a user who moves between a native screen and a web screen is seen as one visitor.
+Both SDKs include a protected WebView. Pages loaded in it, and the requests those pages make, carry the same Prosopo headers as your native requests. The WebView and native code also share one `prosopo_session` (on iOS from v0.1.9), so a user who moves between a native screen and a web screen is seen as one visitor.
 
 ## Seeing app traffic
 
