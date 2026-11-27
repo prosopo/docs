@@ -1,0 +1,41 @@
+---
+title: 'Blocksy'
+description: 'Supporto di Blocksy.'
+---
+import {Image} from 'astro:assets';
+import NewsletterExtension from '~/assets/wp-blocksy-newsletter-extension.png';
+import NewsletterBlock from '~/assets/wp-blocksy-newsletter-block.png';
+
+Il plugin Procaptcha estende il modulo di iscrizione alla newsletter del tema [Blocksy](https://creativethemes.com/blocksy/) e copre i suoi moduli account in finestra modale tramite l'integrazione dei moduli nativi di WordPress.
+
+## 1. Modulo Newsletter Subscribe
+
+Il modulo di iscrizione arriva con [Blocksy Companion](https://wordpress.org/plugins/blocksy-companion/) come estensione **Newsletter Subscribe**. Sono protetti sia il blocco sia lo shortcode `[blocksy_newsletter_subscribe]`, e non serve alcun interruttore per singolo modulo: il widget viene aggiunto non appena entrambi i plugin sono attivi.
+
+1. Vai in **Blocksy** > **Extensions** e attiva **Newsletter Subscribe**.
+2. Collega un provider di newsletter (Mailchimp e gli altri servizi supportati) e salva le impostazioni.
+
+<Image src={NewsletterExtension} alt={'Attivazione dell\'estensione Newsletter Subscribe nella schermata Extensions di Blocksy'} style="margin: 20px auto;"/>
+
+3. Aggiungi il blocco **Newsletter** a una pagina o a un'area widget, oppure inserisci lo shortcode `[blocksy_newsletter_subscribe]` nel tuo contenuto.
+
+<Image src={NewsletterBlock} alt={'Il blocco Newsletter di Blocksy nell\'editor a blocchi di WordPress'} style="margin: 20px auto;"/>
+
+Il widget Procaptcha viene mostrato appena sopra l'area messaggi del modulo. Un invio con token mancante o non valido viene respinto prima che venga eseguito il gestore di Blocksy, e il messaggio di validazione compare nell'area messaggi del modulo.
+
+:::note[Il modulo compare solo con un provider collegato]
+Blocksy non produce alcun output per il blocco né per lo shortcode finché non è configurato un provider di newsletter in **Blocksy** > **Extensions** > **Newsletter Subscribe**. Se il modulo di iscrizione non compare nella pagina, è la prima impostazione da controllare: non è un problema di Procaptcha.
+:::
+
+## 2. Moduli account in finestra modale
+
+Blocksy costruisce le sue modali di login, registrazione e recupero password con gli hook account nativi di WordPress e le elabora con il flusso nativo, quindi sono coperte dall'integrazione dei moduli nativi di WordPress e non da una specifica per Blocksy:
+
+1. Apri le impostazioni del plugin Procaptcha
+2. Passa alla scheda "Core forms"
+3. Abilita la protezione dei moduli di login, registrazione e password dimenticata secondo necessità
+4. Salva le impostazioni
+
+**Articoli del blog correlati**
+
+* [How to add CAPTCHA to Blocksy](https://prosopo.io/wordpress/how-to-add-captcha-to-blocksy/)

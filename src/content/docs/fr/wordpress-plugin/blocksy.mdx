@@ -1,0 +1,41 @@
+---
+title: 'Blocksy'
+description: 'Support de Blocksy.'
+---
+import {Image} from 'astro:assets';
+import NewsletterExtension from '~/assets/wp-blocksy-newsletter-extension.png';
+import NewsletterBlock from '~/assets/wp-blocksy-newsletter-block.png';
+
+Le plugin Procaptcha étend le formulaire d'inscription à la newsletter du thème [Blocksy](https://creativethemes.com/blocksy/), et couvre ses formulaires de compte en modale via l'intégration des formulaires natifs de WordPress.
+
+## 1. Formulaire Newsletter Subscribe
+
+Le formulaire d'inscription est fourni par [Blocksy Companion](https://wordpress.org/plugins/blocksy-companion/) sous forme d'extension **Newsletter Subscribe**. Le bloc comme le shortcode `[blocksy_newsletter_subscribe]` sont protégés, et aucun réglage par formulaire n'est nécessaire : le widget est ajouté dès que les deux extensions sont actives.
+
+1. Allez dans **Blocksy** > **Extensions** et activez **Newsletter Subscribe**.
+2. Connectez un fournisseur de newsletter (Mailchimp et les autres services pris en charge) puis enregistrez les réglages.
+
+<Image src={NewsletterExtension} alt={'Activation de l\'extension Newsletter Subscribe sur l\'écran Extensions de Blocksy'} style="margin: 20px auto;"/>
+
+3. Ajoutez le bloc **Newsletter** à une page ou à une zone de widgets, ou placez le shortcode `[blocksy_newsletter_subscribe]` dans votre contenu.
+
+<Image src={NewsletterBlock} alt={'Le bloc Newsletter de Blocksy dans l\'éditeur de blocs WordPress'} style="margin: 20px auto;"/>
+
+Le widget Procaptcha s'affiche juste au-dessus de la zone de message du formulaire. Une soumission dont le jeton est absent ou invalide est rejetée avant l'exécution du gestionnaire propre à Blocksy, et le message de validation apparaît dans la zone de message du formulaire.
+
+:::note[Le formulaire ne s'affiche qu'avec un fournisseur connecté]
+Blocksy ne produit rien pour le bloc ni pour le shortcode tant qu'aucun fournisseur de newsletter n'est configuré dans **Blocksy** > **Extensions** > **Newsletter Subscribe**. Si le formulaire d'inscription n'apparaît pas sur la page, c'est le premier réglage à vérifier : cela ne vient pas de Procaptcha.
+:::
+
+## 2. Formulaires de compte en modale
+
+Blocksy affiche ses modales de connexion, d'inscription et de récupération de mot de passe avec les hooks de compte natifs de WordPress et les traite par le flux natif. Ils sont donc couverts par l'intégration des formulaires natifs de WordPress, et non par une intégration spécifique à Blocksy :
+
+1. Ouvrez les réglages du plugin Procaptcha
+2. Passez à l'onglet « Core forms »
+3. Activez la protection des formulaires de connexion, d'inscription et de mot de passe oublié selon vos besoins
+4. Enregistrez les réglages
+
+**Articles de blog associés**
+
+* [How to add CAPTCHA to Blocksy](https://prosopo.io/wordpress/how-to-add-captcha-to-blocksy/)

@@ -2,25 +2,35 @@
 import { getOgImageUrl } from '~/util/getOgImageUrl';
 import Default from '@astrojs/starlight/components/Head.astro';
 import type { Props } from '@astrojs/starlight/props';
+import { docsIntent } from '~/util/intent';
 
-const { isFallback, lang } = Astro.props;
+const { isFallback, lang, entry } = Astro.props;
+const intent = docsIntent(Astro.url.pathname, entry.data.intent);
 
 const ogImageUrl = getOgImageUrl(Astro.url.pathname, !!isFallback);
 const imageSrc = ogImageUrl ?? '/default-og-image.png';
 const canonicalImageSrc = new URL(imageSrc, Astro.site);
-const is404 = Astro.url.pathname.endsWith('/404/');
 ---
 
 <Default {...Astro.props}><slot /></Default>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+	rel="stylesheet"
+	href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap"
+/>
 <meta property="og:image" content={canonicalImageSrc} />
 <meta name="twitter:image" content={canonicalImageSrc} />
 
 <!-- Algolia docsearch language facet -->
 <meta name="docsearch:language" content={lang} />
-<meta name="twitter:site" content="astrodotbuild" />
+<meta name="twitter:site" content="@prosopo_" />
+<meta name="prosopo:intent" content={intent} />
 
 <!-- Plausible analytics -->
 <script
 	defer data-domain="prosopo.io"
+	data-api="https://prosopo.io/k/nawwIDqpWXow"
 	src="https://prosopo.io/js/script.kairee5buy1chae8eit0so8ahphae9Oo.js"
 ></script>
+<script defer src="https://prosopo.io/assets/scripts/prospector.js" is:inline></script>

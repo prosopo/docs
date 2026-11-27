@@ -1,0 +1,29 @@
+---
+title: "JetFormBuilder"
+description: "JetFormBuilder-Unterstützung."
+---
+import {Image} from 'astro:assets';
+import JetFormBuilderCaptchaProvider from '~/assets/wp-jetformbuilder-captcha-provider.png';
+
+Das Procaptcha-Plugin registriert sich als Captcha-Anbieter für [JetFormBuilder](https://wordpress.org/plugins/jetformbuilder/) und erscheint dadurch im Dropdown `Captcha Provider` des Formulars – neben reCAPTCHA, hCaptcha, Turnstile und Friendly Captcha.
+
+Da JetFormBuilder das Captcha über seinen eigenen Request-Handler prüft, ist kein zusätzliches Feld und keine Editor-Einrichtung nötig: Die Auswahl des Anbieters genügt.
+
+## 1. Procaptcha für ein Formular aktivieren
+
+1. Öffnen Sie das gewünschte Formular unter **JetFormBuilder** > **Forms**.
+2. Klappen Sie im Seitenleisten-Tab **JetForm** das Panel **Captcha Settings** auf.
+3. Setzen Sie **Captcha Provider** auf `Prosopo Procaptcha`.
+4. Speichern Sie das Formular.
+
+<Image src={JetFormBuilderCaptchaProvider} alt={'Auswahl von Prosopo Procaptcha als Captcha Provider im JetFormBuilder-Formulareditor'} style="margin: 20px auto;"/>
+
+Im Frontend wird das Widget oberhalb des Absenden-Buttons angezeigt. Eine Übermittlung mit fehlendem oder ungültigem Token wird mit der formulareigenen Meldung `Captcha failed` abgelehnt.
+
+:::note[Die Schlüssel liegen in den Procaptcha-Einstellungen]
+Anders als die übrigen JetFormBuilder-Captcha-Anbieter fragt Procaptcha unter **JetFormBuilder** > **Settings** > **Captcha Settings** keine Schlüssel ab. Es verwendet den Site Key und den Secret Key aus den Procaptcha-Plugin-Einstellungen (**Einstellungen** > **Procaptcha**), dort ist also nichts auszufüllen.
+:::
+
+**Verwandte Blog-Artikel**
+
+* [How to add CAPTCHA to JetFormBuilder](https://prosopo.io/wordpress/how-to-add-captcha-to-jetformbuilder/)

@@ -1,0 +1,35 @@
+---
+title: Prosopo Protect for mobile apps
+description: Protect native Android and iOS apps with the Prosopo Protect SDKs. Each app request is signed with a key the phone's hardware vouches for, and the edge checks it before the request reaches your API.
+---
+
+Native apps don't run a browser, so they can't load the Protect script or keep a `prosopo_session` cookie the way a web page does. The Protect mobile SDKs give your app a key that the phone's own hardware vouches for and sign each request to your API with it. The [Protect edge](/en/protect-edge/) checks that signature before the request reaches your origin.
+
+| Platform | Package | Device check |
+|--|--|--|
+| [Android](/en/protect-mobile/android/) | [`io.prosopo:android-sdk`](https://central.sonatype.com/artifact/io.prosopo/android-sdk) on Maven Central | Android hardware key attestation, optionally with Google Play Integrity |
+| [iOS](/en/protect-mobile/ios/) | [`ProsopoAttestIOS`](https://github.com/prosopo/protect-ios) Swift package | Apple App Attest |
+
+The mobile SDKs are part of Prosopo Protect, on the Enterprise and Custom plans.
+
+## How it works
+
+1. **On first launch** the SDK creates a key in the phone's secure hardware (StrongBox or the TEE on Android, the Secure Enclave on iOS) and asks the operating system to vouch for it. It sends that attestation to Protect, which checks it with Google or Apple and registers the key for your site.
+2. **On every request** to your protected domain, the SDK signs the request with that key and adds Prosopo headers. Your app's networking code doesn't change.
+3. **At the edge**, Protect checks the signature, the key's registration and your device rules, then returns `allow`, `challenge` or `block`, the same as for web traffic.
+
+A script calling your API directly has no registered key, so it gets the same `401` with `X-Prosopo-Status: no-session` that a cookie-less browser gets on a JSON path. On Android, a key lifted off a phone and replayed from a server is refused when it turns up on a datacentre or VPN network after registering on a clean one.
+
+## Before you start
+
+- Your site must be set up on Protect, with your API paths behind the [Cloudflare Worker](/en/protect-edge/cloudflare-worker/) or [AWS Lambda@Edge](/en/protect-edge/lambda-edge/). The SDKs sign requests; the edge enforces them.
+- You need your **site key** and your **Protect endpoint**: the subdomain you route to Prosopo, shown under **Setup** on the [Protect page](/en/portal/protect/) of the portal (for example `https://protect.example.com`).
+- For Android, add each app under **Android Apps** in your Protect settings. See [Android](/en/protect-mobile/android/#portal-settings).
+
+## Apps with a WebView
+
+Both SDKs include a protected WebView. Pages loaded in it, and the requests those pages make, carry the same Prosopo headers as your native requests. The WebView and native code also share one `prosopo_session` (on iOS from v0.1.9), so a user who moves between a native screen and a web screen is seen as one visitor.
+
+## Seeing app traffic
+
+The portal shows app traffic separately from web traffic. On [Protect traffic](/en/portal/protect-traffic/), requests decided by device checks appear as **iOS App Attest** and **Android Play Integrity**, and [Verdicts](/en/portal/verdicts/) lets you filter to them.
