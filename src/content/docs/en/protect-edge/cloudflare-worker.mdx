@@ -188,6 +188,8 @@ Worker verified? Move to Part 2.
 
 **This part is mandatory.** Without the bundle no session cookie is ever set, and the worker returns 401 `no-session` on every protected path in perpetuity. The worker does not add it for you.
 
+Earlier versions of the worker had an auto-inject mode that inserted the script into HTML responses with `HTMLRewriter`. That mode has been removed. If you set up Protect from an older guide that relied on it, add the script tags below yourself.
+
 ### 2a. Add the Protect script to your pages
 
 Add this snippet to the `<head>` of every HTML page your site serves, as early as you can. A shared header template is the usual spot:
